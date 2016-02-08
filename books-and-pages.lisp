@@ -110,13 +110,10 @@ without an associated book."))
   (:documentation "Ensures that the book is at least as specific as specificity.
 Raises an error and gives common resolutions.")
   (:method ((book page) specificity)
-    (restart-case (if (specificity< (specificity book) specificity)
-                      (error 'not-specific-enough
-                             :problem-book book
-                             :target-specificity specificity))
-      (add-value/book (number)
-        (setf (book book) number))
-      (add-value/page (number )))))
+    (if (specificity< (specificity book) specificity)
+        (error 'not-specific-enough
+               :problem-book book
+               :target-specificity specificity))))
 
 (defgeneric book-path (book)
   (:documentation "Makes the pathname for the book.
