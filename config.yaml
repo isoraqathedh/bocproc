@@ -1,0 +1,82 @@
+%BOCConfig
+---
+languages:
+  # Main four
+  - symbol   : EP
+    name     : Egonyota Pasaru
+  - symbol   : SX
+    name     : Serakafph Xaxex
+  - symbol   : EQ
+    name     : yukũa|Elaga ütæk|Qvaḻsa
+    asciiName: yukua|Elaga utak|Qvalsa
+  - symbol   : Ct
+    name     : Cipogrtesaj
+  # PSD
+  - symbol   : Yk
+    name     : Yoskrai
+  - symbol   : Ag
+    name     : Âagenzbèe
+    asciiName: Aahqgenzbeeq
+  - symbol   : Cd
+    name     : Cindri
+  - symbol   : Rs
+    name     : Rattssaw
+  - symbol   : GE
+    name     : Gwa-elohba
+  - symbol   : NH
+    name     : Nnn Heeel
+  # XAX
+  - symbol   : Sk
+    name     : Sekapon
+  - symbol   : Ya
+    name     : Ya-kĕnaj
+    asciiName: Ya-kewnaj
+  - symbol   : OF
+    name     : Ouduec Fxelw
+  # Others
+  - symbol   : Ub
+    name     : Uvbraot
+  - symbol   : MGY
+    name     : Man Gog Yuu
+  - symbol   : AKF
+    name     : Altrvukaif
+  - symbol   : RDWA
+    name     : Rďƿa
+    asciiName: Rdhwqa
+worlds:
+  - symbol   : PSD
+    name     : Pseudo
+    trueName : Pasaru
+  - symbol   : XAX
+    name     : Xaxex
+  - symbol   : CIR
+    name     : Circular
+  - symbol   : QUX
+    name     : Quaxtion
+  - symbol   : LEB
+    name     : Leħbraot
+    asciiName: Lehqhbraot
+  - symbol   : BIG
+    name     : Bigencenryin
+ignored:
+  boc:
+    - true
+    - true
+    - true
+    - true
+    - true # 5
+    - [2, 3]
+    - [38, 39, 49]
+    - [21, 27, 28]
+    - [34, 37]
+    - [41] # 10
+    - [2]
+    - []
+    - [47]
+    - [29, 40]
+    - [] # 15
+    - []
+    - []
+    - [15]
+  purple:
+    - [2]
