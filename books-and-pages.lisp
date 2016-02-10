@@ -65,16 +65,15 @@ that is either a page or part of one."))
 
 ;;; Specific errors
 (define-condition not-specific-enough (error)
-  ((problem-book :initarg :problem-book
-                 :reader problem-book)
+  ((problem-book :initarg :missing-value-accessor
+                 :reader missing-value-accessor)
    (target-specificity :initarg :target-specificity
                        :reader target-specificity))
   (:report (lambda (condition stream)
-             (format stream "The object ~a has specificity ~a, ~
-                             which is less specific than ~a."
-                          (problem-book condition)
-                          (specificity (problem-book condition))
-                          (target-specificity condition)))))
+             (format stream "~a returned NIL, ~
+which is not specific enough for ~a."
+                     (missing-value-accessor condition)
+                     (target-specificity condition)))))
 
 ;;; Specific types of page
 (defclass book-of-conworlds-page (page)
@@ -124,11 +123,47 @@ without an associated book."))
 (defgeneric ensure-book-specific (book specificity)
   (:documentation "Ensures that the book is at least as specific as specificity.
 Raises an error and gives common resolutions.")
-  (:method ((book page) specificity)
-    (if (specificity< (specificity book) specificity)
-        (error 'not-specific-enough
-               :problem-book book
-               :target-specificity specificity))))
+  (:method ((book-obj page) specificity)
+    (let ((specificity-spec '(nil :book :page :subpage))
+          (getters (list (lambda (&rest ignored) (declare (ignore ignored)) t)
+                         #'book
+                         #'page
+                         #'subpage))
+          (setters (list nil #'(setf book) #'(setf page) #'(setf subpage))))
+      (unless (member specificity specificity-spec)
+        (error "~a is not a specificity-spec." specificity))
+      (loop for test-specificity in specificity-spec
+            and prev-specificity = nil then test-specificity
+            for getter in getters
+            for setter in setters
+            unless (funcall getter book-obj)
+            do (restart-case (error 'not-specific-enough
+                                    :missing-value-accessor setter
+                                    :target-specificity test-specificity)
+                 (new-value (new-value &optional (slot-writer setter))
+                   :interactive (lambda ()
+                                  (format *query-io*
+                                          "Write in a new value for ~a: "
+                                          setter)
+                                  (list (parse-integer (read-line))))
+                   :report "Provide a value for the missing specificity."
+                   (funcall slot-writer new-value book-obj)
+                   (ensure-book-specific book-obj test-specificity))
+                 (new-values (new-book new-page new-subpage)
+                   :report "Put in new values of book/page/subpage all at once."
+                   :interactive (lambda ()
+                                  (format *query-io*
+                                          "Three-element list of (book page subpage): ")
+                                  (read))
+                   (setf (book book-obj) new-book
+                         (page book-obj) new-page
+                         (subpage book-obj) new-subpage)
+                   (ensure-book-specific book-obj test-specificity))
+                 (return-specificity ()
+                   :report "Return the specificity of the object."
+                   (return-from ensure-book-specific prev-specificity)))
+            when (eql test-specificity specificity) do (loop-finish))
+      book-obj)))
 
 (defgeneric book-path (book)
   (:documentation "Makes the pathname for the book.
