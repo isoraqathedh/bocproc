@@ -113,11 +113,12 @@ without an associated book."))
 
 (defun specificity< (specificity-spec &rest more-specificities)
   "Determines if the specificities are in increasing order."
-  (apply #'<=
-         (mapcar (lambda (specificity)
-                   (or (position specificity '(nil :book :page :subpage))
-                       (error "Invalid specificity: ~a" specificity)))
-                 (cons specificity-spec more-specificities))))
+  (apply
+   #'<=
+   (mapcar (lambda (specificity)
+             (or (position specificity '(nil :book :page :subpage))
+                 (error "Invalid specificity: ~a" specificity)))
+           (cons specificity-spec more-specificities))))
 
 ;;; Operations
 (defgeneric ensure-book-specific (book specificity)
