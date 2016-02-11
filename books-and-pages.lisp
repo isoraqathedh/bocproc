@@ -116,10 +116,7 @@ without an associated book."))
 Raises an error and gives common resolutions.")
   (:method ((book-obj page) specificity)
     (let ((specificity-spec '(nil :book :page :subpage))
-          (getters (list (lambda (&rest ignored) (declare (ignore ignored)) t)
-                         #'book
-                         #'page
-                         #'subpage))
+          (getters (list (constantly t) #'book #'page #'subpage))
           (setters (list nil #'(setf book) #'(setf page) #'(setf subpage))))
       (unless (member specificity specificity-spec)
         (error "~a is not a specificity-spec." specificity))
