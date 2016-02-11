@@ -110,15 +110,6 @@ without an associated book."))
             (book :book)
             (t nil)))))
 
-(defun specificity< (specificity-spec &rest more-specificities)
-  "Determines if the specificities are in increasing order."
-  (apply
-   #'<=
-   (mapcar (lambda (specificity)
-             (or (position specificity '(nil :book :page :subpage))
-                 (error "Invalid specificity: ~a" specificity)))
-           (cons specificity-spec more-specificities))))
-
 ;;; Operations
 (defgeneric ensure-book-specific (book specificity)
   (:documentation "Ensures that the book is at least as specific as specificity.
@@ -158,18 +149,15 @@ Raises an error and gives common resolutions.")
                    (setf (book book-obj) new-book
                          (page book-obj) new-page
                          (subpage book-obj) new-subpage)
-                   (ensure-book-specific book-obj test-specificity))
-                 (return-specificity ()
-                   :report "Return the specificity of the object."
-                   (return-from ensure-book-specific prev-specificity)))
-            when (eql test-specificity specificity) do (loop-finish))
-      book-obj)))
+                   (ensure-book-specific book-obj test-specificity)))
+            when (eql test-specificity specificity) do (loop-finish)
+            finally (return book-obj)))))
 
 (defgeneric book-path (book)
   (:documentation "Makes the pathname for the book.
 Raises an error if the book is not specific enough.")
   (:method ((book page))
-    #+(or) (ensure-book-specific book :book)
+    (ensure-book-specific book :book)
     (with-accessors ((book book) (root root)) book
       (merge-pathnames
        (make-pathname :directory (list :relative (format nil "Book ~a" book)))
@@ -179,7 +167,7 @@ Raises an error if the book is not specific enough.")
   (:documentation "Makes the pathname for a specific page.
 Only returns the wild format. ")
   (:method ((page-object book-of-conworlds-page))
-    #+(or) (ensure-book-specific book :page)
+    (ensure-book-specific page-object :page)
     (with-accessors ((page page) (subpage subpage)) page-object
       (merge-pathnames
        (make-pathname :name (pathname-name
@@ -193,12 +181,13 @@ Only returns the wild format. ")
   (:documentation "Checks if a book exists.
  Raises errors if the book is not specific enough.")
   (:method ((page-object page))
-    #+(or) (ensure-book-specific page-object :book)
+    (ensure-book-specific page-object :book)
     (probe-file (book-path page-object))))
 
 (defgeneric book-ignored-p (book)
   (:documentation "Checks if a book is ignored.")
   (:method ((book-object book-of-conworlds-page))
+    (ensure-book-specific page-object :book)
     (with-accessors ((book book)) book-object
       (->> *config*
         (gethash "ignored")
@@ -208,7 +197,8 @@ Only returns the wild format. ")
 
 (defgeneric page-ignored-p (page)
   (:documentation "Checks if a book is ignored.")
-  (:method ((page-object page))
+  (:method ((page-object book-of-conworlds-page))
+    (ensure-book-specific page-object :page)
     (with-accessors ((page page) (book book)) page-object
       (with-expression-threading (*config*)
         (gethash "ignored" :||)
