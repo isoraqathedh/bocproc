@@ -74,43 +74,60 @@ which is not specific enough for ~a."
                      (missing-value-accessor condition)
                      (target-specificity condition)))))
 
+(defclass dated-page ()
+  ((date-of-creation :accessor date-of-creation))
+  (:documentation "Mixin of pages
+whose file name depends on the date of creation."))
+
 ;;; Specific types of page
 (defclass book-of-conworlds-page (page)
   ((root-path :initform (books-location-subdir "Book of Conworlds")))
   (:documentation "Represents a page in the book of conworlds book."))
 
-(defclass non-boc-conworld-page (page)
+(defclass non-boc-conworld-page (book-of-conworlds-page dated-page)
   ((root-path :initform (books-location-subdir "Book of Conworlds" "Non-BoC")))
   (:documentation "Represents a book of conworlds page
 without an associated book."))
 
-(defclass non-boc-page (page)
-  ((root-path :initform (books-location-subdir "Unsorted by Date"))))
+(defclass non-boc-page (page dated-page)
+  ((root-path :initform (books-location-subdir "Unsorted by Date")))
+  (:documentation "Represents another scan."))
 
 ;;; Printing controls
+(defun format-time (timestamp)
+  (local-time:format-timestring
+   nil timestamp :format '(:year "-" (:month 2) " (" :short-month ")")))
+
+(defmethod initialize-instance :after
+    ((instance dated-page) &key &allow-other-keys)
+  (setf (date-of-creation instance) (local-time:now)))
+
 (defgeneric format-page-code (page)
   (:documentation "Writes the printed representation of a page object.")
   (:method ((page book-of-conworlds-page))
     (with-accessors ((book book) (page page) (subpage subpage)) page
-      (format nil "Book ~a/~a~c"
-              (or book "?")
-              (if page (format nil "~2,'0d" page) "??")
+      (format nil "~:[?~;~d~] / ~:[??~;~:*~2,'0d~]~c"
+              book
+              page
               (cond ((null subpage) #\?)
                     ((<= 1 subpage 26)
-                     (char "abcdefghijklmnopqrstuvwxyz" (1- subpage))))))))
+                     (char "abcdefghijklmnopqrstuvwxyz" (1- subpage)))))))
+  (:method ((page-object non-boc-conworld-page))
+    (with-accessors ((page page) (subpage subpage) (date date-of-creation))
+        page-object
+      (format nil "~a / ~:[??~;~:*~2,'0d~]~c"
+              (format-time date)
+              page
+              (cond ((null subpage) #\?)
+                    ((<= 1 subpage 26)
+                     (char "abcdefghijklmnopqrstuvwxyz" (1- subpage)))))))
+  (:method ((page-object non-boc-page))
+    (with-accessors ((page page) (date date-of-creation)) page-object
+      (format nil "~a / ~:[????~;~:*~4,'0d~]" (format-time date) page))))
 
-(defmethod print-object ((object book-of-conworlds-page) stream)
+(defmethod print-object ((object page) stream)
   (print-unreadable-object (object stream :type t)
     (princ (format-page-code object) stream)))
-
-(defgeneric specificity (page)
-  (:documentation "Determines how specific a page is.")
-  (:method ((page page))
-    (with-accessors ((book book) (page page) (subpage subpage)) page
-      (cond ((and book page subpage) :subpage)
-            ((and book page) :page)
-            (book :book)
-            (t nil)))))
 
 ;;; Operations
 (defgeneric ensure-book-specific (book specificity)
@@ -155,12 +172,17 @@ Raises an error and gives common resolutions.")
 (defgeneric book-path (book)
   (:documentation "Makes the pathname for the book.
 Raises an error if the book is not specific enough.")
-  (:method ((book page))
+  (:method ((book book-of-cownworlds-page))
     (ensure-book-specific book :book)
     (with-accessors ((book book) (root root)) book
       (merge-pathnames
        (make-pathname :directory (list :relative (format nil "Book ~a" book)))
-       root))))
+       root)))
+  (:method ((book non-boc-conworlds-pate))
+    (ensure-book-specific book :book)
+    (with-accessors ((root root)) book
+      (merge-pathnames
+       (make-pathname :directory (list :relative ()))))))
 
 (defgeneric page-path-wild (page)
   (:documentation "Makes the pathname for a specific page.
@@ -178,15 +200,24 @@ Only returns the wild format. ")
 
 (defgeneric page-path (page)
   (:documentation "Finds the pathname for a specific page.")
-  (:method ((page-object page))
-    (let (search-results (directory (page-path-wild page-object)))
+  (:method :before ((page-object page))
+    (ensure-book-specific page-object :page))
+  (:method ((page-object book-of-conworlds-page))
+    (let ((search-results (directory (page-path-wild page-object))))
       (cond ((= 1 (length search-results))
              (first search-results))
             ((= 0 (length search-results))
              (warn "No items found for specified page number."))
             (t (warn "Too many items found for specified page number.")
                (values (first search-results)
-                       (rest search-results)))))))
+                       (rest search-results))))))
+  (:method ((object non-boc-page))
+    (with-accessors ((page page) (date date-of-creation) (root root)) object
+      (merge-pathnames
+       (make-pathname :directory (list :relative (format-time date))
+                      :name (format nil "SCAN~4,'0d" page)
+                      :type "jpg")
+       root))))
 
 (defgeneric book-exists (book)
   (:documentation "Checks if a book exists.
@@ -206,6 +237,12 @@ Only returns the wild format. ")
         (nth (1- book))
         (eql t)))))
 
+(defgeneric page-exists-p (page)
+  (:documentation "Checks if a page exists.")
+  (:method ((page-object page))
+    (ensure-book-specific page-object :subpage)
+    (page-path page-object)))
+
 (defgeneric page-ignored-p (page)
   (:documentation "Checks if a book is ignored.")
   (:method ((page-object book-of-conworlds-page))
@@ -217,3 +254,6 @@ Only returns the wild format. ")
         (nth (1- book) :||)
         (and (listp :||)
              (member page :||))))))
+
+;;; Auto-determination
+(defgeneric calculate-page )
