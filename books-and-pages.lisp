@@ -34,8 +34,7 @@ Classes and methods that relate to representing and finding books and pages.
             uiop:slurp-stream-string
             cl-yy:yaml-load
             car
-            cadr
-            ))))
+            cadr))))
 
 (defun books-location-subdir (&rest folder-names)
   (merge-pathnames
@@ -84,6 +83,9 @@ which is not specific enough for ~a."
   ((root-path :initform (books-location-subdir "Book of Conworlds" "Non-BoC")))
   (:documentation "Represents a book of conworlds page
 without an associated book."))
+
+(defclass non-boc-page (page)
+  ((root-path :initform (books-location-subdir "Unsorted by Date"))))
 
 ;;; Printing controls
 (defgeneric format-page-code (page)
@@ -173,6 +175,18 @@ Only returns the wild format. ")
                                      (if subpage (number->letter subpage) "?")))
                       :type "jpg")
        (book-path page-object)))))
+
+(defgeneric page-path (page)
+  (:documentation "Finds the pathname for a specific page.")
+  (:method ((page-object page))
+    (let (search-results (directory (page-path-wild page-object)))
+      (cond ((= 1 (length search-results))
+             (first search-results))
+            ((= 0 (length search-results))
+             (warn "No items found for specified page number."))
+            (t (warn "Too many items found for specified page number.")
+               (values (first search-results)
+                       (rest search-results)))))))
 
 (defgeneric book-exists (book)
   (:documentation "Checks if a book exists.
