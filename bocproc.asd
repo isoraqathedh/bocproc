@@ -7,4 +7,5 @@
   :depends-on (#:local-time #:cl-yaclyaml #:thread-expr)
   :serial t
   :components ((:file "package")
+               (:file "helper")
                (:file "books-and-pages")))
