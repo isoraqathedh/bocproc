@@ -1,63 +1,59 @@
-%BOCConfig
+%YAML 1.2
 ---
+# Associative list in two forms:
+# The first form is `symbol: hash`,
+# where hash are key-value pairs
+# That indicate the variations of the name associated with the symbol,
+# such as ASCII form, true form, etc.
+# If there's only one form, a bare string can be substituted in its place.
 languages:
   # Main four
-  - symbol   : EP
-    name     : Egonyota Pasaru
-  - symbol   : SX
-    name     : Serakafph Xaxex
-  - symbol   : EQ
-    name     : yukũa|Elaga ütæk|Qvaḻsa
-    asciiName: yukua|Elaga utak|Qvalsa
-  - symbol   : Ct
-    name     : Cipogrtesaj
+  EP: Egonyota Pasaru
+  SX: Serakafph Xaxex
+  EQ: {name: yukũa|Elaga ütæk|Qvaḻsa, ascii-name: yukua|Elaga utak|Qvalsa}
+  Ct: Cipogrtesaj
+
   # PSD
-  - symbol   : Yk
-    name     : Yoskrai
-  - symbol   : Ag
-    name     : Âagenzbèe
-    asciiName: Aahqgenzbeeq
-  - symbol   : Cd
-    name     : Cindri
-  - symbol   : Rs
-    name     : Rattssaw
-  - symbol   : GE
-    name     : Gwa-elohba
-  - symbol   : NH
-    name     : Nnn Heeel
+  Yk: Yoskrai
+  Ag: {name: Âagenzbèe, ascii-name: Aahqgenzbeeq}
+  Cd: Cindri
+  Rs: Rattssaw
+  GE: Gwa-elohba
+  NH: Nnn Heeel
+  # Reserved for future use
+  # Gb: Genbarg
+  # Or: {name: Oraṕ, ascii-name: Oraf}
+
   # XAX
-  - symbol   : Sk
-    name     : Sekapon
-  - symbol   : Ya
-    name     : Ya-kĕnaj
-    asciiName: Ya-kewnaj
-  - symbol   : OF
-    name     : Ouduec Fxelw
+  Sk: Sekapon
+  Ya: {name: Ya-kĕnaj, ascii-name: Ya-kewnaj}
+  OF: Ouduec Fxelw
+
   # Others
-  - symbol   : Ub
-    name     : Uvbraot
-  - symbol   : MGY
-    name     : Man Gog Yuu
-  - symbol   : AKF
-    name     : Altrvukaif
-  - symbol   : RDWA
-    name     : Rďƿa
-    asciiName: Rdhwqa
+  Ub: Uvbraot
+  MGY: Man Gog Yuu
+  AKF: Altrvukaif
+  RDWA: {name: Rďƿa, ascii-name: Rdhwqa}
+
 worlds:
-  - symbol   : PSD
-    name     : Pseudo
-    trueName : Pasaru
-  - symbol   : XAX
-    name     : Xaxex
-  - symbol   : CIR
-    name     : Circular
-  - symbol   : QUX
-    name     : Quaxtion
-  - symbol   : LEB
-    name     : Leħbraot
-    asciiName: Lehqhbraot
-  - symbol   : BIG
-    name     : Bigencenryin
+  PSD: {name: Pseudo, true-name: Pasaru}
+  XAX: Xaxex
+  CIR: {name: Circular, true-name: Cipog}
+  QUX: Quaxtion
+  LEB: {name: Leħbraot, ascii-name: Lehqhbraot}
+  BIG: Bigencenryin
+
+special-tags:
+  RSGN: Road signs
+  OVEX: Octovexillology
+
+# --- # Maybe have this be a real document break in the future.
+# Ignore list.
+# For each book (whose code is indicated by the key),
+# a list of objects that indicate its ignorance.
+# Lists indicate that the specified pages are ignored in that particular book,
+# whereas true indicates the entire book is ignored.
+
 ignored:
   boc:
     - true
