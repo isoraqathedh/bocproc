@@ -4,7 +4,7 @@
   "The alphabet as required in the subpage specifications.")
 
 (defvar *config-file* (asdf:system-relative-pathname
-                       :bocproc "config" :type "yaml"))
+                       :bocproc "config" :type "lisp"))
 
 (defparameter *books-location*
   (merge-pathnames
@@ -12,7 +12,10 @@
    (uiop/common-lisp:user-homedir-pathname)))
 
 (defparameter *config* ()
-  "Configuration hash-table.")
+  "Configuration tree.")
+
+(defparameter *ignore-list* ()
+  "Hash-table for the ignore list.")
 
 (defun letter->number (letter)
   (let ((maybe-position (position letter +alphabet+)))
@@ -28,8 +31,7 @@
 (defun load-config-file ()
   "Reads the config file into *config*."
   (with-open-file (s *config-file* :external-format :utf-8)
-    (setf *config*
-          (-> s uiop:slurp-stream-string cl-yy:yaml-load car cadr))))
+    (setf *config* (read s))))
 
 (defun books-location-subdir (&rest folder-names)
   (merge-pathnames
