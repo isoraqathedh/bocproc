@@ -47,32 +47,27 @@ special-tags:
   RSGN: Road signs
   OVEX: Octovexillology
 
-# --- # Maybe have this be a real document break in the future.
+---
 # Ignore list.
 # For each book (whose code is indicated by the key),
 # a list of objects that indicate its ignorance.
 # Lists indicate that the specified pages are ignored in that particular book,
 # whereas true indicates the entire book is ignored.
 
-ignored:
-  boc:
-    - true
-    - true
-    - true
-    - true
-    - true # 5
-    - [2, 3]
-    - [38, 39, 49]
-    - [21, 27, 28]
-    - [34, 37]
-    - [41] # 10
-    - [2]
-    - []
-    - [47]
-    - [29, 40]
-    - [] # 15
-    - []
-    - []
-    - [15]
-  purple:
-    - [2]
+boc:
+  1: true
+  2: true
+  3: true
+  4: true
+  5: true
+  6: [2, 3]
+  7: [38, 39, 49]
+  8: [21, 27, 28]
+  9: [34, 37]
+  10: [41]
+  11: [2]
+  13: [47]
+  14: [29, 40]
+  18: [15]
+purple:
+  1: [2]
