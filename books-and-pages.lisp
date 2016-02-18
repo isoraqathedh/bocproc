@@ -18,7 +18,10 @@ that represent the book/page/subpage structure of the page.")
 that indicate what the corresponding number in page-number-list means.")
    (root-path :reader root
               :documentation "The path
- where all the objects that this class represents are stored in."))
+ where all the objects that this class represents are stored in.")
+   (series-key :reader series-key
+               :allocation :class
+               :documentation "A short string indicating the code of the page."))
   (:documentation "Represents a single file
 that is either a page or part of one.
 Should not be instantiated directly;
@@ -28,7 +31,8 @@ use generic-page."))
 (defclass generic-page (page)
   ((root-path :initarg :root
               :initform (uiop/common-lisp:user-homedir-pathname))
-   (specifcities :initarg :specificities))
+   (specifcities :initarg :specificities)
+   (series-key :initform "generic"))
   (:documentation "Represents a single file
 that is either a page or a part of one.
 This generic page is meant to be instantiated if none of the other classes
@@ -69,18 +73,25 @@ whose file names depend on wildcards."))
 ;;; Specific types of page
 (defclass book-of-conworlds-page (page-using-wildcards page)
   ((specificities :initform '(:book :page :subpage))
-   (root-path :initform (books-location-subdir "Book of Conworlds")))
+   (root-path :initform (books-location-subdir "Book of Conworlds"))
+   (series-key :initform "boc"))
   (:documentation "Represents a page in the book of conworlds book."))
 
-(defclass non-boc-conworld-page (dated-page page-using-wildcards book-of-conworlds-page)
+(defclass boc-purple-page (book-of-conworlds-page)
+  ((series-key :initform "purple"))
+  (:documentation "Represents a page in the purple series of a BoC book."))
+
+(defclass non-boc-conworld-page (dated-page book-of-conworlds-page)
   ((specificities :initform '(:page :subpage))
-   (root-path :initform (books-location-subdir "Book of Conworlds" "Non-BoC")))
+   (root-path :initform (books-location-subdir "Book of Conworlds" "Non-BoC"))
+   (series-key :initform "nboc"))
   (:documentation "Represents a book of conworlds page
 without an associated book."))
 
 (defclass non-boc-page (dated-page page)
   ((specificities :initform '(:page))
-   (root-path :initform (books-location-subdir "Unsorted by Date")))
+   (root-path :initform (books-location-subdir "Unsorted by Date"))
+   (series-key :initform "uncategorised"))
   (:documentation "Represents another scan."))
 
 ;;; Printing controls
@@ -130,6 +141,15 @@ with the provided specificity.")
   (:method ((object page) specificity)
     (aref (page-numbers object) (position specificity (specificities object)))))
 
+(defgeneric specificity (object)
+  (:documentation "Retrieves the specificity of an object.")
+  (:method ((object page))
+    (loop for number across (page-numbers object)
+          for specificity in (specificities object)
+          and prev-specificity = nil then specificity
+          unless number return prev-specificity
+          finally (return specificity))))
+
 (defgeneric (setf get-specificity) (value object specificity)
   (:method (value (object page) specificity)
     (setf (aref (page-numbers object)
@@ -175,9 +195,15 @@ with the provided specificity.")
   (print-unreadable-object (object stream :type t :identity t)
     (format stream "~a ~a" (root object) (page-numbers object))))
 
+(defvar *do-ensure* nil
+  "Determines whether or not checking for well-formedness.")
+
 (defgeneric ensure-book-specific (book specificity)
   (:documentation "Ensures that the book is at least as specific as specificity.
 Raises appropriate errors and gives common resolutions.")
+  (:method :around (book specificity)
+    (when *do-ensure*
+      (call-next-method)))
   (:method ((book-obj page) specificity)
     (let ((specificity-spec (specificities book-obj))
           (page-number-list (page-numbers book-obj)))
@@ -202,7 +228,6 @@ Raises appropriate errors and gives common resolutions.")
         do (flet ((back-to-top (page spec)
                     ;; Restart the main loop to ensure everything is still sane.
                     (return-from main-loop (ensure-book-specific page spec))))
-             (format t "Got here.")
              (restart-case (error 'not-specific-enough
                                  :current-specificity test-specificity
                                  :target-specificity specificity)
@@ -257,110 +282,109 @@ unless allow-multiple-files is non-nil."
              (values (first matched-files)
                      (rest matched-files))))))
 
-(defgeneric construct-boc-filename (book-object specificity &optional use-wild)
+(defgeneric construct-filename (book-object &optional use-wild)
   (:documentation "Constructs the filename off of an object.")
-  (:method ((book-object book-of-conworlds-page) specificity &optional use-wild)
+  (:method ((book-object book-of-conworlds-page) &optional use-wild)
     (specificity-bind ((page :page) (subpage :subpage)) book-object
-      (cond ((eql specificity :book) (if use-wild :wild))
-            (t (when (and (eql specificity :subpage)
-                          (null subpage))
-                 (setf subpage 1))
-               (pathname-name
-                (format nil "~2,'0d~:[?~;~:*~c~]-*"
-                        page (number->letter subpage))))))))
+      (pathname-name
+       (ecase (specificity book-object)
+         (:book (if use-wild "*" ""))
+         (:page (format nil "~2,'0d?-*" page))
+         (:subpage (format nil "~2,'0d~c-*" page (number->letter subpage)))))))
+  (:method ((object non-boc-page) &optional use-wild)
+    (declare (ignore use-wild))
+    (when (eql (specificity object) :page)
+      (specificity-bind ((page :page)) object
+        (format nil "SCAN~4,'0d" page)))))
 
 (defgeneric construct-folder-name (book-object)
   (:documentation "Returns the folder name associated with the book.")
   (:method ((object book-of-conworlds-page))
     (specificity-bind ((book :book)) object
-      (format nil "Book ~a" book)))
+      (format nil "Book ~d" book)))
+  (:method ((object boc-purple-page))
+    (specificity-bind ((book :book)) object
+      (format nil "Book p~d" book)))
   (:method ((object dated-page))
     (format-time (date-of-creation object))))
 
-(defgeneric path-up-to (object specificity &key use-wild expand-wild)
+(defgeneric get-path (object &key use-wild expand-wild)
   (:documentation "Returns the path up to the specificity.
 If use-wild is non-nil, then provide a wild pathname if relevant.")
-  (:method :before ((object page) specificity &key &allow-other-keys)
-    (handler-bind ((warning #'muffle-warning)
-                   (not-specific-enough #'implicit-subpage))
-      (ensure-book-specific object specificity)))
-  (:method ((object page) (specificity symbol)
-            &key use-wild expand-wild)
-    (specificity-bind ((book :book)) object
-      ;; Find the wild path in any case,
-      ;; as it is required to find the ordinary path.
-      (let ((wild-path
-              (merge-pathnames
-               (make-pathname
-                :directory (list :relative (construct-folder-name object))
-                :name (construct-boc-filename object specificity use-wild)
-                :type (if (eql specificity :book)
-                          (if use-wild :wild)
-                          "jpg"))
-               (root object))))
-        ;; Now decide if we bail out here.
-        (cond (use-wild wild-path)
-              ((or expand-wild (find specificity '(:page :subpage)))
-               (expand-wild-pathname wild-path)))))))
+  (:method ((object page) &key use-wild expand-wild)
+    ;; Find the wild path in any case,
+    ;; as it is required to find the ordinary path.
+    (let* ((specificity (specificity object))
+           (wild-path
+            (merge-pathnames
+             (make-pathname
+              :directory (list :relative (construct-folder-name object))
+              :name (construct-filename object (or use-wild expand-wild))
+              :type (cond ((and (typep object 'page-using-wildcards)
+                                (or use-wild expand-wild)) :wild)
+                          ((find specificity '(:page :subpage)) "jpg")))
+             (root object))))
+      ;; Now decide if we bail out here.
+      (if (and (typep object 'page-using-wildcards)
+               expand-wild
+               (wild-pathname-p wild-path))
+          (expand-wild-pathname wild-path)
+          wild-path))))
 
-;;; Existence and Ignoredness
+;;; Existence and Ignorance
 (defgeneric book-exists-p (book)
-  (:documentation "Checks if a book exists.
- Raises errors if the book is not specific enough.")
-  (:method :before ((object page))
-    (ensure-book-specific object :book))
+  (:documentation "Checks if a page exists at that specificity level.")
   (:method ((page-object page))
-    (probe-file (book-path page-object))))
+    (handler-bind ((warning #'muffle-warning)
+                   (type-error
+                     ;; probe-file errors when given nil;
+                     ;; probe-file* chokes on Unicode filenames.
+                     ;; This will have to do.
+                     (lambda (c)
+                       (declare (ignore c))
+                       (return-from book-exists-p nil))))
+      (probe-file
+       (get-path
+        page-object
+        :expand-wild (not (eql (specificity page-object) :book)))))))
 
 (defgeneric book-ignored-p (book)
-  (:documentation "Checks if a book is ignored.")
-  (:method :before ((object page))
-    (handler-bind ((warning #'muffle-warning))
-      (ensure-book-specific object :book)))
+  (:documentation "Checks if a page is ignored at that specificity level.")
   (:method ((object book-of-conworlds-page))
-    (->> *config*
-      (gethash "ignored")
-      (gethash "boc")
-      (nth (1- (get-specificity object :book)))
-      (eql t))))
-
-(defgeneric page-exists-p (page)
-  (:documentation "Checks if a page exists.")
-  (:method ((page-object page))
-    (handler-bind ((not-specific-enough #'implicit-subpage)
-                   (warning #'muffle-warning))
-      (ensure-book-specific page-object :subpage)
-      (page-path page-object))))
-
-(defgeneric page-ignored-p (page)
-  (:documentation "Checks if a book is ignored.")
-  (:method ((page-object book-of-conworlds-page))
-    (ensure-book-specific page-object :page)
-    (with-accessors ((page page) (book book)) page-object
-      (with-expression-threading ()
-        *config*
-        (gethash "ignored" :||)
-        (gethash "boc" :||)
-        (nth (1- book) :||)
-        (and (listp :||)
-             (member page :||))))))
+    (when (find :book (specificities object))
+      ;; No pages are ignored if they are not arranged in books.
+      (let ((specificity (specificity object)))
+        (specificity-bind ((book :book) (page :page)) object
+          (with-expression-threading ()
+            *config*
+            (assoc :ignore-list :||) #'cdr
+            (assoc (series-key object) :|| :test #'string=) #'cdr
+            (assoc book :||) #'cdr
+            (ecase specificity
+              (:book (eql t :||))
+              ((:page :subpage) (find page :||)))))))))
 
 ;;; Auto-determination
-(defgeneric calculate-book (book spec)
-  (:documentation "Automatically calculates the book number.
-If spec is :next, return the first book that is not used or ignored.
-If spec is :cur, return the last book that is used and not ignored.
-If spec is a wandering page, extract its paging-behaviour and use that.
-This is only used for pages that have a book number;
-it will return nil if not found.")
+(defgeneric calculate-page-number (book specificity requested-value)
+  (:documentation "Automatically calculates
+the value associated with the specificity.
+If requested-value is :cur, return the last book that is used and not ignored.
+If requested-value is :next, return the first book that is not used or ignored.
+If requested-value is a number, simply slot the number into the specificity.")
   ;; wandering-page placed in another file.
-  (:method ((page-number-slot page) (spec symbol))
-    (when (member :book (specificities page-number-slot))
-      (loop for potential-book from 1
-            do (setf (get-specificity page-number-slot :book) potential-book)
-            unless (or (book-ignored-p page-number-slot)
-                       (book-exists-p page-number-slot))
-            return (ecase spec
-                     (:next page-number-slot)
-                     (:cur (decf (get-specificity page-number-slot :book))
-                      page-number-slot))))))
+  (:method ((page-number-slot page) specificity (end-condition symbol))
+    (loop for test-number from 1 do
+          (setf (get-specificity book-object specificity) test-number)
+          (when (ecase end-condition
+                  (:cur (and (not (book-ignored-p book-object))
+                             (book-exists-p book-object)))
+                  (:next (not (or (book-ignored-p book-object)
+                                  (book-exists-p book-object)))))
+            (return book-object))))
+  (:method ((page-number-slot page) specificity (direct-value number))
+    (setf (get-specificity book-object specificity) direct-value)))
+
+(defgeneric calculate-page-numbers (book requested-value)
+  (:documentation "Calculate all positions of the page-number."))
+
+;; If end-condition is a wandering page, extract its paging-behaviour and use that.
