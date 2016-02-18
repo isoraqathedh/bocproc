@@ -365,6 +365,10 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
               ((:page :subpage) (find page :||)))))))))
 
 ;;; Auto-determination
+(defvar *cutoffs* '(1 . 99)
+  "A cons cell of two numbers
+that determines which numbers to be checked for a certain page number.")
+
 (defgeneric calculate-page-number (book specificity requested-value)
   (:documentation "Automatically calculates
 the value associated with the specificity.
@@ -373,16 +377,16 @@ If requested-value is :next, return the first book that is not used or ignored.
 If requested-value is a number, simply slot the number into the specificity.")
   ;; wandering-page placed in another file.
   (:method ((page-number-slot page) specificity (end-condition symbol))
-    (loop for test-number from 1 do
-          (setf (get-specificity book-object specificity) test-number)
+    (loop for test-number from (car *cutoffs*) to (cdr *cutoffs*) do
+          (setf (get-specificity page-number-slot specificity) test-number)
           (when (ecase end-condition
-                  (:cur (and (not (book-ignored-p book-object))
-                             (book-exists-p book-object)))
-                  (:next (not (or (book-ignored-p book-object)
-                                  (book-exists-p book-object)))))
-            (return book-object))))
+                  (:cur (and (not (book-ignored-p page-number-slot))
+                             (book-exists-p page-number-slot)))
+                  (:next (not (or (book-ignored-p page-number-slot)
+                                  (book-exists-p page-number-slot)))))
+            (return page-number-slot))))
   (:method ((page-number-slot page) specificity (direct-value number))
-    (setf (get-specificity book-object specificity) direct-value)))
+    (setf (get-specificity page-number-slot specificity) direct-value)))
 
 (defgeneric calculate-page-numbers (book requested-value)
   (:documentation "Calculate all positions of the page-number."))
