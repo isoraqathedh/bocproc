@@ -21,12 +21,18 @@ that indicate what the corresponding number in page-number-list means.")
  where all the objects that this class represents are stored in.")
    (series-key :reader series-key
                :allocation :class
-               :documentation "A short string indicating the code of the page."))
+               :documentation "A short string indicating the code of the page.")
+   (cutoffs :reader cutoffs
+            :allocation :class
+            :documentation "The possible values each page number can take."))
   (:documentation "Represents a single file
 that is either a page or part of one.
 Should not be instantiated directly;
 if a page that isn't covered in the other classes is required
 use generic-page."))
+
+(defvar *cutoffs* '(1 . 99)
+  "Default ranges for page numbers to be under.")
 
 (defclass generic-page (page)
   ((root-path :initarg :root
@@ -73,6 +79,7 @@ whose file names depend on wildcards."))
 ;;; Specific types of page
 (defclass book-of-conworlds-page (page-using-wildcards page)
   ((specificities :initform '(:book :page :subpage))
+   (cutoffs :initform '(nil nil (1 . 26)))
    (root-path :initform (books-location-subdir "Book of Conworlds"))
    (series-key :initform "boc"))
   (:documentation "Represents a page in the book of conworlds book."))
@@ -83,6 +90,7 @@ whose file names depend on wildcards."))
 
 (defclass non-boc-conworld-page (dated-page book-of-conworlds-page)
   ((specificities :initform '(:page :subpage))
+   (cutoffs :initform '(nil (1 . 26)))
    (root-path :initform (books-location-subdir "Book of Conworlds" "Non-BoC"))
    (series-key :initform "nboc"))
   (:documentation "Represents a book of conworlds page
@@ -90,6 +98,7 @@ without an associated book."))
 
 (defclass non-boc-page (dated-page page)
   ((specificities :initform '(:page))
+   (cutoffs :initform '((1 . 9999)))
    (root-path :initform (books-location-subdir "Unsorted by Date"))
    (series-key :initform "uncategorised"))
   (:documentation "Represents another scan."))
@@ -267,6 +276,18 @@ Raises appropriate errors and gives common resolutions.")
 
 ;;; Operations
 ;;; = = = = =
+;;; Get cutoffs
+
+(defgeneric get-cutoffs (book specificity)
+  (:documentation "Returns the two cutoffs of a specificity in a book,
+or the default if there is none")
+  (:method ((book page) specificity)
+    (let ((test-cutoffs (with-expression-threading () specificity
+                          (position :|| (specificities book))
+                          (nth :|| (cutoffs book)))))
+      (cons (or (car test-cutoffs) (car *cutoffs*))
+            (or (cdr test-cutoffs) (cdr *cutoffs*))))))
+
 ;;; Determining the path.
 (defun expand-wild-pathname (wild-path &optional allow-multiple-files)
   "Expands out a wild pathname and returns the first one.
@@ -362,33 +383,70 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
             (assoc book :||) #'cdr
             (ecase specificity
               (:book (eql t :||))
-              ((:page :subpage) (find page :||)))))))))
+              ((:page :subpage) (find page :||))))))))
+  (:method ((book non-boc-conworld-page)))
+  (:method ((book non-boc-page))))
 
 ;;; Auto-determination
-(defvar *cutoffs* '(1 . 99)
-  "A cons cell of two numbers
-that determines which numbers to be checked for a certain page number.")
-
 (defgeneric calculate-page-number (book specificity requested-value)
   (:documentation "Automatically calculates
 the value associated with the specificity.
-If requested-value is :cur, return the last book that is used and not ignored.
 If requested-value is :next, return the first book that is not used or ignored.
+If requested-value is :cur, return the previous book to :next.
 If requested-value is a number, simply slot the number into the specificity.")
   ;; wandering-page placed in another file.
+  (:method ((page-number-slot page) specificity (end-condition (eql :first)))
+    (setf (get-specificity page-number-slot specificity)
+          (car (get-cutoffs page-number-slot specificity))))
   (:method ((page-number-slot page) specificity (end-condition symbol))
-    (loop for test-number from (car *cutoffs*) to (cdr *cutoffs*) do
-          (setf (get-specificity page-number-slot specificity) test-number)
-          (when (ecase end-condition
-                  (:cur (and (not (book-ignored-p page-number-slot))
-                             (book-exists-p page-number-slot)))
-                  (:next (not (or (book-ignored-p page-number-slot)
-                                  (book-exists-p page-number-slot)))))
-            (return page-number-slot))))
+    (destructuring-bind (start . stop)
+        (get-cutoffs page-number-slot specificity)
+      (loop for test-number from start to stop do
+            (setf (get-specificity page-number-slot specificity) test-number)
+            (when (not (or (book-ignored-p page-number-slot)
+                           (book-exists-p page-number-slot)))
+              (ecase end-condition
+                (:cur (decf (get-specificity page-number-slot specificity)))
+                (:next))
+              (return page-number-slot)))))
   (:method ((page-number-slot page) specificity (direct-value number))
     (setf (get-specificity page-number-slot specificity) direct-value)))
 
-(defgeneric calculate-page-numbers (book requested-value)
-  (:documentation "Calculate all positions of the page-number."))
+(defgeneric construct-book-object (book slots-spec)
+  (:documentation "Calculate all positions of the page-number.")
+  (:method ((book-designator string) slots-spec)
+    (construct-book-object (make-instance
+                            (alexandria:switch (book-designator
+                                                :test #'string-equal)
+                              ("boc" 'book-of-conworlds-page)
+                              ("purple" 'boc-purple-page)
+                              ("nboc" 'non-boc-conworld-page)
+                              ("uncategorised" 'non-boc-page)))
+                           slots-spec))
+  (:method ((book-designator symbol) slots-spec)
+    (construct-book-object (symbol-name book-designator) slots-spec))
+  (:method ((test-object page) (ending-condition-plist list))
+    ;; A plist.
+    (alexandria:destructuring-case ending-condition-plist
+      ((&key next)
+       ;; If it's just :next
+       ;; then write it as in single-keyword, viz:
+       ;; The named keyword is NEXT
+       ;; Anything before is CUR
+       ;; Anything after is FIRST
+       (let ((specificities-list (specificities test-object)))
+         (loop with match-number = (or (position next specificities-list)
+                                       (error "The specificity ~a ~
+                                               is not defined."
+                                              slots-spec))
+               for spec in (specificities test-object)
+               for counter from 0
+               do (calculate-page-number
+                   book spec (cond
+                               ((< match-number counter) :cur)
+                               ((= match-number counter) :next)
+                               ((> match-number counter) :first)))))
+       (construct-book-object test-object next)))
+    ))
 
 ;; If end-condition is a wandering page, extract its paging-behaviour and use that.
