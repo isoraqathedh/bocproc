@@ -17,6 +17,9 @@
 (defparameter *ignore-list* ()
   "Hash-table for the ignore list.")
 
+(defparameter *exists-list* ()
+  "List for finding which files are there and not.")
+
 (defun letter->number (letter)
   (let ((maybe-position (position letter +alphabet+)))
     (if maybe-position
@@ -32,6 +35,18 @@
   "Reads the config file into *config*."
   (with-open-file (s *config-file* :external-format :utf-8)
     (setf *config* (read s))))
+
+(defun scan-for-files ()
+  "Detects and stores all files in *BOOKS-LOCATION*.
+Returns number of files detected, as this can be very large."
+  (with-expression-threading ()
+    (make-pathname :directory '(:relative :wild-inferiors)
+                   :name :wild
+                   :type :wild)
+    (merge-pathnames :|| *books-location*)
+    #'directory
+    (setf *exists-list* :||)
+    #'length))
 
 (defun books-location-subdir (&rest folder-names)
   (merge-pathnames
