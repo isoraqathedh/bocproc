@@ -98,7 +98,7 @@ without an associated book."))
 
 (defclass non-boc-page (dated-page page)
   ((specificities :initform '(:page))
-   (cutoffs :initform '((1 . 9999)))
+   (cutoffs :initform '((0 . 9999)))
    (root-path :initform (books-location-subdir "Unsorted by Date"))
    (series-key :initform "uncategorised"))
   (:documentation "Represents another scan."))
