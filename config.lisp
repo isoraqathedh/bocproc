@@ -4,62 +4,61 @@
   (t :metadata "Other/Misc" :type "misc" :filename "Mis"))
  (:tags
   ;;; Tags
-  ;; A property list that follows two strings.
-  ;; The two strings represent, in turn:
-  ;; - a SYMBOL: a short code for the object that this thing names.
-  ;; - a NAME: The full name of the object as it is most commonly known as.
-  ;; The first key is always a tag
-  ;; All properties in the plist alist are optional
-  ;; and represent alternate forms of the name of the object
+  ;; A property list that follows a string:
+  ;; a SYMBOL: a short code for the object that this thing names.
+  ;; All properties in the plist alist are optional except two:
+  ;; NAME: The full name of the object as it is most commonly known as, and
+  ;; TYPE: the type of tag that it belongs to.
+  ;; Other keys and values
+  ;; represent alternate forms of the name of the object
   ;; such as ASCII form, true form, etc.
-  ;; as well as :TYPE, the type of tag that it belongs to.
 
   ;; Main four
-  ("EP" "Egonyota Pasaru" :type :language)
-  ("SX" "Serakafph Xaxex" :type :language)
-  ("EQ" "yukũa|Elaga ütæk|Qvaḻsa"
+  ("EP" :name "Egonyota Pasaru" :type :language)
+  ("SX" :name "Serakafph Xaxex" :type :language)
+  ("EQ" :name "yukũa|Elaga ütæk|Qvaḻsa"
         :type :language
         :ascii-name "yukua|Elaga utak|Qvalsa")
-  ("Ct" "Cipogrtesaj" :type :language)
+  ("Ct" :name "Cipogrtesaj" :type :language)
 
   ;; PSD
-  ("Yk" "Yoskrai" :type :language)
-  ("Ag" "Âagenzbèe" :type :language :ascii-name "Aahqgenzbeeq")
-  ("Cd" "Cindri" :type :language)
-  ("Rs" "Rattssaw" :type :language)
-  ("GE" "Gwa-elohba" :type :language)
-  ("NH" "Nnn Heeel" :type :language)
+  ("Yk" :name "Yoskrai" :type :language)
+  ("Ag" :name "Âagenzbèe" :type :language :ascii-name "Aahqgenzbeeq")
+  ("Cd" :name "Cindri" :type :language)
+  ("Rs" :name "Rattssaw" :type :language)
+  ("GE" :name "Gwa-elohba" :type :language)
+  ("NH" :name "Nnn Heeel" :type :language)
   ;; Reserved for future use
-  ;;R ("Gb" "Genbarg" :type :language)
-  ;;R ("Or" "Oraṕ" :type :language :ascii-name "Oraf")
+  ;;R ("Gb" :name "Genbarg" :type :language)
+  ;;R ("Or" :name "Oraṕ" :type :language :ascii-name "Oraf")
 
   ;; XAX
-  ("Sk" "Sekapon" :type :language)
-  ("Ya" "Ya-kĕnaj" :type :language :ascii-name "Ya-kewnaj")
-  ("OF" "Ouduec Fxelw" :type :language)
+  ("Sk" :name "Sekapon" :type :language)
+  ("Ya" :name "Ya-kĕnaj" :type :language :ascii-name "Ya-kewnaj")
+  ("OF" :name "Ouduec Fxelw" :type :language)
 
   ;; Others
-  ("Ub" "Uvbraot" :type :language)
-  ("MGY" "Man Gog Yuu" :type :language)
-  ("AKF" "Altrvukaif" :type :language)
+  ("Ub" :name "Uvbraot" :type :language)
+  ("MGY" :name "Man Gog Yuu" :type :language)
+  ("AKF" :name "Altrvukaif" :type :language)
   ;;R ("RDWA" :type :language "Rďƿa" :ascii-name "Rdhwqa")
-  ("GMF" "g'Mòdyfäjq" :type :language :ascii-name "gModifajq")
+  ("GMF" :name "g'Mòdyfäjq" :type :language :ascii-name "gModifajq")
 
   ;; Worlds
-  ("PSD" "Pseudo" :type :world :true-name "Pasaru")
-  ("XAX" "Xaxex" :type :world)
-  ("CIR" "Circular" :type :world :true-name "Cipog")
-  ("QUX" "Quaxtion" :type :world)
-  ("LEB" "Leħbraot" :type :world :ascii-name "Lehqhbraot")
-  ("BIG" "Bigencenryin" :type :world))
- (:special-tags
+  ("PSD" :name "Pseudo" :type :world :true-name "Pasaru")
+  ("XAX" :name "Xaxex" :type :world)
+  ("CIR" :name "Circular" :type :world :true-name "Cipog")
+  ("QUX" :name "Quaxtion" :type :world)
+  ("LEB" :name "Leħbraot" :type :world :ascii-name "Lehqhbraot")
+  ("BIG" :name "Bigencenryin" :type :world)
+
   ;;; Special tags
   ;; These are thematic tags, tags that describe a running theme;
   ;; they can be used in any combination with the tags above.
   ;; They are usually mutually exclusive with each other and
   ;; are in English rather than in their own language.
-  ("RSGN" "Road signs")
-  ("OVEX" "Octovexillology"))
+  ("RSGN" :type :special :name "Road signs")
+  ("OVEX" :type :special :name "Octovexillology"))
 
  (:ignore-list
   ;;; Ignore list
