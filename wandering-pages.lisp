@@ -40,4 +40,21 @@ that would be in the metadata (that can then be injected via exiftool.)"))
           (pathname file))))
 
 ;;; Category determination
+(defun tag-type (tag)
+  "Finds the tag plist relating to the given tag."
+  (with-expression-threading () *config*
+    (assoc :tags :||) #'cdr
+    (assoc tag :|| :test #'string=) #'cdr))
+
+(defun genre (tags)
+  "Finds the genre/type of all the tags given."
+  (with-expression-threading ()
+    (mapcar (lambda (tag) (-> tag tag-type (getf :type)))
+            tags)
+    (remove :special :||)
+    (if (every #'eql :|| (cdr :||))
+        (car :||) t)
+    (assoc :|| (cdr (assoc :tag-props *config*)))
+    #'cdr))
+
 ;;; Filename conjoinment
