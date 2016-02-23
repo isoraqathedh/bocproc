@@ -53,8 +53,40 @@ that would be in the metadata (that can then be injected via exiftool.)"))
             tags)
     (remove :special :||)
     (if (every #'eql :|| (cdr :||))
-        (car :||) t)
-    (assoc :|| (cdr (assoc :tag-props *config*)))
-    #'cdr))
+        (car :||) t)))
+
+(defun get-name-variants (&rest variants)
+  "Creates a function that, when given a tag,
+runs through the list of variants and stops when a non-nil variant is found,
+which it then returns. If all of them return nil, then nil is returned."
+  (lambda (tag)
+    (let ((tag-plist (tag-type tag)))
+      (loop for i in variants
+            when (getf tag-plist i) return it))))
+
+(defun tag-manifestations (tags)
+  "Computes the exact tag combination for all tags in the list."
+  (destructuring-bind (&key metadata tumblr filename)
+      (cdr (assoc
+            (genre tags)
+            (cdr (assoc :tag-props *config*))))
+    (list
+     :metadata
+     (cons metadata
+           (remove nil (mapcar (get-name-variants :ascii-name :name)
+                               tags)))
+     :tumblr
+     (cons tumblr
+           (remove nil (mapcar (get-name-variants :tumblr :name)
+                               tags)))
+     :filename
+     (let ((tags-less-specials
+             (remove-if
+              (lambda (a)
+                (-> a tag-type (getf :type) (eql :special)))
+              tags)))
+       (if (= 1 (length tags-less-specials))
+           (first tags-less-specials)
+           filename)))))
 
 ;;; Filename conjoinment
