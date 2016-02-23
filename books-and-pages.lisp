@@ -104,7 +104,6 @@ without an associated book."))
   (:documentation "Represents another scan."))
 
 ;;; Printing controls
-
 (defmethod initialize-instance :after
     ((instance dated-page) &key &allow-other-keys)
   (setf (date-of-creation instance) (local-time:now)))
@@ -386,6 +385,9 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
               ((:page :subpage) (find page :||))))))))
   (:method ((book non-boc-conworld-page)))
   (:method ((book non-boc-page))))
+
+(defparameter *reserved-book-values* ()
+  "List of page numbers that are temporarily reserved.")
 
 ;;; Auto-determination
 (defun expand-to-specificities (book page-determination-plist)
