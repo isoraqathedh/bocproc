@@ -8,4 +8,5 @@
   :serial t
   :components ((:file "package")
                (:file "helper")
-               (:file "books-and-pages")))
+               (:file "books-and-pages")
+               (:file "wandering-pages")))
