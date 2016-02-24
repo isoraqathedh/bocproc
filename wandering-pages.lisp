@@ -17,7 +17,11 @@
    (categories :initarg :categories
                :initform ()
                :accessor categories
-               :documentation "A list of tags related to the object."))
+               :documentation "A list of tags related to the object.")
+   (paging-behaviour :initarg :paging-behaviour
+                     :initform ()
+                     :accessor paging-behaviour
+                     :documentation "How this page should be paged."))
   (:documentation "Represents a wandering page –
 pages whose page numbers are unknown.
 This is because they are tied to filenames that don't match any standard ones.
