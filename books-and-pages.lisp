@@ -390,9 +390,6 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
   (:method ((book non-boc-conworld-page)))
   (:method ((book non-boc-page))))
 
-(defparameter *reserved-book-values* ()
-  "List of page numbers that are temporarily reserved.")
-
 ;;; Auto-determination
 (defun expand-to-specificities (book page-determination-plist)
   "Expands PAGE-DETERMINATION-PLIST into the specificities understood by BOOK."
@@ -428,7 +425,9 @@ Returns the original object.")
   (:method ((page-number-slot page) specificity (end-condition (eql :first))
             starting-point)
     (setf (get-specificity page-number-slot specificity)
-          (car (get-cutoffs page-number-slot specificity starting-point))))
+          ;; When we start a new section,
+          ;; we don't particularly care where we started from.
+          (car (get-cutoffs page-number-slot specificity nil))))
   (:method ((page-number-slot page) specificity (direct-value number)
             starting-point)
     (setf (get-specificity page-number-slot specificity) direct-value))
@@ -483,5 +482,16 @@ You should not alter this parameter normally.")
           do (calculate-page-number
               test-object spec ending-condition starting-point)
           finally (return test-object))))
+
+(defun allocate-multiple-books (book-designator slots-specs)
+  "Allocates page numbers in batch for a single series."
+  (loop for slot-spec in slots-specs
+        for next-page = (construct-book-object book-designator
+                                               slot-spec
+                                               nil)
+        then (construct-book-object book-designator
+                                    slot-spec
+                                    next-page)
+        collect next-page))
 
 ;; If end-condition is a wandering page, extract its paging-behaviour and use that.
