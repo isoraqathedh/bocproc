@@ -435,6 +435,9 @@ Returns the original object.")
             starting-point)
     (destructuring-bind (start . stop)
         (get-cutoffs page-number-slot specificity starting-point)
+      (when (< stop start)
+        (error "There's no room to put anything more than page ~d ~
+                in the cutoff range ~d → ~d!" start start stop))
       (loop for test-number from start to stop do
             (setf (get-specificity page-number-slot specificity) test-number)
             (when (not (or (book-ignored-p page-number-slot)
