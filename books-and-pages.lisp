@@ -277,14 +277,18 @@ Raises appropriate errors and gives common resolutions.")
 ;;; = = = = =
 ;;; Get cutoffs
 
-(defgeneric get-cutoffs (book specificity)
+(defgeneric get-cutoffs (book specificity starting-book)
   (:documentation "Returns the two cutoffs of a specificity in a book,
 or the default if there is none")
-  (:method ((book page) specificity)
+  (:method ((book page) specificity starting-book)
     (let ((test-cutoffs (with-expression-threading () specificity
                           (position :|| (specificities book))
                           (nth :|| (cutoffs book)))))
-      (cons (or (car test-cutoffs) (car *cutoffs*))
+      (cons (or
+             (car test-cutoffs)
+             (when starting-book
+               (1+ (get-specificity starting-book specificity)))
+             (car *cutoffs*))
             (or (cdr test-cutoffs) (cdr *cutoffs*))))))
 
 ;;; Determining the path.
@@ -411,22 +415,27 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
                                            spec-key))
                  collect spec-val)))))
 
-(defgeneric calculate-page-number (book specificity requested-value)
+(defgeneric calculate-page-number (book specificity requested-value
+                                   starting-point)
   (:documentation "Automatically calculates
 the value associated with the specificity.
 If requested-value is :next, return the first book that is not used or ignored.
 If requested-value is :cur, return the previous book to :next.
 If requested-value is a number, simply slot the number into the specificity.
+Starts at the starting-point if provided.
 Returns the original object.")
   ;; wandering-page placed in another file.
-  (:method ((page-number-slot page) specificity (end-condition (eql :first)))
+  (:method ((page-number-slot page) specificity (end-condition (eql :first))
+            starting-point)
     (setf (get-specificity page-number-slot specificity)
-          (car (get-cutoffs page-number-slot specificity))))
-  (:method ((page-number-slot page) specificity (direct-value number))
+          (car (get-cutoffs page-number-slot specificity starting-point))))
+  (:method ((page-number-slot page) specificity (direct-value number)
+            starting-point)
     (setf (get-specificity page-number-slot specificity) direct-value))
-  (:method ((page-number-slot page) specificity (end-condition symbol))
+  (:method ((page-number-slot page) specificity (end-condition symbol)
+            starting-point)
     (destructuring-bind (start . stop)
-        (get-cutoffs page-number-slot specificity)
+        (get-cutoffs page-number-slot specificity starting-point)
       (loop for test-number from start to stop do
             (setf (get-specificity page-number-slot specificity) test-number)
             (when (not (or (book-ignored-p page-number-slot)
@@ -436,13 +445,14 @@ Returns the original object.")
                 (:next))
               (return page-number-slot))))))
 
-(defgeneric construct-book-object (book-designator slots-spec
+(defgeneric construct-book-object (book-designator slots-spec starting-point
                                    &optional kill-existing)
   (:documentation "Calculate all positions of the page-number.
 Kill-existing controls whether or not the original values
 are wiped before calculation.
 You should not alter this parameter normally.")
-  (:method ((book-designator string) slots-spec &optional kill-existing)
+  (:method ((book-designator string) slots-spec starting-point
+            &optional kill-existing)
     (declare (ignore kill-existing))
     (construct-book-object (make-instance
                             (alexandria:switch (book-designator
@@ -452,23 +462,26 @@ You should not alter this parameter normally.")
                               ("nboc" 'non-boc-conworld-page)
                               ("uncategorised" 'non-boc-page)))
                            slots-spec
+                           starting-point
                            nil))
-  (:method ((book-designator symbol) slots-spec &optional kill-existing)
+  (:method ((book-designator symbol) slots-spec starting-point
+            &optional kill-existing)
     (construct-book-object (symbol-name book-designator)
                            slots-spec kill-existing))
-  (:method :before ((test-object page) slots-spec
+  (:method :before ((test-object page) slots-spec starting-point
                     &optional (kill-existing t))
     ;; Clear all the page numbers before attempting computation
     (when kill-existing
       (loop for i from 0 below (length (specificities test-object))
             do (setf (aref (specificities test-object) i) nil))))
-  (:method ((test-object page) (ending-condition-plist list)
+  (:method ((test-object page) (ending-condition-plist list) starting-point
             &optional (kill-existing t))
     (declare (ignore kill-existing))
     (loop for spec in (specificities test-object)
           for ending-condition in (expand-to-specificities
                                    test-object ending-condition-plist)
-          do (calculate-page-number test-object spec ending-condition)
+          do (calculate-page-number
+              test-object spec ending-condition starting-point)
           finally (return test-object))))
 
 ;; If end-condition is a wandering page, extract its paging-behaviour and use that.
