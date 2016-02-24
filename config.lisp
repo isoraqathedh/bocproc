@@ -1,7 +1,7 @@
 ((:tag-props
   (:language :metadata "Langs" :tumblr "conlangs" :filename "Trl")
   (:world :metadata "Worlds" :tumblr "conworlds" :filename "Tpl")
-  (t :metadata "Other/Misc" :type "misc" :filename "Mis"))
+  (t :metadata "Other/Misc" :tumblr "misc" :filename "Mis"))
  (:tags
   ;;; Tags
   ;; A property list that follows a string:
