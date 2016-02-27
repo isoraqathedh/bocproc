@@ -6,18 +6,17 @@
 (in-package :bocproc)
 
 ;;; The class
+(defvar *processing-parameters*
+  '((:title . "Untitled") :tags :comment #|:rotate :crop|#)
+  "List of currently active tags.")
+
 (defclass wandering-page ()
   ((file :initarg :file
          :initform *books-location*
          :reader file
          :documentation "The file name that the wandering-page is tied to.")
-   (title :initarg :title
-          :initform "Untitled"
-          :accessor title)
-   (categories :initarg :categories
-               :initform ()
-               :accessor categories
-               :documentation "A list of tags related to the object.")
+   (processing-parameters :initform (make-hash-table)
+                          :accessor processing-parameters)
    (paging-behaviour :initarg :paging-behaviour
                      :initform ()
                      :accessor paging-behaviour
@@ -29,19 +28,37 @@ However, they often hold more information than their static counterparts –
 they have titles, categories, genres, and all the stuff
 that would be in the metadata (that can then be injected via exiftool.)"))
 
+(defgeneric get-parameter (object parameter)
+  (:method ((object wandering-page) parameter)
+    (gethash parameter (processing-parameters object))))
+
+(defgeneric (setf get-parameter) (value object parameter)
+  (:method (value (object wandering-page) parameter)
+    (setf (gethash parameter (processing-parameters object)) value)))
+
+(defmethod initialize-instance :after ((object wandering-page)
+                                       &rest initargs
+                                       &key file &allow-other-keys)
+  (setf (slot-value object 'file)
+        (etypecase file
+          (string (uiop:parse-native-namestring file))
+          (pathname file)
+          (null *books-location*)))
+  (dolist (parameter *processing-parameters*)
+    (if (consp parameter)
+        (setf (get-parameter object (car parameter))
+              (getf initargs (car parameter) (cdr parameter)))
+        (setf (get-parameter object parameter)
+              (getf initargs parameter)))))
+
+
 (defmethod print-object ((object wandering-page) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~:[no-filename~*~;~:*~a.~a~] \"~a\" ~a"
             (pathname-name (file object))
             (pathname-type (file object))
-            (title object)
-            (categories object))))
-
-(defmethod initialize-instance :after ((object wandering-page) &key file)
-  (setf (slot-value object 'file)
-        (etypecase file
-          (string (uiop:parse-native-namestring file))
-          (pathname file))))
+            (get-parameter object :title)
+            (get-parameter object :tags))))
 
 ;;; Category determination
 (defun tag-type (tag)
@@ -94,3 +111,53 @@ which it then returns. If all of them return nil, then nil is returned."
            filename)))))
 
 ;;; Filename conjoinment
+(defgeneric construct-filename-with-metadata (page-slot wandering-page)
+  (:documentation "Constructs the filename with the metadata provided.")
+  (:method ((page-slot book-of-conworlds-page) (wandering-page wandering-page))
+    (specificity-bind ((page :page) (subpage :subpage)) page-slot
+      (format nil "~2,'0d~c-~a-~a"
+              page
+              (number->letter subpage)
+              (-> wandering-page tags tag-manifestations (getf :filename))
+              (title wandering-page))))
+  (:method ((page-slot page) wandering-page)
+    (declare (ignore wandering-page))
+    ;; For the others, the metadata does not impact the filename
+    (construct-filename page-slot)))
+
+(defgeneric get-path-with-metadata (page-slot wandering-page)
+  (:documentation "Constructs the complete path with the metadata provided.")
+  (:method ((page-slot page) (wandering-page wandering-page))
+    (merge-pathnames
+     (make-pathname
+      :directory (list :relative (construct-folder-name page-slot))
+      :name (construct-filename-with-metadata page-slot wandering-page)
+      :type (pathname-type (file wandering-page)))
+     (root page-slot))))
+
+;;; Make argument:
+(defun write-argument (stream option &optional operator (value ""))
+  "Writes an argument of the form -OPTION=VALUE into STREAM.
+SET-OPERATOR determines if it is an \"append\" (+=) or \"set\" (-) operation."
+  (format stream "-~a~a~a"
+          option
+          (ecase operator (:append "+=") (:set "=") ((nil) ""))
+          value))
+
+(defun %format-exiftool-args-1 (stream exiftool-option value)
+  (fresh-line stream)
+  (write-argument stream :set exiftool-option value))
+
+(defun %format-exiftool-args-many (stream exiftool-option values)
+  (fresh-line stream)
+  (write-argument stream exiftool-option :set)
+  (dolist (value values)
+    (fresh-line stream)
+    (write-argument stream exiftool-option :append value)))
+
+(defun format-exiftool-args (stream option value\(s\))
+  "Dispatches to format-exiftool-args-1 or -many depending on the option."
+  (ecase option
+    (:comment (%format-exiftool-args-1 stream "Comment" value\(s\)))
+    (:title (%format-exiftool-args-1 stream "Title" value\(s\)))
+    (:tags (%format-exiftool-args-many stream "Subject" value\(s\)))))
