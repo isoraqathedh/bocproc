@@ -39,7 +39,7 @@ All book series have at least PAGE, with various super- and subdivisions.
 
 ## Version ##
 
-Lambda list: `(&REST VERSION-NUMBERS)`
+Lambda list: `VERSION (&REST VERSION-NUMBERS)`
 
 This is a vector that defines a version.
 It is an identifier and does not affect processing directly.
@@ -48,12 +48,18 @@ Example:
 
     (version 6)
 
-## Single file processing ##
+# Single file processing #
 
 Lambda list:
-`(FILE &KEY PAGING TITLE COMMENT TAGS EXPORT-TEXT &ALLOW-OTHER-KEYS)`
+`PROCESS-FILE
+(FILE &KEY PAGING TITLE COMMENT TAGS EXPORT-TEXT ROTATE &ALLOW-OTHER-KEYS)`
 
 Processes a single file.
+
+Specifically, this function will order that FILE
+will receive a new name as calculated by PAGING.
+It will also receive EXIF tags as specified by COMMENT and TAGS.
+Finally, CSV output will be directed to EXPORT-TEXT.
 
 Explanation of each key option:
 
@@ -61,9 +67,24 @@ Explanation of each key option:
   Reserves a page number as understood by `PAGING-SPEC`,
   which in turn is either a plist of specificity keys
   or the symbol `:NEXT` followed by a specificity.
-  * If it is a plist of specificities,
-    then reserve the page number as specified by the specificities.
-    For example, `(:PAGE 5 :SUBPAGE 6)` is
+      * If it is a plist of specificities,
+        then reserve the page number as specified by the specificities.
+        For example, `(:PAGE 5 :SUBPAGE 6)` reserves that exact page number.
+        Three special values can be used instead of a number:
+          * `:FIRST`, a shorthand for the minimum possible value it can take,
+          * `:NEXT`, the next available value, or
+          * `:CUR`, one before `:NEXT`
+      * If it is the symbol `:NEXT` followed by a specificity,
+        it is a shorthand for a listing of all specificities,
+        with everything before the listed specificity having value `:CUR`,
+        everything after the listed specificity `:FIRST`,
+        and the named specificity itself having the value `:NEXT`.
+* `:TITLE TITLE`:
+  Specifies the title string. Defaults to "untitled".
+* `:COMMENT COMMENT`:
+  Specifies a comment string. Defaults to NIL, representing no comment string.
+* `:TAGS (&REST TAG-SPEC)`:
+  Names a list of tags understood by their short names in the config file.
 
 Example:
 
@@ -72,7 +93,66 @@ Example:
       :title "Example title"
       :comment "This is an example comment."
       :tags ("EP" "SX" "RSGN")
-      ;; :rotate 90
-      ;; :crop (15 15 -120 -120)
-      ;; :tumblr t
+      :rotate 90
+      :crop (15 15 -120 -120)
+      :tumblr t
       :export-text t)
+
+Future options:
+
+* `:EXPORT-TEXT EXPORT-PATHNAME`:
+  *scheduled for version 6.1*
+  Writes a CSV file to the designated pathname.
+  This will, for each file, write the following values to its own line,
+  in this order:
+    * Page numbers, separated by pipes.
+    * Title
+    * Comment
+    * An image URL, if `TUMBLR` is non-NIL.
+* `:ROTATE ROTATE-SPEC`
+  *scheduled for version 6.1*
+  The image must be rotated according to `ROTATE-SPEC`.
+  `ROTATE-SPEC` must be one of the following:
+      * No rotation: nil
+      * 90° clockwise: 90, CW, R
+      * 180°: 180, U
+      * 90° anticlockwise: -90, 270, CCW, L
+* `:CROP (TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`
+  *scheduled for version 6.2*
+  Specifies that the image should be cropped using the coordinates provided.
+  All numbers should be specified in pixels, measured from the top-left corner
+  However, if `BOTTOM-RIGHT-X` and  `BOTTOM-RIGHT-Y` are negative,
+  then those two are specified from the bottom-right corner.
+  Can be restricted to multiples of 8 or 16
+  to ensure lossless rotation.
+* `:TUMBLR POST-TO-TUMBLR-P`
+  *scheduled for version 7, if at all*
+  Can only be nil or t. If t, posts to Tumblr via Humbler.
+* `:IMGUR POST-TO-IMGUR-P`
+  *scheduled for version 7, if at all*
+  Can only be nil or t.
+  If t, posts the image to Imgur,
+  potentially in an album if many are processed at the same time.
+
+Sending posts to internet services is not at all easy,
+and those options may not be implemented at all.
+
+## Other commands ##
+
+None of these commands are planned out into the program yet,
+so they are considered "concepts".
+A primary concern is that they require writing to the configuration file,
+which is a nasty affair.
+
+### Place a page number to the ignore list ###
+
+Lambda-list: `IGNORE-PAGE (SERIES &REST PAGING-SPEC)`
+
+Ignores a page permanently
+by placing it into the ignore list in the configuration file.
+
+### Add a tag ###
+
+lambda-list: `ADD-TAG (TAG-SHORT-NAME &KEY NAME &ALLOW-OTHER-KEYS)`
+
+Adds a tag to the configuration file.
