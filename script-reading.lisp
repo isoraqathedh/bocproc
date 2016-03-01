@@ -5,21 +5,55 @@ and interprets it as commands. |#
 
 (in-package :bocproc)
 
-(defclass processing-session ()
-  ((in-file :initarg :in-file
-            :reader in-file
-            :documentation
-            "The location of the file that is currently being processed.")
-   (current-file :initform nil
-                 :documentation
-                 "The page object of the most recent file being processed.")
-   (exiftool-file :documentation
-                  "The location of the file that is passed to exiftool."))
-  (:documentation "Represents a single file of BPC that has to be processed
-and translated."))
+;;; Functions for processing BPC files.
+;;; = = = = = = = = = = = = = = = = = =
 
-(defmethod print-object ((object processing-session) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "~a.~a"
-            (pathname-name (in-file object))
-            (pathname-type (in-file object)))))
+;;; Processor states.
+(defclass bocproc-state ()
+  ((version :initarg :version
+            :initform nil
+            :reader version)
+   (current-page :accessor current-page))
+  (:documentation "An object that represents the state of the processor."))
+
+(defparameter *state* nil
+  "An object holds the state of the processor.")
+
+(define-condition state-already-there (error) ()
+  (:documentation "Error indicating that there already is a processor."))
+
+(define-condition state-not-there (error) ()
+  (:documentation
+   "Error indicating that there is no processor currently active."))
+
+(defun make-restart-lambda (restart-name)
+  "Creates a lambda function that that takes in one argument, ignores it,
+and invokes the restart RESTART-NAME."
+  (lambda (condition)
+    (declare (ignore condition))
+    (invoke-restart restart-name)))
+
+;;; Utility functions for processing the script, not exported
+(defun set-state (version-numbers)
+  "Sets *state* to be a fresh new processor."
+  (setf *state*
+        (make-instance 'bocproc-state :version version-numbers)))
+
+;;; The functions that the processor understands.
+(defun version (&rest version-numbers)
+  "Sets up the parameters for processing the following script page."
+  (if (and *state* (version *state*))
+      (restart-case (error 'state-already-there)
+        (continue ()
+          :report "Ignore the form and do nothing else.")
+        (set-value ()
+          :report "Make a new state and overwrite the old one."
+          (set-state version-numbers)))
+      (set-state version-numbers)))
+
+
+;;; Finally, load files
+(defun load-script (bpc-location)
+  "Loads the script from the file."
+  (let ((*package* (find-package :bpc)))
+    (load boc-location)))
