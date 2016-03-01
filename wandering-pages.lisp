@@ -161,3 +161,11 @@ SET-OPERATOR determines if it is an \"append\" (+=) or \"set\" (-) operation."
     (:comment (%format-exiftool-args-1 stream "Comment" value\(s\)))
     (:title (%format-exiftool-args-1 stream "Title" value\(s\)))
     (:tags (%format-exiftool-args-many stream "Subject" value\(s\)))))
+
+(defun dump-exiftool-args (file wandering-page)
+  "Dumps all exiftool args to some file,
+that exiftool can then read again through the -@ option."
+  (with-open-file (open-file file :direction :output :external-format :utf-8)
+    (dolist (i '(:title :comment :tags))
+      (format-exiftool-args open-file i (get-parameter wandering-page i)))
+    (format open-file "~&~a" (uiop:native-namestring (file wandering-page)))))
