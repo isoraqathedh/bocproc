@@ -101,7 +101,9 @@ Example:
 Future options:
 
 * `:EXPORT-TEXT EXPORT-PATHNAME`:
+
   *scheduled for version 6.1*
+
   Writes a CSV file to the designated pathname.
   This will, for each file, write the following values to its own line,
   in this order:
@@ -109,27 +111,35 @@ Future options:
     * Title
     * Comment
     * An image URL, if `TUMBLR` is non-NIL.
-* `:ROTATE ROTATE-SPEC`
+* `:ROTATE ROTATE-SPEC`:
+
   *scheduled for version 6.1*
+
   The image must be rotated according to `ROTATE-SPEC`.
   `ROTATE-SPEC` must be one of the following:
       * No rotation: nil
       * 90° clockwise: 90, CW, R
       * 180°: 180, U
       * 90° anticlockwise: -90, 270, CCW, L
-* `:CROP (TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`
+* `:CROP (TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`:
+
   *scheduled for version 6.2*
+
   Specifies that the image should be cropped using the coordinates provided.
   All numbers should be specified in pixels, measured from the top-left corner
   However, if `BOTTOM-RIGHT-X` and  `BOTTOM-RIGHT-Y` are negative,
   then those two are specified from the bottom-right corner.
   Can be restricted to multiples of 8 or 16
   to ensure lossless rotation.
-* `:TUMBLR POST-TO-TUMBLR-P`
+* `:TUMBLR POST-TO-TUMBLR-P`:
+
   *scheduled for version 7, if at all*
+
   Can only be nil or t. If t, posts to Tumblr via Humbler.
-* `:IMGUR POST-TO-IMGUR-P`
+* `:IMGUR POST-TO-IMGUR-P`:
+
   *scheduled for version 7, if at all*
+
   Can only be nil or t.
   If t, posts the image to Imgur,
   potentially in an album if many are processed at the same time.
