@@ -151,28 +151,53 @@ SET-OPERATOR determines if it is an \"append\" (+=) or \"set\" (-) operation."
           (ecase operator (:append "+=") (:set "=") ((nil) ""))
           value))
 
-(defun %format-exiftool-args-1 (stream exiftool-option value)
+(defun write-exiftool-argument (stream option &optional operator (value ""))
+  "Like write-argument, but always writes the argument on a freshline."
   (fresh-line stream)
-  (write-argument stream :set exiftool-option value))
-
-(defun %format-exiftool-args-many (stream exiftool-option values)
-  (fresh-line stream)
-  (write-argument stream exiftool-option :set)
-  (dolist (value values)
-    (fresh-line stream)
-    (write-argument stream exiftool-option :append value)))
+  (write-argument stream option operator value))
 
 (defun format-exiftool-args (stream option value\(s\))
-  "Dispatches to format-exiftool-args-1 or -many depending on the option."
-  (ecase option
-    (:comment (%format-exiftool-args-1 stream "Comment" value\(s\)))
-    (:title (%format-exiftool-args-1 stream "Title" value\(s\)))
-    (:tags (%format-exiftool-args-many stream "Subject" value\(s\)))))
+  "Writes the arguments that correspond to setting the OPTION to VALUE(S).
+If VALUE(S) is a list, then write arguments that first clears the original value
+and then appends each value to the thing."
+  (if (listp value\(s\))
+      ;; A list of values means that appending is needed.
+      (loop initially (write-exiftool-argument
+                       stream (get option :exiftool-arg) :set)
+            for i in value\(s\)
+            do (write-exiftool-argument
+                stream (get option :exiftool-arg) :append i))
+      ;; else just set it directly
+      (write-exiftool-argument
+       stream (get option :exiftool-arg) :set value\(s\))))
 
 (defun dump-exiftool-args (file wandering-page)
   "Dumps all exiftool args to some file,
 that exiftool can then read again through the -@ option."
-  (with-open-file (open-file file :direction :output :external-format :utf-8)
-    (dolist (i '(:title :comment :tags))
-      (format-exiftool-args open-file i (get-parameter wandering-page i)))
-    (format open-file "~&~a" (uiop:native-namestring (file wandering-page)))))
+  (with-open-file (open-file file :direction :output
+                                  :if-does-not-exist :create
+                                  :if-exists :append
+                                  :external-format :utf-8)
+    ;; Title
+    (format-exiftool-args open-file :title
+                          (get-parameter wandering-page :title))
+    ;; Comments
+    (format-exiftool-args open-file :comment
+                          (get-parameter wandering-page :comment))
+    ;; Tags/Categories/Subjects
+    (format-exiftool-args open-file :tags
+                          (getf
+                           (tag-manifestations
+                            (get-parameter wandering-page :tags))
+                           :metadata))
+    ;; Overwrite or not
+    (case (get-parameter wandering-page :overwritable)
+      (:overwrite-preserving-metadata
+       (write-exiftool-argument open-file "overwrite_original_in_place"))
+      (:overwrite
+       (write-exiftool-argument open-file "overwrite_original")))
+    ;; The file name to be processed
+    (format open-file "~&~a"
+            (-> wandering-page file namestring uiop:native-namestring))
+    ;; Filename separator
+    (write-exiftool-argument open-file "execute")))
