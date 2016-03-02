@@ -89,14 +89,14 @@ Explanation of each key option:
 Example:
 
     (process-file "~/path/to/original/file.jpg"
-      :paging (:next :page)
-      :title "Example title"
-      :comment "This is an example comment."
-      :tags ("EP" "SX" "RSGN")
-      :rotate 90
-      :crop (15 15 -120 -120)
-      :tumblr t
-      :export-text t)
+      (:paging :next :page)
+      (:title "Example title")
+      (:comment "This is an example comment.")
+      (:tags "EP" "SX" "RSGN")
+      (:rotate 90)
+      (:crop 15 15 -120 -120)
+      (:tumblr t)
+      (:export-text t))
 
 Future options:
 
