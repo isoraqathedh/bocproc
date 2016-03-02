@@ -188,10 +188,9 @@ that exiftool can then read again through the -@ option."
                           (get-parameter wandering-page :comment))
     ;; Tags/Categories/Subjects
     (format-exiftool-args open-file :tags
-                          (getf
-                           (tag-manifestations
-                            (get-parameter wandering-page :tags))
-                           :metadata))
+                          (-> wandering-page
+                            (get-parameter :tags)
+                            (getf :metadata)))
     ;; Overwrite or not
     (case (get-parameter wandering-page :overwritable)
       (:overwrite-preserving-metadata
