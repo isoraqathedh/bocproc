@@ -43,13 +43,15 @@ that would be in the metadata (that can then be injected via exiftool.)"))
 
 (defmethod initialize-instance :after ((object wandering-page)
                                        &rest initargs
-                                       &key file &allow-other-keys)
+                                       &key file paging-behaviour
+                                       &allow-other-keys)
   (setf (slot-value object 'file)
         (etypecase file
           (string (uiop:parse-native-namestring file))
           (pathname file)
           (null *books-location*))
-        (get-parameter object :overwritable) :overwrite)
+        (get-parameter object :overwritable) :overwrite
+        (paging-behaviour object) paging-behaviour)
   (dolist (parameter *processing-parameters*)
     (if (consp parameter)
         (setf (get-parameter object (car parameter))
