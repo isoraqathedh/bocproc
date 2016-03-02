@@ -48,7 +48,8 @@ that would be in the metadata (that can then be injected via exiftool.)"))
         (etypecase file
           (string (uiop:parse-native-namestring file))
           (pathname file)
-          (null *books-location*)))
+          (null *books-location*))
+        (get-parameter object :overwritable) :overwrite)
   (dolist (parameter *processing-parameters*)
     (if (consp parameter)
         (setf (get-parameter object (car parameter))
@@ -59,9 +60,10 @@ that would be in the metadata (that can then be injected via exiftool.)"))
 
 (defmethod print-object ((object wandering-page) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~:[no-filename~*~;~:*~a.~a~] \"~a\" ~a"
+    (format stream "~:[no-filename~*~;~:*~a.~a~]~:[~;†~] \"~a\" ~a"
             (pathname-name (file object))
             (pathname-type (file object))
+            (get-parameter object :overwritable)
             (get-parameter object :title)
             (get-parameter object :tags))))
 
