@@ -10,6 +10,11 @@
   '((:title . "Untitled") :tags :comment #|:rotate :crop|#)
   "List of currently active tags.")
 
+;; Corresponding Exiftool arguments.
+(setf (get :title :exiftool-arg) "Title")
+(setf (get :tags :exiftool-arg) "Subject")
+(setf (get :comment :exiftool-arg) "Comment")
+
 (defclass wandering-page ()
   ((file :initarg :file
          :initform *books-location*
