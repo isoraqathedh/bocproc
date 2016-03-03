@@ -61,10 +61,10 @@ and the rest being that option's arguments.
 
 Currently there are the following options.
 
-* `:PAGING (&REST PAGING-SPEC)`:
+* `:PAGING (SERIES &REST PAGING-SPEC)`:
   Reserves, and eventually ensures that the output file
   will have a file name corresponding to the page number
-  as understood by `PAGING-SPEC`,
+  as understood by the combination of `SERIES` and `PAGING-SPEC`,
   which in turn is either a plist of specificity keys
   or the symbol `:NEXT` followed by a specificity.
   * If it is a plist of specificities,
