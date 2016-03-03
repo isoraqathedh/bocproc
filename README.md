@@ -50,21 +50,20 @@ Example:
 
 # Single file processing #
 
-Lambda list:
-`PROCESS-FILE
-(FILE &KEY PAGING TITLE COMMENT TAGS EXPORT-TEXT ROTATE &ALLOW-OTHER-KEYS)`
+Lambda list: `PROCESS-FILE (FILE &REST OPTIONS)`
 
 Processes a single file.
 
-Specifically, this function will order that FILE
-will receive a new name as calculated by PAGING.
-It will also receive EXIF tags as specified by COMMENT and TAGS.
-Finally, CSV output will be directed to EXPORT-TEXT.
+`OPTIONS` is a list of lists,
+with the first element of each list being an option keyword
+and the rest being that option's arguments.
 
-Explanation of each key option:
+Currently there are the following options.
 
 * `:PAGING (&REST PAGING-SPEC)`:
-  Reserves a page number as understood by `PAGING-SPEC`,
+  Reserves, and eventually ensures that the output file
+  will have a file name corresponding to the page number
+  as understood by `PAGING-SPEC`,
   which in turn is either a plist of specificity keys
   or the symbol `:NEXT` followed by a specificity.
       * If it is a plist of specificities,
@@ -81,10 +80,18 @@ Explanation of each key option:
         and the named specificity itself having the value `:NEXT`.
 * `:TITLE TITLE`:
   Specifies the title string. Defaults to "untitled".
+  Ensures that the `Title` metadata on the file is set to that value,
+  if non-nil.
+  Existing metadata might be overwritten.
 * `:COMMENT COMMENT`:
   Specifies a comment string. Defaults to NIL, representing no comment string.
+  Ensures that the `Comment` metadata field on the file is set to that value,
+  if non-nil.
+  Existing metadata might be overwritten.
 * `:TAGS (&REST TAG-SPEC)`:
   Names a list of tags understood by their short names in the config file.
+  Ensures that the `Subject` metadata field on the file is set to those values.
+  Existing metadata might be overwritten.
 
 Example:
 
