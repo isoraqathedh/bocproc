@@ -52,7 +52,8 @@ Example:
 
 Lambda list: `PROCESS-FILE (FILE &REST OPTIONS)`
 
-Processes a single file.
+Systematically alters the contents (viz. cropping and rotating),
+metadata and eventually the location of a single file, named by `FILE`.
 
 `OPTIONS` is a list of lists,
 with the first element of each list being an option keyword
@@ -66,18 +67,18 @@ Currently there are the following options.
   as understood by `PAGING-SPEC`,
   which in turn is either a plist of specificity keys
   or the symbol `:NEXT` followed by a specificity.
-      * If it is a plist of specificities,
-        then reserve the page number as specified by the specificities.
-        For example, `(:PAGE 5 :SUBPAGE 6)` reserves that exact page number.
-        Three special values can be used instead of a number:
-          * `:FIRST`, a shorthand for the minimum possible value it can take,
-          * `:NEXT`, the next available value, or
-          * `:CUR`, one before `:NEXT`
-      * If it is the symbol `:NEXT` followed by a specificity,
-        it is a shorthand for a listing of all specificities,
-        with everything before the listed specificity having value `:CUR`,
-        everything after the listed specificity `:FIRST`,
-        and the named specificity itself having the value `:NEXT`.
+  * If it is a plist of specificities,
+    then reserve the page number as specified by the specificities.
+    For example, `(:PAGE 5 :SUBPAGE 6)` reserves that exact page number.
+    Three special values can be used instead of a number:
+    * `:FIRST`, a shorthand for the minimum possible value it can take,
+    * `:NEXT`, the next available value, or
+    * `:CUR`, one before `:NEXT`
+  * If it is the symbol `:NEXT` followed by a specificity,
+    it is a shorthand for a listing of all specificities,
+    with everything before the listed specificity having value `:CUR`,
+    everything after the listed specificity `:FIRST`,
+    and the named specificity itself having the value `:NEXT`.
 * `:TITLE TITLE`:
   Specifies the title string. Defaults to "untitled".
   Ensures that the `Title` metadata on the file is set to that value,
