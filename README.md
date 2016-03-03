@@ -104,8 +104,9 @@ Example:
       (:tags "EP" "SX" "RSGN")
       (:rotate 90)
       (:crop 15 15 -120 -120)
-      (:tumblr t)
-      (:export-text t))
+      (:export-to
+        (:csv "~/path/to/output.csv")
+        (:tumblr)))
 
 Future options:
 
@@ -140,18 +141,33 @@ Future options:
   then those two are specified from the bottom-right corner.
   Can be restricted to multiples of 8 or 16
   to ensure lossless rotation.
-* `:TUMBLR POST-TO-TUMBLR-P`:
+* `:EXPORT-TO &REST EXPORT-DESTINATIONS`:
+  This option enables sending processing results to other places.
+  Each destination has its own parameters and identifying keyword.
+  They are:
+  * `:CSV CSV-FILENAME`:
 
-  *scheduled for version 7, if at all*
+    *scheduled for version 6.1*
 
-  Can only be nil or t. If t, posts to Tumblr via Humbler.
-* `:IMGUR POST-TO-IMGUR-P`:
+    Writes a CSV file to CSV-FILENAME.
+    This will, for each file, write the following values to its own line,
+    in this order:
+    * Page numbers, separated by pipes.
+    * Title
+    * Comment
+    * An image URL, if `TUMBLR` is non-NIL.
 
-  *scheduled for version 7, if at all*
+  * `:TUMBLR`:
 
-  Can only be nil or t.
-  If t, posts the image to Imgur,
-  potentially in an album if many are processed at the same time.
+    *scheduled for version 7, if at all*
+
+    If present, posts to Tumblr via Humbler.
+  * `:IMGUR`:
+
+    *scheduled for version 7, if at all*
+
+    If present, posts the image to Imgur,
+    potentially in an album if many are processed at the same time.
 
 Sending posts to internet services is not at all easy,
 and those options may not be implemented at all.
