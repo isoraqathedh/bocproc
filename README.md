@@ -61,7 +61,7 @@ and the rest being that option's arguments.
 
 Currently there are the following options.
 
-* `:PAGING (SERIES &REST PAGING-SPEC)`:
+* `(:PAGING SERIES &REST PAGING-SPEC)`:
   Reserves, and eventually ensures that the output file
   will have a file name corresponding to the page number
   as understood by the combination of `SERIES` and `PAGING-SPEC`,
@@ -69,7 +69,8 @@ Currently there are the following options.
   or the symbol `:NEXT` followed by a specificity.
   * If it is a plist of specificities,
     then reserve the page number as specified by the specificities.
-    For example, `(:PAGE 5 :SUBPAGE 6)` reserves that exact page number.
+    For example, `("boc" :PAGE 5 :SUBPAGE 6)` reserves that exact page number
+    in the "boc" series.
     Three special values can be used instead of a number:
     * `:FIRST`, a shorthand for the minimum possible value it can take,
     * `:NEXT`, the next available value, or
@@ -79,17 +80,17 @@ Currently there are the following options.
     with everything before the listed specificity having value `:CUR`,
     everything after the listed specificity `:FIRST`,
     and the named specificity itself having the value `:NEXT`.
-* `:TITLE TITLE`:
+* `(:TITLE TITLE)`:
   Specifies the title string. Defaults to "untitled".
   Ensures that the `Title` metadata on the file is set to that value,
   if non-nil.
   Existing metadata might be overwritten.
-* `:COMMENT COMMENT`:
+* `(:COMMENT COMMENT)`:
   Specifies a comment string. Defaults to NIL, representing no comment string.
   Ensures that the `Comment` metadata field on the file is set to that value,
   if non-nil.
   Existing metadata might be overwritten.
-* `:TAGS (&REST TAG-SPEC)`:
+* `(:TAGS &REST TAG-SPEC)`:
   Names a list of tags understood by their short names in the config file.
   Ensures that the `Subject` metadata field on the file is set to those values.
   Existing metadata might be overwritten.
@@ -97,7 +98,7 @@ Currently there are the following options.
 Example:
 
     (process-file "~/path/to/original/file.jpg"
-      (:paging :next :page)
+      (:paging "boc" :next :page)
       (:title "Example title")
       (:comment "This is an example comment.")
       (:tags "EP" "SX" "RSGN")
