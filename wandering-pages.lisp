@@ -5,7 +5,7 @@
 
 (in-package :bocproc)
 
-;;; The class
+;;; Parameters
 (defvar *processing-parameters*
   '((:title . "Untitled") :tags :comment #|:rotate :crop|#)
   "List of currently active tags.")
@@ -15,6 +15,7 @@
 (setf (get :tags :exiftool-arg) "Subject")
 (setf (get :comment :exiftool-arg) "Comment")
 
+;;; The class
 (defclass wandering-page ()
   ((file :initarg :file
          :initform *books-location*
@@ -68,6 +69,8 @@ that would be in the metadata (that can then be injected via exiftool.)"))
             (get-parameter object :overwritable)
             (get-parameter object :title)
             (get-parameter object :tags))))
+
+;;; Married tags
 
 ;;; Category determination
 (defun tag-type (tag)
