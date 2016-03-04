@@ -120,7 +120,7 @@ Future options:
       * 90° clockwise: 90, CW, R
       * 180°: 180, U
       * 90° anticlockwise: -90, 270, CCW, L
-* `:CROP (TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`:
+* (`:CROP TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`:
 
   *scheduled for version 6.2*
 
@@ -130,11 +130,11 @@ Future options:
   then those two are specified from the bottom-right corner.
   Can be restricted to multiples of 8 or 16
   to ensure lossless rotation.
-* `:EXPORT-TO &REST EXPORT-DESTINATIONS`:
+* `(:EXPORT-TO &REST EXPORT-DESTINATIONS)`:
   This option enables sending processing results to other places.
   Each destination has its own parameters and identifying keyword.
   They are:
-  * `:CSV CSV-FILENAME`:
+  * `(:CSV CSV-FILENAME)`:
 
     *scheduled for version 6.1*
 
@@ -144,14 +144,14 @@ Future options:
     * Page numbers, separated by pipes.
     * Title
     * Comment
-    * An image URL, if `TUMBLR` is non-NIL.
+    * An image URL, if `TUMBLR` is present.
 
-  * `:TUMBLR`:
+  * `(:TUMBLR)`:
 
     *scheduled for version 7, if at all*
 
     If present, posts to Tumblr via Humbler.
-  * `:IMGUR`:
+  * `(:IMGUR)`:
 
     *scheduled for version 7, if at all*
 
