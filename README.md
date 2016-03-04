@@ -110,18 +110,7 @@ Example:
 
 Future options:
 
-* `:EXPORT-TEXT EXPORT-PATHNAME`:
-
-  *scheduled for version 6.1*
-
-  Writes a CSV file to the designated pathname.
-  This will, for each file, write the following values to its own line,
-  in this order:
-    * Page numbers, separated by pipes.
-    * Title
-    * Comment
-    * An image URL, if `TUMBLR` is non-NIL.
-* `:ROTATE ROTATE-SPEC`:
+* `(:ROTATE ROTATE-SPEC)`:
 
   *scheduled for version 6.1*
 
