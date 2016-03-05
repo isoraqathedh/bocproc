@@ -23,6 +23,10 @@
          :documentation "The file name that the wandering-page is tied to.")
    (processing-parameters :initform (make-hash-table)
                           :accessor processing-parameters)
+   (paging-series :initarg :series
+                  :initform ""
+                  :accessor paging-series
+                  :documentation "Which series this page belongs to.")
    (paging-behaviour :initarg :paging-behaviour
                      :initform ()
                      :accessor paging-behaviour
