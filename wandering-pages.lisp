@@ -64,15 +64,18 @@ that would be in the metadata (that can then be injected via exiftool.)"))
         (setf (get-parameter object parameter)
               (getf initargs parameter)))))
 
-
-(defmethod print-object ((object wandering-page) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "~:[no-filename~*~;~:*~a.~a~]~:[~;†~] \"~a\" ~a"
+(defgeneric %format-wandering-page (object)
+  (:method ((object wandering-page))
+    (format nil "~:[no-filename~*~;~:*~a.~a~]~:[~;†~] \"~a\" ~a"
             (pathname-name (file object))
             (pathname-type (file object))
             (get-parameter object :overwritable)
             (get-parameter object :title)
             (get-parameter object :tags))))
+
+(defmethod print-object ((object wandering-page) stream)
+  (print-unreadable-object (object stream :type t)
+    (%format-wandering-page object stream)))
 
 ;;; Married tags
 
