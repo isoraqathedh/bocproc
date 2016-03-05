@@ -77,7 +77,39 @@ that would be in the metadata (that can then be injected via exiftool.)"))
   (print-unreadable-object (object stream :type t)
     (%format-wandering-page object stream)))
 
-;;; Married tags
+;;; Married pages
+(defclass married-page ()
+  ((page-slot :initarg :page-slot
+              :accessor page-slot)
+   (metadata :initarg :wandering-page
+             :accessor wandering-page))
+  (:documentation "A married page is a page that has
+all the page numbers already set."))
+
+(defmethod print-object ((object married-page) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~a ~a ~a"
+            (-> object page-slot series-key)
+            (-> object page-slot format-page-code)
+            (-> object wandering-page %format-wandering-page))))
+
+(defgeneric marry-page (wandering-page &optional start-at)
+  (:documentation "Assigns a page number to a wandering-page
+ and puts them together into a married-page class.")
+  (:method ((wandering-page wandering-page) &optional start-at)
+    (construct-book-object
+     (paging-series wandering-page)
+     (paging-behaviour wandering-page)
+     start-at))
+  (:method ((wandering-pages list) &optional start-at)
+    (declare (ignore start-at))
+    (let ((latest-page (make-hash-table :test #'equal)))
+      (loop for i in wandering-pages
+            for calculated-page = (marry-page
+                                   i (gethash (paging-series i) latest-page))
+            collect calculated-page
+            do (setf (gethash (paging-series i) latest-page)
+                     calculated-page)))))
 
 ;;; Category determination
 (defun tag-type (tag)
