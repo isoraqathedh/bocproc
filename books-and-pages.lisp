@@ -193,7 +193,8 @@ with the provided specificity.")
     (specificity-bind ((page :page)) page-object
         (format nil "~a / ~:[????~;~:*~4,'0d~]"
              (format-time (date-of-creation page-object))
-             page))))
+             page)))
+  (:method ((object page))))
 
 (defmethod print-object ((object page) stream)
   (print-unreadable-object (object stream :type t)
