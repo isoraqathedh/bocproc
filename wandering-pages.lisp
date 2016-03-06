@@ -110,23 +110,17 @@ with a specified page-number."))
             (format-page-code object)
             (%format-wandering-page object))))
 
-(defgeneric marry-page (wandering-page &optional start-at)
+(defgeneric marry-page (wandering-page state)
   (:documentation "Assigns a page number to a wandering-page
  and puts them together into a married-page class.")
-  (:method ((wandering-page wandering-page) &optional start-at)
-    (construct-book-object
-     (paging-series wandering-page)
-     (paging-behaviour wandering-page)
-     start-at))
-  (:method ((wandering-pages list) &optional start-at)
-    (declare (ignore start-at))
-    (let ((latest-page (make-hash-table :test #'equal)))
-      (loop for i in wandering-pages
-            for calculated-page = (marry-page
-                                   i (gethash (paging-series i) latest-page))
-            collect calculated-page
-            do (setf (gethash (paging-series i) latest-page)
-                     calculated-page)))))
+  (:method ((wandering-page wandering-page) (state null))
+    (make-instance
+     'married-page
+     :metadata  wandering-page
+     :page-slot (construct-book-object
+                 (paging-series wandering-page)
+                 (paging-behaviour wandering-page)
+                 state))))
 
 ;;; Category determination
 (defun tag-type (tag)
