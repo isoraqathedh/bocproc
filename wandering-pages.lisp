@@ -105,10 +105,10 @@ with a specified page-number."))
 
 (defmethod print-object ((object married-page) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~a ~a ~a"
-            (-> object page-slot series-key)
-            (-> object page-slot format-page-code)
-            (-> object wandering-page %format-wandering-page))))
+    (format stream "(~a: ~a) ~a"
+            (series-key object)
+            (format-page-code object)
+            (%format-wandering-page object))))
 
 (defgeneric marry-page (wandering-page &optional start-at)
   (:documentation "Assigns a page number to a wandering-page
