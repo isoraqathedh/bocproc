@@ -81,10 +81,27 @@ that would be in the metadata (that can then be injected via exiftool.)"))
 (defclass married-page ()
   ((page-slot :initarg :page-slot
               :accessor page-slot)
-   (metadata :initarg :wandering-page
-             :accessor wandering-page))
-  (:documentation "A married page is a page that has
-all the page numbers already set."))
+   (metadata :initarg :metadata
+             :accessor metadata))
+  (:documentation "Represents a married page, which is a wandering-page
+with a specified page-number."))
+
+(defmacro define-married-page-method (reader-method)
+  "Quick and dirty macro for defining reader methods for married-pages."
+  `(defmethod ,reader-method ((object married-page))
+     (,reader-method
+      (funcall
+       (cond ((find-method #',reader-method nil '(wandering-page) nil)
+              #'metadata)
+             ((find-method #',reader-method nil '(page) nil)
+              #'page-slot)
+             (t (error "No method found for the reader-method ~a"
+                       #',reader-method))) object))))
+
+(define-married-page-method file)
+(define-married-page-method series-key)
+(define-married-page-method format-page-code)
+(define-married-page-method %format-wandering-page)
 
 (defmethod print-object ((object married-page) stream)
   (print-unreadable-object (object stream :type t)
