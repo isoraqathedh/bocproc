@@ -75,7 +75,7 @@ that would be in the metadata (that can then be injected via exiftool.)"))
 
 (defmethod print-object ((object wandering-page) stream)
   (print-unreadable-object (object stream :type t)
-    (%format-wandering-page object stream)))
+    (princ (%format-wandering-page object) stream)))
 
 ;;; Married pages
 (defclass married-page ()
