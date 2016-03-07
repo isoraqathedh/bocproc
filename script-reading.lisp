@@ -13,6 +13,8 @@ and interprets it as commands. |#
   ((version :initarg :version
             :initform nil
             :reader version)
+   (files-to-process :initform ()
+                     :accessor files-to-process)
    (current-page :accessor current-page))
   (:documentation "An object that represents the state of the processor."))
 
