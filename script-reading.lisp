@@ -62,6 +62,7 @@ and invokes the restart RESTART-NAME."
           (set-state version-numbers)))
       (set-state version-numbers)))
 
+#+(or) (defmacro process-file (file &rest options))
 
 ;;; Finally, load files
 (defun load-script (bpc-location)
