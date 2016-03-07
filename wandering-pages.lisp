@@ -226,12 +226,12 @@ and then appends each value to the thing."
       (write-exiftool-argument
        stream (get option :exiftool-arg) :set value\(s\))))
 
-(defun dump-exiftool-args (file wandering-page)
+(defun dump-exiftool-args (file wandering-page &optional (newp t))
   "Dumps all exiftool args to some file,
 that exiftool can then read again through the -@ option."
   (with-open-file (open-file file :direction :output
                                   :if-does-not-exist :create
-                                  :if-exists :append
+                                  :if-exists (if newp :supersede :append)
                                   :external-format :utf-8)
     ;; Title
     (format-exiftool-args open-file :title
