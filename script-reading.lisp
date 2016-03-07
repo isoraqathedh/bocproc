@@ -39,6 +39,15 @@ and invokes the restart RESTART-NAME."
   (setf *state*
         (make-instance 'bocproc-state :version version-numbers)))
 
+(defmethod marry-page ((wandering-page wandering-page)
+                       (state bocproc-state))
+  (make-instance 'married-page
+                 :metadata wandering-page
+                 :page-slot (construct-book-object
+                             (paging-series wandering-page)
+                             (paging-behaviour wandering-page)
+                             (current-page state))))
+
 ;;; The functions that the processor understands.
 (defun version (&rest version-numbers)
   "Sets up the parameters for processing the following script page."
