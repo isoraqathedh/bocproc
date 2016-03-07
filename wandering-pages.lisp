@@ -154,9 +154,9 @@ which it then returns. If all of them return nil, then nil is returned."
 (defun tag-manifestations (tags)
   "Computes the exact tag combination for all tags in the list."
   (destructuring-bind (&key metadata tumblr filename)
-      (cdr (assoc
-            (genre tags)
-            (cdr (assoc :tag-props *config*))))
+      (with-expression-threading () :tag-props
+        (assoc :|| *config*) #'cdr
+        (assoc (genre tags) :||) #'cdr)
     (list
      :metadata
      (cons metadata
