@@ -6,7 +6,7 @@
 (in-package :bocproc)
 
 ;;; Parameters
-(defvar *processing-parameters*
+(defparameter *processing-parameters*
   '(:title :tags :comment :overwritable #|:rotate :crop|#)
   "List of currently active tags.")
 
@@ -22,7 +22,7 @@
 
 ;; Default values for tags.
 (setf (get :title :default) "Untitled")
-(setf (get :overwritable :default) t)
+(setf (get :overwritable :default) :overwrite)
 
 ;;; The class
 (defclass wandering-page ()
@@ -64,7 +64,6 @@ that would be in the metadata (that can then be injected via exiftool.)"))
           (string (uiop:parse-native-namestring file))
           (pathname file)
           (null *books-location*))
-        (get-parameter object :overwritable) :overwrite
         (paging-behaviour object) paging-behaviour)
   (dolist (parameter *processing-parameters*)
     (setf (get-parameter object parameter)
