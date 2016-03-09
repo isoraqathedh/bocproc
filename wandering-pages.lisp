@@ -7,7 +7,7 @@
 
 ;;; Parameters
 (defvar *processing-parameters*
-  '(:title :tags :comment #|:rotate :crop|#)
+  '(:title :tags :comment :overwritable #|:rotate :crop|#)
   "List of currently active tags.")
 
 ;; Corresponding Exiftool arguments.
@@ -22,6 +22,7 @@
 
 ;; Default values for tags.
 (setf (get :title :default) "Untitled")
+(setf (get :overwritable :default) t)
 
 ;;; The class
 (defclass wandering-page ()
