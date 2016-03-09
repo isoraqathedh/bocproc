@@ -18,7 +18,7 @@
 ;; Some arguments can contain compound values
 ;; which are represented in list.
 ;; It is useful to have that marked out.
-(setf (get :title :compound-value) t)
+(setf (get :tags :compound-value) t)
 
 ;; Default values for tags.
 (setf (get :title :default) "Untitled")
