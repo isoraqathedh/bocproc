@@ -50,6 +50,15 @@ and invokes the restart RESTART-NAME."
                              (paging-behaviour wandering-page)
                              (current-page state))))
 
+(defun ensure-keyword (symbol)
+  "Coerces SYMBOL into a keyword."
+  (or (find-symbol (symbol-name symbol) "KEYWORD")
+      (intern (symbol-name symbol) "KEYWORD")))
+
+(defun symbol-name-assoc-cdr (keyform alist)
+  "Like ASSOC, but compares only symbol names (case-insensitively)."
+  (cdr (assoc keyform alist :test #'string-equal :key #'symbol-name)))
+
 ;;; The functions that the processor understands.
 (defun version (&rest version-numbers)
   "Sets up the parameters for processing the following script page."
@@ -62,7 +71,37 @@ and invokes the restart RESTART-NAME."
           (set-state version-numbers)))
       (set-state version-numbers)))
 
-#+(or) (defmacro process-file (file &rest options))
+(defun %process-file (file &rest options
+                      &key series paging-behaviour &allow-other-keys)
+  "Constructs and forms a "
+  (let ((instance (make-instance 'wandering-page :file file)))
+    (setf (paging-series instance) series
+          (paging-behaviour instance) paging-behaviour)
+    (loop for parameter in *processing-parameters*
+          for parameter-args = (getf options parameter)
+          when parameter-args
+          do (setf (get-parameter instance parameter)
+                   (getf options parameter)))
+    (if *state*
+        (push (files-to-process *state*) instance)
+        (error 'state-not-there))))
+
+(defmacro process-file (file &body options)
+  "Thin wrapper around `%process-file',
+ adding in quotes and breaking out lists."
+  (destructuring-bind (series &rest paging-behaviour)
+      (symbol-name-assoc-cdr :paging options)
+    `(%process-file
+      ,file
+      :series ,series
+      :paging-behaviour ',paging-behaviour
+      ,@(loop for parameter in *processing-parameters*
+              for parameter-args = (symbol-name-assoc-cdr parameter options)
+              when parameter-args
+              append (list parameter
+                           (if (get parameter :compound-value)
+                               `',parameter-args
+                               `',(car parameter-args)))))))
 
 ;;; Finally, load files
 (defun load-script (bpc-location)
