@@ -7,13 +7,21 @@
 
 ;;; Parameters
 (defvar *processing-parameters*
-  '((:title . "Untitled") :tags :comment #|:rotate :crop|#)
+  '(:title :tags :comment #|:rotate :crop|#)
   "List of currently active tags.")
 
 ;; Corresponding Exiftool arguments.
 (setf (get :title :exiftool-arg) "Title")
 (setf (get :tags :exiftool-arg) "Subject")
 (setf (get :comment :exiftool-arg) "Comment")
+
+;; Some arguments can contain compound values
+;; which are represented in list.
+;; It is useful to have that marked out.
+(setf (get :title :compound-value) t)
+
+;; Default values for tags.
+(setf (get :title :default) "Untitled")
 
 ;;; The class
 (defclass wandering-page ()
@@ -58,11 +66,8 @@ that would be in the metadata (that can then be injected via exiftool.)"))
         (get-parameter object :overwritable) :overwrite
         (paging-behaviour object) paging-behaviour)
   (dolist (parameter *processing-parameters*)
-    (if (consp parameter)
-        (setf (get-parameter object (car parameter))
-              (getf initargs (car parameter) (cdr parameter)))
-        (setf (get-parameter object parameter)
-              (getf initargs parameter)))))
+    (setf (get-parameter object parameter)
+          (getf initargs parameter (get parameter :default)))))
 
 (defgeneric %format-wandering-page (object)
   (:method ((object wandering-page))
