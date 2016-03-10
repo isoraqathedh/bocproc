@@ -12,7 +12,7 @@ and interprets it as commands. |#
 (defclass bocproc-state ()
   ((version :initarg :version
             :initform nil
-            :reader version)
+            :reader state-version)
    (files-to-process :initform ()
                      :accessor files-to-process)
    (current-page :accessor current-page))
