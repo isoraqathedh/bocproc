@@ -92,7 +92,7 @@ and invokes the restart RESTART-NAME."
           (set-state version-numbers)))
       (set-state version-numbers)))
 
-(defmacro process-file (file &body options)
+(defmacro bpc:process-file (file &body options)
   "Thin wrapper around `%process-file',
  adding in quotes and breaking out lists."
   (destructuring-bind (series &rest paging-behaviour)
