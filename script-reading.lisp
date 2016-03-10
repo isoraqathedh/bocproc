@@ -112,5 +112,6 @@ and invokes the restart RESTART-NAME."
 ;;; Finally, load files
 (defun load-script (bpc-location)
   "Loads the script from the file."
-  (let ((*package* (find-package :bpc)))
+  (let ((*package* (find-package :bpc))
+        (*state* (bpc:version 6)))
     (load boc-location)))
