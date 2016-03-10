@@ -18,6 +18,12 @@ and interprets it as commands. |#
    (current-page :accessor current-page))
   (:documentation "An object that represents the state of the processor."))
 
+(defmethod print-object ((object bocproc-state) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "v.~{~a~^.~}; ~a file~:p"
+            (state-version object)
+            (length (files-to-process object)))))
+
 (defparameter *state* nil
   "An object holds the state of the processor.")
 
