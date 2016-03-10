@@ -65,18 +65,6 @@ and invokes the restart RESTART-NAME."
   "Like ASSOC, but compares only symbol names (case-insensitively)."
   (cdr (assoc keyform alist :test #'string-equal :key #'symbol-name)))
 
-;;; The functions that the processor understands.
-(defun version (&rest version-numbers)
-  "Sets up the parameters for processing the following script page."
-  (if (and *state* (version *state*))
-      (restart-case (error 'state-already-there)
-        (continue ()
-          :report "Ignore the form and do nothing else.")
-        (set-value ()
-          :report "Make a new state and overwrite the old one."
-          (set-state version-numbers)))
-      (set-state version-numbers)))
-
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
   "Constructs and forms a "
@@ -91,6 +79,18 @@ and invokes the restart RESTART-NAME."
     (if *state*
         (push instance (files-to-process *state*))
         (error 'state-not-there))))
+
+;;; The functions that the processor understands.
+(defun bpc:version (&rest version-numbers)
+  "Sets up the parameters for processing the following script page."
+  (if (and *state* (state-version *state*))
+      (restart-case (error 'state-already-there)
+        (continue ()
+          :report "Ignore the form and do nothing else.")
+        (set-value ()
+          :report "Make a new state and overwrite the old one."
+          (set-state version-numbers)))
+      (set-state version-numbers)))
 
 (defmacro process-file (file &body options)
   "Thin wrapper around `%process-file',
