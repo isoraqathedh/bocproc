@@ -6,4 +6,4 @@
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
-  (:import-from #:bocproc #:version #:process-file #:*state*))
+  (:export #:version #:process-file))
