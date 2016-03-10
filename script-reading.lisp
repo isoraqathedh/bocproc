@@ -89,7 +89,7 @@ and invokes the restart RESTART-NAME."
           do (setf (get-parameter instance parameter)
                    (getf options parameter)))
     (if *state*
-        (push (files-to-process *state*) instance)
+        (push instance (files-to-process *state*))
         (error 'state-not-there))))
 
 (defmacro process-file (file &body options)
