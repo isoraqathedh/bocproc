@@ -68,7 +68,7 @@ and invokes the restart RESTART-NAME."
 
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
-  "Constructs and forms a "
+  "Constructs and forms a wandering-page from the arguments."
   (let ((instance (make-instance 'wandering-page :file file)))
     (setf (paging-series instance) series
           (paging-behaviour instance) paging-behaviour)
