@@ -181,17 +181,17 @@ with the provided specificity.")
   (:documentation "Writes the printed representation of a page object.")
   (:method ((object book-of-conworlds-page))
     (specificity-bind ((book :book) (page :page) (subpage :subpage)) object
-      (format nil "~:[?~;~:*~d~] / ~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
+      (format nil "~:[?~;~:*~d~]/~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
               book page (number->letter subpage))))
   (:method ((page-object non-boc-conworld-page))
     (specificity-bind ((page :page) (subpage :subpage)) page-object
-      (format nil "~a / ~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
+      (format nil "~a/~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
               (format-time (date-of-creation page-object))
               page
               (number->letter subpage))))
   (:method ((page-object non-boc-page))
     (specificity-bind ((page :page)) page-object
-        (format nil "~a / ~:[????~;~:*~4,'0d~]"
+        (format nil "~a/~:[????~;~:*~4,'0d~]"
              (format-time (date-of-creation page-object))
              page)))
   (:method ((object page))))
