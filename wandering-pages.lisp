@@ -10,19 +10,24 @@
   '(:title :tags :comment :overwritable #|:rotate :crop|#)
   "List of currently active tags.")
 
-;; Corresponding Exiftool arguments.
-(setf (get :title :exiftool-arg) "Title")
-(setf (get :tags :exiftool-arg) "Subject")
-(setf (get :comment :exiftool-arg) "Comment")
+;; Each processing parameter has a handful of details
+;; that are useful in doing something.
+;; These are encoded in the symbol-plists for now,
+;; but may they'll graduate to full objects or structures.
+(setf
+ ;; Corresponding Exiftool arguments.
+ (get :title :exiftool-arg) "Title"
+ (get :tags :exiftool-arg) "Subject"
+ (get :comment :exiftool-arg) "Comment"
 
-;; Some arguments can contain compound values
-;; which are represented in list.
-;; It is useful to have that marked out.
-(setf (get :tags :compound-value) t)
+ ;; Some arguments can contain compound values
+ ;; which are represented in list.
+ ;; It is useful to have that marked out.
+ (get :tags :compound-value) t
 
-;; Default values for tags.
-(setf (get :title :default) "Untitled")
-(setf (get :overwritable :default) :overwrite)
+ ;; Default values for tags.
+ (get :title :default) "Untitled"
+ (get :overwritable :default) :overwrite)
 
 ;;; The class
 (defclass wandering-page ()
