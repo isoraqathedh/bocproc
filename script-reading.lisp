@@ -15,7 +15,8 @@ and interprets it as commands. |#
             :reader state-version)
    (files-to-process :initform ()
                      :accessor files-to-process)
-   (current-page :accessor current-page))
+   (current-page :initform nil
+                 :accessor current-page))
   (:documentation "An object that represents the state of the processor."))
 
 (defmethod print-object ((object bocproc-state) stream)
