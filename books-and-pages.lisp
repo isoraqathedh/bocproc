@@ -396,22 +396,21 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
   "Expands PAGE-DETERMINATION-PLIST into the specificities understood by BOOK."
   (let ((specificities-list (specificities book))
         (next (getf page-determination-plist :next)))
-    (cond (next
-           (loop with match-number = (or (position next specificities-list)
-                                         (error "The specificity ~a ~
+    (if next
+        (loop with match-number = (or (position next specificities-list)
+                                      (error "The specificity ~a ~
                                                  is not defined." next))
-                 for spec in specificities-list
-                 for counter from 0
-                 collect (cond
-                           ((< counter match-number) :cur)
-                           ((= counter match-number) :next)
-                           ((> counter match-number) :first))))
-          (t
-           (loop for spec-key in specificities-list
-                 for spec-val = (or (getf page-determination-plist spec-key)
-                                    (error "The specificity ~a is not found"
-                                           spec-key))
-                 collect spec-val)))))
+              for spec in specificities-list
+              for counter from 0
+              collect (cond
+                        ((< counter match-number) :cur)
+                        ((= counter match-number) :next)
+                        ((> counter match-number) :first)))
+        (loop for spec-key in specificities-list
+              for spec-val = (or (getf page-determination-plist spec-key)
+                                 (error "The specificity ~a is not found"
+                                        spec-key))
+              collect spec-val))))
 
 (defgeneric calculate-page-number (book specificity requested-value
                                    starting-point)
