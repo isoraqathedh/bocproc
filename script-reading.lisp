@@ -15,9 +15,19 @@ and interprets it as commands. |#
             :reader state-version)
    (files-to-process :initform ()
                      :accessor files-to-process)
-   (current-page :initform nil
+   (current-page :initform (make-hash-table :test #'equal)
                  :accessor current-page))
   (:documentation "An object that represents the state of the processor."))
+
+(defgeneric get-current-page (state series)
+  (:documentation "Gets the latest accessed page number in the series.")
+  (:method ((state bocproc-state) (series string))
+    (gethash series (current-page state))))
+
+(defgeneric (setf get-current-page) (value state series)
+  (:documentation "SETF function for get-current-page.")
+  (:method (value (state bocproc-state) (series string))
+    (setf (gethash series (current-page state)) value)))
 
 (defmethod print-object ((object bocproc-state) stream)
   (print-unreadable-object (object stream :type t)
@@ -55,7 +65,8 @@ and invokes the restart RESTART-NAME."
                  :page-slot (construct-book-object
                              (paging-series wandering-page)
                              (paging-behaviour wandering-page)
-                             (current-page state))))
+                             (get-current-page
+                              state (paging-series wandering-page)))))
 
 (defun ensure-keyword (symbol)
   "Coerces SYMBOL into a keyword."
