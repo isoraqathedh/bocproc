@@ -1,6 +1,8 @@
 (in-package :bocproc)
 
-(defconstant +alphabet+ "abcdefghijklmnopqrstuvwxyz"
+(defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz"
+  ;; It's actually a constant
+  ;; but using defvar makes redefinition warnings makes the errors go away.
   "The alphabet as required in the subpage specifications.")
 
 (defvar *config-file* (asdf:system-relative-pathname
