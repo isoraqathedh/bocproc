@@ -80,7 +80,7 @@ and invokes the restart RESTART-NAME."
     (if *state*
         (push instance (files-to-process *state*))
         (error 'state-not-there)
-        #+(or)
+        #|
         (restart-case (#)
           (make-state (version-numbers)
             :report "Set up a state."
@@ -89,7 +89,7 @@ and invokes the restart RESTART-NAME."
                            (let ((test-version (read)))
                              (when (every #'numberp test-version)
                                test-version)))
-            (set-state version-numbers))))))
+            (set-state version-numbers)))|#)))
 
 ;;; The functions that the processor understands.
 (defun bpc:version (&rest version-numbers)
