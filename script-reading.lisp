@@ -79,17 +79,17 @@ and invokes the restart RESTART-NAME."
                    (getf options parameter)))
     (if *state*
         (push instance (files-to-process *state*))
-        (error 'state-not-there)
-        #|
-        (restart-case (#)
+        (restart-case (error 'state-not-there)
           (make-state (version-numbers)
             :report "Set up a state."
             :interactive (lambda ()
                            (format *query-io* "A list of version numbers: ")
                            (let ((test-version (read)))
-                             (when (every #'numberp test-version)
-                               test-version)))
-            (set-state version-numbers)))|#)))
+                             (assert (every #'numberp test-version)
+                                     (test-version)
+                                     "Must be a list of numbers.")
+                             test-version))
+            (set-state version-numbers))))))
 
 ;;; The functions that the processor understands.
 (defun bpc:version (&rest version-numbers)
