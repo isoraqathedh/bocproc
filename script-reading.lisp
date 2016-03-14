@@ -142,10 +142,39 @@ and invokes the restart RESTART-NAME."
                                `',parameter-args
                                `',(car parameter-args)))))))
 
+;;; Processing facilities
+(defgeneric move-pages (pages-to-move)
+  (:documentation "Performs a page move to an automatically determined path.")
+  (:method ((pages-to-move bocproc-state))
+    (dolist (page (files-to-process pages-to-move))
+      (let ((corresponding-page
+              (construct-book-object (paging-series page)
+                                     (paging-behaviour page)
+                                     (current-page page))))
+        (setf (get-current-page (paging-series page)) corresponding-page)
+        (rename-file (file page) (construct-filename-with-metadata
+                                  corresponding-page
+                                  page))))))
+
+(defgeneric run-exiftool (pages-to-move)
+  (:documentation "Dumps all arguments to a file and run exiftool with it.")
+  (:method ((pages-to-move bocproc-state))
+    (let ((associated-file (files-to-process pages-to-move)))
+      (loop for page in (files-to-process pages-to-move)
+            for newp = t then nil
+            do (dump-exiftool-args associated-file page newp))
+      (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
+      (delete-file associated-file))))
+
 ;;; Finally, load files
 (defun load-script (bpc-location)
   "Loads the script from the file."
   (let ((*package* (find-package :bpc))
         (*state* (bpc:version 6))
         (*read-eval* nil))
-    (load bpc-location)))
+    (load bpc-location)
+    (setf (files-to-process *state*) (reverse (files-to-process *state*)))
+    ;; handle stuff here
+    ;; (run-exiftool *state*)
+    ;; (move-pages *state*)
+    *state*))
