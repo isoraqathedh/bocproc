@@ -16,8 +16,19 @@ and interprets it as commands. |#
    (files-to-process :initform ()
                      :accessor files-to-process)
    (current-page :initform (make-hash-table :test #'equal)
-                 :accessor current-page))
+                 :accessor current-page)
+   (exiftool-file :accessor exiftool-file
+                  :documentation "Exiftool ARGFILE."))
   (:documentation "An object that represents the state of the processor."))
+
+(defmethod initialize-instance :after ((instance bocproc-state)
+                                       &key &allow-other-keys)
+  (setf (exiftool-file instance)
+        (asdf:system-relative-pathname
+         :bocproc
+         (local-time:format-timestring
+          nil (local-time:now) :format '((:month 2) (:day 2) (:hour 2)))
+         :type "txt")))
 
 (defgeneric get-current-page (state series)
   (:documentation "Gets the latest accessed page number in the series.")
