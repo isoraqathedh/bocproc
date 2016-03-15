@@ -176,6 +176,5 @@ and invokes the restart RESTART-NAME."
     (load bpc-location)
     (setf (files-to-process *state*) (reverse (files-to-process *state*)))
     ;; handle stuff here
-    ;; (run-exiftool *state*)
-    ;; (move-pages *state*)
-    *state*))
+    (run-exiftool *state*)
+    (move-pages *state*)))
