@@ -69,16 +69,6 @@ and invokes the restart RESTART-NAME."
   (setf *state*
         (make-instance 'bocproc-state :version version-numbers)))
 
-(defmethod marry-page ((wandering-page wandering-page)
-                       (state bocproc-state))
-  (make-instance 'married-page
-                 :metadata wandering-page
-                 :page-slot (construct-book-object
-                             (paging-series wandering-page)
-                             (paging-behaviour wandering-page)
-                             (get-current-page
-                              state (paging-series wandering-page)))))
-
 (defun ensure-keyword (symbol)
   "Coerces SYMBOL into a keyword."
   (or (find-symbol (symbol-name symbol) "KEYWORD")
