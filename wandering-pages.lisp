@@ -221,9 +221,9 @@ SET-OPERATOR determines if it is an \"append\" (+=) or \"set\" (-) operation."
           value))
 
 (defun write-exiftool-argument (stream option &optional operator (value ""))
-  "Like write-argument, but always writes the argument on a freshline."
-  (fresh-line stream)
-  (write-argument stream option operator value))
+  "Like write-argument, but leaves a new line at the end."
+  (write-argument stream option operator value)
+  (terpri stream))
 
 (defun format-exiftool-args (stream option value\(s\))
   "Writes the arguments that correspond to setting the OPTION to VALUE(S).
@@ -266,7 +266,7 @@ that exiftool can then read again through the -@ option."
       (:overwrite
        (write-exiftool-argument open-file "overwrite_original")))
     ;; The file name to be processed
-    (format open-file "~&~a"
+    (format open-file "~a~%"
             (-> wandering-page file namestring uiop:native-namestring))
     ;; Filename separator
     (write-exiftool-argument open-file "execute")))
