@@ -150,16 +150,17 @@ and invokes the restart RESTART-NAME."
       (let ((corresponding-page
               (construct-book-object (paging-series page)
                                      (paging-behaviour page)
-                                     (current-page page))))
-        (setf (get-current-page (paging-series page)) corresponding-page)
-        (rename-file (file page) (construct-filename-with-metadata
-                                  corresponding-page
-                                  page))))))
+                                     (get-current-page pages-to-move
+                                                       (paging-series page)))))
+        (setf (get-current-page pages-to-move (paging-series page))
+              corresponding-page)
+        (rename-file (file page)
+                     (get-path-with-metadata corresponding-page page))))))
 
 (defgeneric run-exiftool (pages-to-move)
   (:documentation "Dumps all arguments to a file and run exiftool with it.")
   (:method ((pages-to-move bocproc-state))
-    (let ((associated-file (files-to-process pages-to-move)))
+    (let ((associated-file (exiftool-file pages-to-move)))
       (loop for page in (files-to-process pages-to-move)
             for newp = t then nil
             do (dump-exiftool-args associated-file page newp))
