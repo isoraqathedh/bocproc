@@ -87,55 +87,6 @@ that would be in the metadata (that can then be injected via exiftool.)"))
   (print-unreadable-object (object stream :type t)
     (princ (%format-wandering-page object) stream)))
 
-;;; Married pages
-(defclass married-page ()
-  ((page-slot :initarg :page-slot
-              :accessor page-slot)
-   (metadata :initarg :metadata
-             :accessor metadata))
-  (:documentation "Represents a married page, which is a wandering-page
-with a specified page-number."))
-
-(defmacro define-married-page-method (reader-method)
-  "Quick and dirty macro for defining reader methods for married-pages."
-  `(defmethod ,reader-method ((object married-page))
-     (,reader-method
-      (funcall
-       (cond ((find-method #',reader-method nil '(wandering-page) nil)
-              #'metadata)
-             ((find-method #',reader-method nil '(page) nil)
-              #'page-slot)
-             (t (error "No method found for the reader-method ~a"
-                       #',reader-method))) object))))
-
-(define-married-page-method file)
-(define-married-page-method series-key)
-(define-married-page-method format-page-code)
-(define-married-page-method %format-wandering-page)
-(defmethod get-parameter ((object married-page) parameter)
-  (get-parameter (metadata object) parameter))
-(defmethod (setf get-parameter) (value (object married-page) parameter)
-  (setf (get-parameter (metadata object) parameter) value))
-
-(defmethod print-object ((object married-page) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "(~a: ~a) ~a"
-            (series-key object)
-            (format-page-code object)
-            (%format-wandering-page object))))
-
-(defgeneric marry-page (wandering-page state)
-  (:documentation "Assigns a page number to a wandering-page
- and puts them together into a married-page class.")
-  (:method ((wandering-page wandering-page) (state null))
-    (make-instance
-     'married-page
-     :metadata  wandering-page
-     :page-slot (construct-book-object
-                 (paging-series wandering-page)
-                 (paging-behaviour wandering-page)
-                 state))))
-
 ;;; Category determination
 (defun tag-type (tag)
   "Finds the tag plist relating to the given tag."
