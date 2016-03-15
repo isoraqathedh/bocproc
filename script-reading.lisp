@@ -158,12 +158,15 @@ and invokes the restart RESTART-NAME."
       (delete-file associated-file))))
 
 ;;; Finally, load files
-(defun load-script (bpc-location)
+(defun load-script (bpc-location &optional (new-state-p t))
   "Loads the script from the file."
   (let ((*package* (find-package :bpc))
         (*state* (bpc:version 6))
         (*read-eval* nil))
-    (load bpc-location)
+    (handler-bind ((state-already-there (if new-state-p
+                                            (make-restart-lambda 'continue)
+                                            (constantly nil))))
+      (load bpc-location))
     (setf (files-to-process *state*) (reverse (files-to-process *state*)))
     ;; handle stuff here
     (run-exiftool *state*)
