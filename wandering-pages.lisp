@@ -257,6 +257,7 @@ that exiftool can then read again through the -@ option."
     (format-exiftool-args open-file :tags
                           (-> wandering-page
                             (get-parameter :tags)
+                            tag-manifestations
                             (getf :metadata)))
     ;; Overwrite or not
     (case (get-parameter wandering-page :overwritable)
