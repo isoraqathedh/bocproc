@@ -194,8 +194,11 @@ which it then returns. If all of them return nil, then nil is returned."
       (format nil "~2,'0d~c-~a-~a"
               page
               (number->letter subpage)
-              (-> wandering-page tags tag-manifestations (getf :filename))
-              (title wandering-page))))
+              (-> wandering-page
+                (get-parameter :tags)
+                tag-manifestations
+                (getf :filename))
+              (get-parameter wandering-page :title))))
   (:method ((page-slot page) wandering-page)
     (declare (ignore wandering-page))
     ;; For the others, the metadata does not impact the filename
