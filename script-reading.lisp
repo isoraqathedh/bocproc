@@ -144,7 +144,7 @@ and invokes the restart RESTART-NAME."
                                                        (paging-series page)))))
         (setf (get-current-page pages-to-move (paging-series page))
               corresponding-page)
-        (rename-file (file page)
+        (rename-file (truename (namestring (file page)))
                      (get-path-with-metadata corresponding-page page))))))
 
 (defgeneric run-exiftool (pages-to-move)
