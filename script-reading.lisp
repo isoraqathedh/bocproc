@@ -66,8 +66,7 @@ and invokes the restart RESTART-NAME."
 ;;; Utility functions for processing the script, not exported
 (defun set-state (version-numbers)
   "Sets *state* to be a fresh new processor."
-  (setf *state*
-        (make-instance 'bocproc-state :version version-numbers)))
+  (setf *state* (make-instance 'bocproc-state :version version-numbers)))
 
 (defun ensure-keyword (symbol)
   "Coerces SYMBOL into a keyword."
