@@ -159,17 +159,18 @@ and invokes the restart RESTART-NAME."
 ;;; Finally, load files
 (defun load-script (bpc-location &optional (new-state-p t))
   "Loads the script from the file."
-  (let ((*package* (find-package :bpc))
-        (*state* (bpc:version 6))
-        (*read-eval* nil))
-    (handler-bind ((state-already-there (if new-state-p
-                                            (make-restart-lambda 'continue)
-                                            (constantly nil))))
-      (load bpc-location))
-    (setf (files-to-process *state*) (reverse (files-to-process *state*)))
-    ;; handle stuff here
-    (run-exiftool *state*)
-    (move-pages *state*)))
+  (handler-bind ((state-already-there (if new-state-p
+                                          (make-restart-lambda 'continue)
+                                          (constantly nil))))
+    (let ((*package* (find-package :bpc))
+          (*state* (bpc:version 6))
+          (*config* (load-config-file))
+          (*read-eval* nil))
+      (load bpc-location)
+      (setf (files-to-process *state*) (reverse (files-to-process *state*)))
+      ;; handle stuff here
+      (run-exiftool *state*)
+      (move-pages *state*))))
 
 (defun main ()
   "Entry point to bocproc."
