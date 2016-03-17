@@ -170,3 +170,10 @@ and invokes the restart RESTART-NAME."
     ;; handle stuff here
     (run-exiftool *state*)
     (move-pages *state*)))
+
+(defun main ()
+  "Entry point to bocproc."
+  (load-script
+   (loop for i in (uiop:command-line-arguments)
+         when (string-equal (pathname-type i) "bpc")
+         return i)))
