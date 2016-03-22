@@ -29,6 +29,9 @@
  (get :title :default) "Untitled"
  (get :overwritable :default) :overwrite)
 
+(defparameter *versbosep* nil
+  "Determines if output should be provided when the script is run.")
+
 ;;; The class
 (defclass wandering-page ()
   ((file :initarg :file
