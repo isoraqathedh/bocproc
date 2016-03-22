@@ -496,5 +496,3 @@ You should not alter this parameter normally.")
                                     slot-spec
                                     next-page)
         collect next-page))
-
-;; If end-condition is a wandering page, extract its paging-behaviour and use that.
