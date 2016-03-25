@@ -2,7 +2,8 @@
 
 (defpackage #:info.isoraqathedh.bocproc
   (:use #:cl #:thread-expr #:alexandria)
-  (:nicknames #:bocproc))
+  (:nicknames #:bocproc)
+  (:export #:main #:load-script))
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
