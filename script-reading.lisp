@@ -136,15 +136,18 @@ and invokes the restart RESTART-NAME."
   (:documentation "Performs a page move to an automatically determined path.")
   (:method ((pages-to-move bocproc-state))
     (dolist (page (files-to-process pages-to-move))
-      (let ((corresponding-page
-              (construct-book-object (paging-series page)
-                                     (paging-behaviour page)
-                                     (get-current-page pages-to-move
-                                                       (paging-series page)))))
+      (let* ((corresponding-page
+               (construct-book-object (paging-series page)
+                                      (paging-behaviour page)
+                                      (get-current-page pages-to-move
+                                                        (paging-series page))))
+             (old-name (truename (namestring (file page))))
+             (new-name (get-path-with-metadata corresponding-page page)))
         (setf (get-current-page pages-to-move (paging-series page))
               corresponding-page)
-        (rename-file (truename (namestring (file page)))
-                     (get-path-with-metadata corresponding-page page))))))
+        (when *verbosep*
+          (format t "Moving ~a to ~a" old-name new-name))
+        (rename-file old-name new-name)))))
 
 (defgeneric run-exiftool (pages-to-move)
   (:documentation "Dumps all arguments to a file and run exiftool with it.")

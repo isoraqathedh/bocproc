@@ -197,6 +197,32 @@ and then appends each value to the thing."
       (write-exiftool-argument
        stream (get option :exiftool-arg) :set value\(s\))))
 
+(defun %dump-exiftool-args (stream wandering-page)
+  "Dumps all exiftool args to some stream."
+  ;; Title
+  (format-exiftool-args
+   stream :title (get-parameter wandering-page :title))
+  ;; Comments
+  (format-exiftool-args
+   stream :comment (get-parameter wandering-page :comment))
+  ;; Tags/Categories/Subjects
+  (format-exiftool-args
+   stream :tags (-> wandering-page
+                  (get-parameter :tags)
+                  tag-manifestations
+                  (getf :metadata)))
+  ;; Overwrite or not
+  (case (get-parameter wandering-page :overwritable)
+    (:overwrite-preserving-metadata
+     (write-exiftool-argument stream "overwrite_original_in_place"))
+    (:overwrite
+     (write-exiftool-argument stream "overwrite_original")))
+  ;; The file name to be processed
+  (format stream "~a~%"
+          (-> wandering-page file namestring uiop:native-namestring))
+  ;; Filename separator
+  (write-exiftool-argument stream "execute"))
+
 (defun dump-exiftool-args (file wandering-page &optional (newp t))
   "Dumps all exiftool args to some file,
 that exiftool can then read again through the -@ option."
@@ -204,26 +230,8 @@ that exiftool can then read again through the -@ option."
                                   :if-does-not-exist :create
                                   :if-exists (if newp :supersede :append)
                                   :external-format :utf-8)
-    ;; Title
-    (format-exiftool-args open-file :title
-                          (get-parameter wandering-page :title))
-    ;; Comments
-    (format-exiftool-args open-file :comment
-                          (get-parameter wandering-page :comment))
-    ;; Tags/Categories/Subjects
-    (format-exiftool-args open-file :tags
-                          (-> wandering-page
-                            (get-parameter :tags)
-                            tag-manifestations
-                            (getf :metadata)))
-    ;; Overwrite or not
-    (case (get-parameter wandering-page :overwritable)
-      (:overwrite-preserving-metadata
-       (write-exiftool-argument open-file "overwrite_original_in_place"))
-      (:overwrite
-       (write-exiftool-argument open-file "overwrite_original")))
-    ;; The file name to be processed
-    (format open-file "~a~%"
-            (-> wandering-page file namestring uiop:native-namestring))
-    ;; Filename separator
-    (write-exiftool-argument open-file "execute")))
+    (let ((out (if *verbosep*
+                   (make-broadcast-stream open-file *standard-output*)
+                   open-file)))
+      (unwind-protect (%dump-exiftool-args out wandering-page)
+       (close out)))))
