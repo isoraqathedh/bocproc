@@ -29,7 +29,7 @@
  (get :title :default) "Untitled"
  (get :overwritable :default) :overwrite)
 
-(defparameter *versbosep* nil
+(defparameter *verbosep* nil
   "Determines if output should be provided when the script is run.")
 
 ;;; The class
