@@ -18,7 +18,7 @@
  ;; Corresponding Exiftool arguments.
  (get :title :exiftool-arg) "Title"
  (get :tags :exiftool-arg) "Subject"
- (get :comment :exiftool-arg) "Comment"
+ (get :comment :exiftool-arg) "Comments"
 
  ;; Some arguments can contain compound values
  ;; which are represented in list.
