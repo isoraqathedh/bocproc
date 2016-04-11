@@ -177,23 +177,59 @@ with the provided specificity.")
   (local-time:format-timestring
    nil timestamp :format '(:year "-" (:month 2) " (" :short-month ")")))
 
+(defun format-date-of-creation (stream argument &optional colon at)
+  (declare (ignore colon at))
+  (format stream "~a" (format-time (date-of-creation argument))))
+
+(defun format-book (stream argument &optional colon at)
+  (declare (ignore colon at))
+  (if argument
+      (format stream "~d" argument)
+      (format stream "?")))
+
+(defun format-page (stream argument &optional colon at)
+  (declare (ignore colon at))
+  (if argument
+      (format stream "~2,'0d" argument)
+      (format stream "??")))
+
+(defun format-subpage (stream argument &optional colon at)
+  (declare (ignore colon at))
+  (if argument
+      (format stream "~c" argument)
+      (format stream "?")))
+
+(defun format-serial (stream argument &optional colon at)
+  (declare (ignore colon at))
+  (if argument
+      (format stream "~4,'0d" argument)
+      (format stream "????")))
+
 (defgeneric format-page-code (page)
   (:documentation "Writes the printed representation of a page object.")
   (:method ((object book-of-conworlds-page))
     (specificity-bind ((book :book) (page :page) (subpage :subpage)) object
-      (format nil "~:[?~;~:*~d~]/~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
+      (format nil (concatenate
+                   'string
+                   "~/bocproc::format-book/" "/"
+                   "~/bocproc::format-page/"
+                   "~/bocproc::format-subpage/")
               book page (number->letter subpage))))
   (:method ((page-object non-boc-conworld-page))
     (specificity-bind ((page :page) (subpage :subpage)) page-object
-      (format nil "~a/~:[??~;~:*~2,'0d~]~:[?~;~:*~c~]"
-              (format-time (date-of-creation page-object))
-              page
-              (number->letter subpage))))
+      (format nil (concatenate
+                   'string
+                   "~/bocproc::format-date-of-creation/" "/"
+                   "~/bocproc::format-page/"
+                   "~/bocproc::format-subpage/")
+              page-object page (number->letter subpage))))
   (:method ((page-object non-boc-page))
     (specificity-bind ((page :page)) page-object
-        (format nil "~a/~:[????~;~:*~4,'0d~]"
-             (format-time (date-of-creation page-object))
-             page)))
+      (format nil (concatenate
+                   'string
+                   "~/bocproc::format-date-of-creation/" "/"
+                   "~/bocproc::format-serial/")
+              page-object page)))
   (:method ((object page))))
 
 (defmethod print-object ((object page) stream)
