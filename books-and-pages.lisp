@@ -51,8 +51,10 @@ that are provided fit."))
    (target-specificity :initarg :target-specificity
                        :reader target-specificity))
   (:report (lambda (condition stream)
-             (format stream "~a returned NIL, ~
-which is not specific enough for ~a."
+             (format stream #.(concatenate
+                               'string
+                               "~a returned NIL, "
+                               "which is not specific enough for ~a.")
                      (current-specificity condition)
                      (target-specificity condition)))))
 
@@ -209,26 +211,26 @@ with the provided specificity.")
   (:documentation "Writes the printed representation of a page object.")
   (:method ((object book-of-conworlds-page))
     (specificity-bind ((book :book) (page :page) (subpage :subpage)) object
-      (format nil (concatenate
-                   'string
-                   "~/bocproc::format-book/" "/"
-                   "~/bocproc::format-page/"
-                   "~/bocproc::format-subpage/")
+      (format nil #.(concatenate
+                     'string
+                     "~/bocproc::format-book/" "/"
+                     "~/bocproc::format-page/"
+                     "~/bocproc::format-subpage/")
               book page (number->letter subpage))))
   (:method ((page-object non-boc-conworld-page))
     (specificity-bind ((page :page) (subpage :subpage)) page-object
-      (format nil (concatenate
-                   'string
-                   "~/bocproc::format-date-of-creation/" "/"
-                   "~/bocproc::format-page/"
-                   "~/bocproc::format-subpage/")
+      (format nil #.(concatenate
+                     'string
+                     "~/bocproc::format-date-of-creation/" "/"
+                     "~/bocproc::format-page/"
+                     "~/bocproc::format-subpage/")
               page-object page (number->letter subpage))))
   (:method ((page-object non-boc-page))
     (specificity-bind ((page :page)) page-object
-      (format nil (concatenate
-                   'string
-                   "~/bocproc::format-date-of-creation/" "/"
-                   "~/bocproc::format-serial/")
+      (format nil #.(concatenate
+                     'string
+                     "~/bocproc::format-date-of-creation/" "/"
+                     "~/bocproc::format-serial/")
               page-object page)))
   (:method ((object page))))
 
@@ -434,8 +436,11 @@ If use-wild is non-nil, then provide a wild pathname if relevant.")
         (next (getf page-determination-plist :next)))
     (if next
         (loop with match-number = (or (position next specificities-list)
-                                      (error "The specificity ~a ~
-                                                 is not defined." next))
+                                      (error #.(concatenate
+                                                'string
+                                                "The specificity ~a "
+                                                "is not defined.")
+                                             next))
               for spec in specificities-list
               for counter from 0
               collect (cond
@@ -472,8 +477,11 @@ Returns the original object.")
     (destructuring-bind (start . stop)
         (get-cutoffs page-number-slot specificity starting-point)
       (when (< stop start)
-        (error "There's no room to put anything more than page ~d ~
-                in the cutoff range ~d → ~d!" start start stop))
+        (error #.(concatenate
+                  'string
+                  "There's no room to put anything more than page ~d "
+                  "in the cutoff range ~d → ~d!")
+               start start stop))
       (loop for test-number from start to stop do
             (setf (get-specificity page-number-slot specificity) test-number)
             (when (not (or (book-ignored-p page-number-slot)
