@@ -178,7 +178,7 @@ with the provided specificity.")
 (defun format-time (stream timestamp &optional colon at)
   "Writes timestamp in a format based on the folder naming system."
   (declare (ignore colon at))
-  (local-time:format-timesting
+  (local-time:format-timestring
    stream timestamp :format '(:year "-" (:month 2) " (" :short-month ")")))
 
 (defun format-date-of-creation (stream argument &optional colon at)
