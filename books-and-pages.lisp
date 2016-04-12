@@ -508,8 +508,8 @@ You should not alter this parameter normally.")
             &optional starting-point kill-existing)
     (declare (ignore kill-existing))
     (construct-book-object (make-instance
-                            (alexandria:switch (book-designator
-                                                :test #'string-equal)
+                            (alexandria:switch
+                                (book-designator :test #'string-equal)
                               ("boc" 'book-of-conworlds-page)
                               ("purple" 'boc-purple-page)
                               ("nboc" 'non-boc-conworld-page)
