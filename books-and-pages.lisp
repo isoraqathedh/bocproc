@@ -498,14 +498,14 @@ Returns the original object.")
                 (:next))
               (return page-number-slot))))))
 
-(defgeneric construct-book-object (book-designator slots-spec starting-point
-                                   &optional kill-existing)
+(defgeneric construct-book-object (book-designator slots-spec
+                                   &optional starting-point kill-existing)
   (:documentation "Calculate all positions of the page-number.
 Kill-existing controls whether or not the original values
 are wiped before calculation.
 You should not alter this parameter normally.")
-  (:method ((book-designator string) slots-spec starting-point
-            &optional kill-existing)
+  (:method ((book-designator string) slots-spec
+            &optional starting-point kill-existing)
     (declare (ignore kill-existing))
     (construct-book-object (make-instance
                             (alexandria:switch (book-designator
@@ -517,18 +517,18 @@ You should not alter this parameter normally.")
                            slots-spec
                            starting-point
                            nil))
-  (:method ((book-designator symbol) slots-spec starting-point
-            &optional kill-existing)
+  (:method ((book-designator symbol) slots-spec
+            &optional starting-point kill-existing)
     (construct-book-object (symbol-name book-designator)
                            slots-spec kill-existing))
-  (:method :before ((test-object page) slots-spec starting-point
-                    &optional (kill-existing t))
+  (:method :before ((test-object page) slots-spec
+                    &optional starting-point (kill-existing t))
     ;; Clear all the page numbers before attempting computation
     (when kill-existing
       (loop for i from 0 below (length (specificities test-object))
             do (setf (aref (specificities test-object) i) nil))))
-  (:method ((test-object page) (ending-condition-plist list) starting-point
-            &optional (kill-existing t))
+  (:method ((test-object page) (ending-condition-plist list)
+            &optional starting-point (kill-existing t))
     (declare (ignore kill-existing))
     (loop for spec in (specificities test-object)
           for ending-condition in (expand-to-specificities
