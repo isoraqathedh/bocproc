@@ -175,33 +175,40 @@ with the provided specificity.")
          ,@body))))
 
 ;;; Printing controls
-(defun format-time (timestamp)
-  (local-time:format-timestring
-   nil timestamp :format '(:year "-" (:month 2) " (" :short-month ")")))
+(defun format-time (stream timestamp &optional colon at)
+  "Writes timestamp in a format based on the folder naming system."
+  (declare (ignore colon at))
+  (local-time:format-timesting
+   stream timestamp :format '(:year "-" (:month 2) " (" :short-month ")")))
 
 (defun format-date-of-creation (stream argument &optional colon at)
+  "Writes the date of creation as a timestamp based on the folder naming system."
   (declare (ignore colon at))
-  (format stream "~a" (format-time (date-of-creation argument))))
+  (format stream "~/bocproc::format-time/" (date-of-creation argument)))
 
 (defun format-book (stream argument &optional colon at)
+  "Writes the book number."
   (declare (ignore colon at))
   (if argument
       (format stream "~d" argument)
       (format stream "?")))
 
 (defun format-page (stream argument &optional colon at)
+  "Writes the page number."
   (declare (ignore colon at))
   (if argument
       (format stream "~2,'0d" argument)
       (format stream "??")))
 
 (defun format-subpage (stream argument &optional colon at)
+  "Writes the subpage number."
   (declare (ignore colon at))
   (if argument
       (format stream "~c" argument)
       (format stream "?")))
 
 (defun format-serial (stream argument &optional colon at)
+  "Writes the serial number."
   (declare (ignore colon at))
   (if argument
       (format stream "~4,'0d" argument)
@@ -369,7 +376,7 @@ unless allow-multiple-files is non-nil."
     (specificity-bind ((book :book)) object
       (format nil "Book p~d" book)))
   (:method ((object dated-page))
-    (format-time (date-of-creation object))))
+    (format-time nil (date-of-creation object))))
 
 (defgeneric get-path (object &key use-wild expand-wild)
   (:documentation "Returns the path up to the specificity.
