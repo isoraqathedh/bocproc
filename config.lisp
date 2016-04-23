@@ -51,6 +51,7 @@
   ("QUX" :name "Quaxtion" :type :world)
   ("LEB" :name "Leħbraot" :type :world :ascii-name "Lehqhbraot")
   ("BIG" :name "Bigencenryin" :type :world)
+  ("UZY" :name "Ùzje" :type :world :ascii-name "U!zje")
 
   ;;; Special tags
   ;; These are thematic tags, tags that describe a running theme;
