@@ -1,5 +1,4 @@
 ;;;; Books and pages
-
 #|
 Classes and methods that relate to representing and finding books and pages.
 |#
