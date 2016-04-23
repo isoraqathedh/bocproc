@@ -48,6 +48,19 @@ Example:
 
     (version 6)
 
+# Verbosity #
+
+Lambda list: `LOUD (&OPTIONAL ON-OFF)`
+
+Toggles the display of destination information.
+
+The parameter `ON-OFF` controls whether or not verbosity is turned on or not.
+If it is not supplied, then it toggles verbosity.
+Otherwise, it is turned off if `nil`, and on if non-`nil`.
+
+Additionally, if verbosity is turned on,
+execution is paused for two seconds at the end to allow reading of the output.
+
 # Single file processing #
 
 Lambda list: `PROCESS-FILE (FILE &REST OPTIONS)`
