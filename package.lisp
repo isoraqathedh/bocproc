@@ -7,4 +7,4 @@
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
-  (:export #:version #:process-file))
+  (:export #:version #:process-file #:loud))
