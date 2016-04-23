@@ -187,7 +187,9 @@ and invokes the restart RESTART-NAME."
       (setf (files-to-process *state*) (reverse (files-to-process *state*)))
       ;; handle stuff here
       (run-exiftool *state*)
-      (move-pages *state*))))
+      (move-pages *state*)
+      (when (verbosep *state*)
+        (sleep 2)))))
 
 (defun main ()
   "Entry point to bocproc."
