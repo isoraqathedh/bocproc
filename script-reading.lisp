@@ -18,7 +18,13 @@ and interprets it as commands. |#
    (current-page :initform (make-hash-table :test #'equal)
                  :accessor current-page)
    (exiftool-file :accessor exiftool-file
-                  :documentation "Exiftool ARGFILE."))
+                  :documentation "Exiftool ARGFILE.")
+   (verbose :initform t
+            :accessor verbosep
+            :documentation #.(concatenate
+                              'string
+                              "Determines whether or not "
+                              "the motions should be printed.")))
   (:documentation "An object that represents the state of the processor."))
 
 (defmethod initialize-instance :after ((instance bocproc-state)
@@ -131,6 +137,14 @@ and invokes the restart RESTART-NAME."
                                `',parameter-args
                                `',(car parameter-args)))))))
 
+(defun bpc:loud (&optional (on-off nil on-off-supplied-p))
+  "Turns on or off verbosity in *state*."
+  (setf (verbosep *state*)
+        (cond
+          (on-off-supplied-p (not (verbosep *state*)))
+          (on-off t)
+          (t nil))))
+
 ;;; Processing facilities
 (defgeneric move-pages (pages-to-move)
   (:documentation "Performs a page move to an automatically determined path.")
@@ -145,7 +159,7 @@ and invokes the restart RESTART-NAME."
              (new-name (get-path-with-metadata corresponding-page page)))
         (setf (get-current-page pages-to-move (paging-series page))
               corresponding-page)
-        (when *verbosep*
+        (when (verbosep pages-to-move)
           (format t "Moving ~a to ~a" old-name new-name))
         (rename-file old-name new-name)))))
 
