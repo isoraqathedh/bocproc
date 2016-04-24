@@ -29,9 +29,6 @@
  (get :title :default) "Untitled"
  (get :overwritable :default) :overwrite)
 
-(defparameter *verbosep* nil
-  "Determines if output should be provided when the script is run.")
-
 ;;; The class
 (defclass wandering-page ()
   ((file :initarg :file
@@ -230,8 +227,4 @@ that exiftool can then read again through the -@ option."
                                   :if-does-not-exist :create
                                   :if-exists (if newp :supersede :append)
                                   :external-format :utf-8)
-    (let ((out (if *verbosep*
-                   (make-broadcast-stream open-file *standard-output*)
-                   open-file)))
-      (unwind-protect (%dump-exiftool-args out wandering-page)
-       (close out)))))
+    (%dump-exiftool-args open-file wandering-page)))
