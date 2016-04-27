@@ -160,7 +160,7 @@ and invokes the restart RESTART-NAME."
         (setf (get-current-page pages-to-move (paging-series page))
               corresponding-page)
         (when (verbosep pages-to-move)
-          (format t "Moving ~a to ~a" old-name new-name))
+          (format t "Moving ~a to ~a~%" old-name new-name))
         (rename-file old-name new-name)))))
 
 (defgeneric run-exiftool (pages-to-move)
