@@ -19,6 +19,7 @@
  (get :title :exiftool-arg) "Title"
  (get :tags :exiftool-arg) "Subject"
  (get :comment :exiftool-arg) "Comments"
+ (get :date-of-creation :exiftool-arg) "CreateDate"
 
  ;; Some arguments can contain compound values
  ;; which are represented in list.
@@ -196,6 +197,15 @@ and then appends each value to the thing."
 
 (defun %dump-exiftool-args (stream wandering-page)
   "Dumps all exiftool args to some stream."
+  ;; Time
+  (format-exiftool-args
+   stream :date-of-creation
+   (local-time:format-timestring
+    nil (local-time:now)
+    :format '((:year 4) ":" (:month 2) ":" (:day 2) " "
+              (:hour 2) ":" (:min 2) ":" (:sec 2)
+              ;;:gmt-offset <- to do: get the GMT offset.
+              )))
   ;; Title
   (format-exiftool-args
    stream :title (get-parameter wandering-page :title))
