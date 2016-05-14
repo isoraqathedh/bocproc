@@ -16,9 +16,6 @@
 (defparameter *config* ()
   "Configuration tree.")
 
-(defparameter *ignore-list* ()
-  "Hash-table for the ignore list.")
-
 (defparameter *exists-list* ()
   "List for finding which files are there and not.")
 
