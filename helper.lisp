@@ -6,7 +6,10 @@
   "The alphabet as required in the subpage specifications.")
 
 (defun make-subdirectory-pathname (root directories &key name type)
-  "Creates pathname representing a file name or subdirectory in ROOT."
+  "Creates pathname representing a file name or subdirectory in ROOT.
+
+DIRECTORIES is a list of strings that represent folder names,
+and NAME and TYPE is as in `make-pathname'."
   (merge-pathnames
    (make-pathname :directory (cons :relative directories)
                   :name name
@@ -22,7 +25,8 @@
 
 (defparameter *books-location*
   (make-subdirectory-pathname
-   (uiop/common-lisp:user-homedir-pathname) '("Documents" "My Scans")))
+   (uiop/common-lisp:user-homedir-pathname) '("Documents" "My Scans"))
+  "Root directory of the scan destinations.")
 
 (defparameter *config* ()
   "Configuration tree.")
