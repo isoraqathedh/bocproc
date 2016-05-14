@@ -5,13 +5,24 @@
   ;; but using defvar makes redefinition warnings makes the errors go away.
   "The alphabet as required in the subpage specifications.")
 
-(defvar *config-file* (asdf:system-relative-pathname
-                       :bocproc "config" :type "lisp"))
+(defun make-subdirectory-pathname (root directories &key name type)
+  "Creates pathname representing a file name or subdirectory in ROOT."
+  (merge-pathnames
+   (make-pathname :directory (cons :relative directories)
+                  :name name
+                  :type type)
+   root))
+
+(defvar *config-file*
+  (make-subdirectory-pathname
+   (uiop:xdg-config-home) '("bocproc")
+   :name "config"
+   :type "lisp")
+  "Location of the file that holds the config file.")
 
 (defparameter *books-location*
-  (merge-pathnames
-   (make-pathname :directory '(:relative "Documents" "My Scans"))
-   (uiop/common-lisp:user-homedir-pathname)))
+  (make-subdirectory-pathname
+   (uiop/common-lisp:user-homedir-pathname) '("Documents" "My Scans")))
 
 (defparameter *config* ()
   "Configuration tree.")
@@ -39,15 +50,14 @@
   "Detects and stores all files in *BOOKS-LOCATION*.
 Returns number of files detected, as this can be very large."
   (with-expression-threading ()
-    (make-pathname :directory '(:relative :wild-inferiors)
-                   :name :wild
-                   :type :wild)
-    (merge-pathnames :|| *books-location*)
+    *books-location*
+    (make-subdirectory-pathname :|| '(:wild-inferiors)
+                                :name :wild
+                                :type :wild)
     #'directory
     (setf *exists-list* :||)
     #'length))
 
 (defun books-location-subdir (&rest folder-names)
-  (merge-pathnames
-   (make-pathname :directory (cons :relative folder-names))
-   *books-location*))
+  (make-subdirectory-pathname
+   *books-location* folder-names))
