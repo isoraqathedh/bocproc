@@ -37,9 +37,8 @@
         (error "Not a letter: ~s" letter))))
 
 (defun number->letter (number)
-  (when number
-    (if (<= 1 number 26)
-        (char +alphabet+ (1- number)))))
+  (when (and number (<= 1 number 26))
+    (char +alphabet+ (1- number))))
 
 (defun load-config-file ()
   "Reads the config file into *config*."
