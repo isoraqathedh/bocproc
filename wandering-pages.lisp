@@ -139,6 +139,14 @@ which it then returns. If all of them return nil, then nil is returned."
            filename)))))
 
 ;;; Filename conjoinment
+(defun get-timezone ()
+  "Retrieves the timezone as set by the configuration variable."
+  (with-expression-threading ()
+    *config*
+    (assoc :timezone :||)
+    #'cdr
+    #'local-time:find-timezone-by-location-name))
+
 (defgeneric construct-filename-with-metadata (page-slot wandering-page)
   (:documentation "Constructs the filename with the metadata provided.")
   (:method ((page-slot book-of-conworlds-page) (wandering-page wandering-page))
@@ -202,10 +210,9 @@ and then appends each value to the thing."
    stream :date-of-creation
    (local-time:format-timestring
     nil (local-time:now)
-    :format '((:year 4) ":" (:month 2) ":" (:day 2) " "
-              (:hour 2) ":" (:min 2) ":" (:sec 2)
-              ;;:gmt-offset <- to do: get the GMT offset.
-              )))
+    :format '((:year 4) #\: (:month 2) #\: (:day 2) #\Space
+              (:hour 2) #\: (:min 2) #\: (:sec 2) :gmt-offset)
+    :timezone (get-timezone)))
   ;; Title
   (format-exiftool-args
    stream :title (get-parameter wandering-page :title))
