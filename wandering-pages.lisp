@@ -141,6 +141,10 @@ which it then returns. If all of them return nil, then nil is returned."
 ;;; Filename conjoinment
 (defun get-timezone ()
   "Retrieves the timezone as set by the configuration variable."
+  ;; Ensure that the timezone repository is read.
+  (when (zerop (hash-table-count local-time::*location-name->timezone*))
+    (local-time:reread-timezone-repository))
+  ;; Now get the timezone.
   (with-expression-threading ()
     *config*
     (assoc :timezone :||)
