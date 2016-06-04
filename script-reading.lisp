@@ -161,6 +161,7 @@ and invokes the restart RESTART-NAME."
               corresponding-page)
         (when (verbosep pages-to-move)
           (format t "Moving ~a to ~a~%" old-name new-name))
+        (ensure-directories-exist new-name :verbose t)
         (rename-file old-name new-name)))))
 
 (defgeneric run-exiftool (pages-to-move)
