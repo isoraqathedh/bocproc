@@ -5,6 +5,10 @@
   (:nicknames #:bocproc)
   (:export #:main #:load-script))
 
+(defpackage #:info.isoraqathedh.bocproc.experimental
+  (:use #:cl #:thread-expr #:alexandria #:local-time)
+  (:nicknames #:bocproc-exp))
+
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
   (:export #:version #:process-file #:loud)
