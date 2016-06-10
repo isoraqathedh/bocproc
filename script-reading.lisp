@@ -192,9 +192,9 @@ and invokes the restart RESTART-NAME."
       (when (verbosep *state*)
         (sleep 2)))))
 
-(defun main ()
+(defun main (args)
   "Entry point to bocproc."
   (load-script
-   (loop for i in (uiop:command-line-arguments)
+   (loop for i in args
          when (string-equal (pathname-type i) "bpc")
          return i)))
