@@ -161,10 +161,6 @@ UNKNOWN-VALUES will control what happens next:
     (apply #'concatenate 'string
            (namestring bocproc::*books-location*)
            (loop for fragment in (book-format page)
-           if (normalise-book-format
-               page fragment :unknown-values unknown-values) collect it
-           else do (return-from format-page)))))
-
-(defgeneric parse-page (filename)
-  (:documentation "Attempt to read FILENAME as a path representing a page."
-   ))
+                 if (normalise-book-format
+                     page fragment :unknown-values unknown-values) collect it
+                 else do (return-from format-page)))))
