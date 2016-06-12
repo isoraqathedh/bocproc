@@ -53,7 +53,7 @@ with a definite page number."))
 
 (defmacro define-book (name specificities &body format)
   "Defines a book series."
-  `(define-book% ,name ',format ',specificities))
+  `(define-book% ',name ',format ',specificities))
 
 (define-book :boc ((:book 1)
                    (:page 1 99)
