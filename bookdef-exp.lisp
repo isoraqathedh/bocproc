@@ -84,7 +84,7 @@ with a definite page number."))
 
 (defun undefine-book (name)
   "Removes the book series named NAME from the list."
-  (find name *series-list* :key #'series))
+  (delete name *series-list* :key #'series))
 
 (defun make-page (name &rest page-numbers)
   "Creates a page that is in the series NAME, with the specified PAGE-NUMBERS."
