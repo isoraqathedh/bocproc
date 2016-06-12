@@ -32,9 +32,22 @@
   ((page-numbers :initarg :page-numbers
                  :initform (vector)
                  :type (vector number)
-                 :accessor page-numbers))
+                 :accessor page-numbers)
+   (properties :initarg properties
+               :initform (make-hash-table)
+               :accessor properties))
   (:documentation "A manifestation of a book-series,
 with a definite page number."))
+
+(defgeneric get-page-property (object name)
+  (:documentation "Retrieves the page property from a page object.")
+  (:method ((object book-page) name)
+    (gethash name (properties object))))
+
+(defgeneric (setf get-page-property) (value object name)
+  (:documentation "Sets the page property from a page object to VALUE.")
+  (:method (value (object book-page) name)
+    (setf (gethash name (properties object)) value)))
 
 (defun define-book% (name format specificities)
   (push (make-instance
@@ -42,14 +55,11 @@ with a definite page number."))
          :series name
          :format format
          :specificities
-         (make-array
-          (list (length specificities) 3)
-          :initial-contents
-          (mapcar (lambda (list)
-                    (loop repeat 3
-                          for l = list then (cdr l)
-                          collect (car l)))
-                  specificities))) *series-list*))
+         (mapcar (lambda (list)
+                   (loop repeat 3
+                         for l = list then (cdr l)
+                         collect (car l)))
+                 specificities)) *series-list*))
 
 (defmacro define-book (name specificities &body format)
   "Defines a book series."
@@ -94,6 +104,67 @@ with a definite page number."))
      :format (book-format found-page)
      :specificities (specificities found-page)
      :series (series found-page)
-     :page-numbers
-     (make-array (-> found-page specificities array-dimensions first list)
-                  :initial-contents page-numbers))))
+     :page-numbers (if (= (length page-numbers)
+                          (length (specificities found-page)))
+                       page-numbers
+                       (error "Not enough page numbers for the book ~a"
+                              (series found-page))))))
+
+(defun normalise-book-format (page fragment &key unknown-values)
+  "Normalise and compute formatting options."
+  (flet ((handle-missing-value ()
+           (case unknown-values
+             ((nil) (return-from normalise-book-format))
+             (:glob (return-from normalise-book-format "*"))
+             (:error (error
+                      "Cannot compose file name, missing component ~a"
+                      fragment)))))
+    (etypecase fragment
+      (string fragment)
+      (character (string fragment))
+      (symbol (normalise-book-format page (list fragment)
+                                     :unknown-values unknown-values))
+      (list
+       (cond
+         ((eql (car fragment) :date)
+          (local-time:format-timestring nil (local-time:now)
+                                        :format (cdr fragment)
+                                        :timezone (bocproc::get-timezone)))
+         ((find (car fragment) (specificities page) :key #'first)
+          (destructuring-bind (spec &key (pad 0) (type :number)) fragment
+            (let ((page-number
+                    (nth (position spec (specificities page) :key #'first)
+                         (page-numbers page))))
+              (unless page-number
+                (handle-missing-value))
+              (case type
+                (:letter
+                 (format nil "~c" (bocproc::number->letter page-number)))
+                (:number
+                 (format nil "~?"
+                         (format nil "~~~d,'0d" pad)
+                         (list page-number)))))))
+         (t (let ((property-value (get-page-property page (car fragment))))
+              (unless property-value
+                (handle-missing-value))
+              (format nil "~a" property-value))))))))
+
+(defgeneric format-page (page &key unknown-values)
+  (:documentation "Takes a PAGE and derives its filename from it.
+If there are any parts that are not specified,
+UNKNOWN-VALUES will control what happens next:
+
+- NIL, the default, simply makes the function return nil.
+- :ERROR causes an error to be raised.
+- :GLOB replaces any unknown values with a globbing *.")
+  (:method ((page book-page) &key unknown-values)
+    (apply #'concatenate 'string
+           (namestring bocproc::*books-location*)
+           (loop for fragment in (book-format page)
+           if (normalise-book-format
+               page fragment :unknown-values unknown-values) collect it
+           else do (return-from format-page)))))
+
+(defgeneric parse-page (filename)
+  (:documentation "Attempt to read FILENAME as a path representing a page."
+   ))
