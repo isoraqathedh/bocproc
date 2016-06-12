@@ -72,6 +72,21 @@ with a definite page number."))
   (:page :pad 2) (:subpage :type :letter) "-"
   :genre "-" :title ".jpg")
 
+'(:sequence
+  :start-anchor
+  (:non-greedy-repetition 0 1 (namestring bocproc::*books-location*))
+  "Book of Conworlds/Book "
+  (:register (:non-greedy-repetition 1 nil :digit-class))
+  #\/
+  (:register (:non-greedy-repetition 2 nil :digit-class))
+  (:register (:non-greedy-repetition 1 nil :word-char-class))
+  #\-
+  (:register (:non-greedy-repetition 0 nil (:inverted-char-class #\Space)))
+  #\-
+  (:register (:greedy-repetition 0 nil :everything))
+  ".jpg"
+  :end-anchor)
+
 (define-book :purple ((:book 1)
                       (:page 1 99)
                       (:subpage 1 26))
@@ -164,3 +179,17 @@ UNKNOWN-VALUES will control what happens next:
                  if (normalise-book-format
                      page fragment :unknown-values unknown-values) collect it
                  else do (return-from format-page)))))
+
+
+(defun parse-page-1 (series filename )
+  "Attempt to parse FILENAME as the filename of a page from SERIES."
+  (let ((spec (book-format (find-book series)))
+        (relpath (if (uiop:absolute-pathname-p filename)
+                     (enough-namestring filename bocproc::*books-location*)
+                     filename)))
+    
+    ))
+
+(defun parse-page (filename)
+  "Attempt to read FILENAME as a path representing a page."
+  ())
