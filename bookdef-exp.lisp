@@ -193,4 +193,6 @@ If parsing is not possible, return nil."
 
 (defun parse-page (filename)
   "Attempt to read FILENAME as a path representing a page."
-  ())
+  (loop for i in *series-list*
+        when (parse-page-1 i filename)
+        return it))
