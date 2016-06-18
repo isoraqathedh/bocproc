@@ -184,7 +184,7 @@ and invokes the restart RESTART-NAME."
           (*state* (bpc:version 6))
           (*config* (load-config-file))
           (*read-eval* nil))
-      (load bpc-location)
+      (load (or bpc-location *standard-input*))
       (setf (files-to-process *state*) (reverse (files-to-process *state*)))
       ;; handle stuff here
       (run-exiftool *state*)
