@@ -10,4 +10,5 @@
                (:file "helper")
                (:file "books-and-pages")
                (:file "wandering-pages")
-               (:file "script-reading")))
+               (:file "script-reading")
+               (:file "bookdef-exp")))
