@@ -185,8 +185,7 @@ UNKNOWN-VALUES will control what happens next:
   "Attempt to parse FILENAME as the filename of a page from SERIES.
 
 If parsing is not possible, return nil."
-  (let ((spec (book-format (find-book series)))
-        (relpath (if (uiop:absolute-pathname-p filename)
+  (let ((relpath (if (uiop:absolute-pathname-p filename)
                      (enough-namestring filename bocproc::*books-location*)
                      filename)))
     ))
