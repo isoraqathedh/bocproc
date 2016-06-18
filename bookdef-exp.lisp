@@ -3,6 +3,9 @@
 (defparameter *series-list* ()
   "List of series that are currently on the system.")
 
+(defparameter *directory-list* ()
+  "List of files currently in the base directory.")
+
 (defclass book-series ()
   ((series
     :type symbol
@@ -181,17 +184,11 @@ UNKNOWN-VALUES will control what happens next:
                  else do (return-from format-page)))))
 
 
-(defun parse-page-1 (series filename)
-  "Attempt to parse FILENAME as the filename of a page from SERIES.
-
-If parsing is not possible, return nil."
-  (let ((relpath (if (uiop:absolute-pathname-p filename)
-                     (enough-namestring filename bocproc::*books-location*)
-                     filename)))
-    ))
-
-(defun parse-page (filename)
-  "Attempt to read FILENAME as a path representing a page."
-  (loop for i in *series-list*
-        when (parse-page-1 i filename)
-        return it))
+(defun load-directory-contents ()
+  (setf *directory-list*
+        (directory (merge-patnames
+                    (make-pathname
+                     :directory '(:relative :wild-inferiors)
+                     :name :wild
+                     :type :wild)
+                    *books-location*))))
