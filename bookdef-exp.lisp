@@ -42,6 +42,14 @@
   (:documentation "A manifestation of a book-series,
 with a definite page number."))
 
+(defmethod print-object ((object book-page) stream)
+  (with-accessors ((properties properties)) object
+    (print-unreadable-object (object stream :type t)
+      (format stream "~a ~a" (series object) (page-numbers object))
+      (loop for k being the hash-keys of properties
+            for v being the hash-values of properties
+            do (format stream " ~a ~a" k v)))))
+
 (defgeneric get-page-property (object name)
   (:documentation "Retrieves the page property from a page object.")
   (:method ((object book-page) name)
