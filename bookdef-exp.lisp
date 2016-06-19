@@ -187,10 +187,11 @@ UNKNOWN-VALUES will control what happens next:
 
 
 (defun load-directory-contents ()
-  (setf *directory-list*
-        (directory (merge-patnames
-                    (make-pathname
-                     :directory '(:relative :wild-inferiors)
-                     :name :wild
-                     :type :wild)
-                    *books-location*))))
+  (length
+   (setf *directory-list*
+         (directory (merge-pathnames
+                     (make-pathname
+                      :directory '(:relative :wild-inferiors)
+                      :name :wild
+                      :type :wild)
+                     bocproc::*books-location*)))))
