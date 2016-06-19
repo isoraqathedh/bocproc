@@ -116,7 +116,9 @@ with a definite page number."))
 
 (defun make-page (name &rest page-numbers)
   "Creates a page that is in the series NAME, with the specified PAGE-NUMBERS."
-  (let ((found-page (find-book name)))
+  (let ((found-page (if (symbolp name)
+                        (find-book name)
+                        name)))
     (make-instance
      'book-page
      :format (book-format found-page)
