@@ -11,4 +11,5 @@
                (:file "books-and-pages")
                (:file "wandering-pages")
                (:file "script-reading")
-               (:file "bookdef-exp")))
+               (:file "bookdef-exp")
+               (:file "bookgen")))
