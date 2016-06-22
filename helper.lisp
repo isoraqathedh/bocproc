@@ -47,7 +47,9 @@ and NAME and TYPE is as in `make-pathname'."
 (defun load-config-file ()
   "Reads the config file into *config*."
   (with-open-file (s *config-file* :external-format :utf-8)
-    (setf *config* (read s))))
+    (setf *config*
+          (let ((*package* (find-package '#:bocproc)))
+            (read s)))))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
