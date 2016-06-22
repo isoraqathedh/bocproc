@@ -3,10 +3,10 @@
 (defpackage #:info.isoraqathedh.bocproc
   (:use #:cl #:thread-expr #:alexandria)
   (:nicknames #:bocproc)
-  (:export #:main #:load-script))
+  (:export #:main #:load-script #:load-config-file))
 
 (defpackage #:info.isoraqathedh.bocproc.experimental
-  (:use #:cl #:thread-expr #:alexandria #:local-time)
+  (:use #:cl #:thread-expr #:alexandria #:local-time #:bocproc)
   (:nicknames #:bocproc-exp))
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
