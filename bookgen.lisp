@@ -35,7 +35,8 @@ have the same locally-ignored list and are at the same point.")
   (:documentation "Generate a new page using the generator.
 
 Modifies the generator, returns the new page.")
-  )
+  (:method ((gen page-generator))
+    ()))
 
 (defgeneric prev (gen)
   (:documentation "Goes back one page on the generator.
