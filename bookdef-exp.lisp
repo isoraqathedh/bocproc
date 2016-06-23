@@ -138,6 +138,15 @@ with a definite page number."))
                        (error "Not enough page numbers for the book ~a"
                               (series found-page))))))
 
+(defgeneric find-specificity (series specificity)
+  (:documentation "Find if there is a specificity named SPECIFICITY for SERIES.
+
+Return the position of the specificity.")
+  (:method ((series book-series) (specificity symbol))
+    (position specificity (specificities series) :key #'first))
+  (:method ((series symbol) (specificity symbol))
+    (find-specificity (find-book series) specificity)))
+
 (defun normalise-book-format (page fragment &key unknown-values)
   "Normalise and compute formatting options."
   (flet ((handle-missing-value ()
