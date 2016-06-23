@@ -6,6 +6,8 @@
 (defparameter *directory-list* ()
   "List of files currently in the base directory.")
 
+;;; Basic objects and accessors
+
 (defclass book-series ()
   ((series
     :type symbol
@@ -76,6 +78,41 @@ with a definite page number."))
   "Defines a book series."
   `(define-book% ',name ',format ',specificities))
 
+(defun find-book (name)
+  "Finds the book series named NAME from the list"
+  (find name *series-list* :key #'series))
+
+(defun undefine-book (name)
+  "Removes the book series named NAME from the list."
+  (delete name *series-list* :key #'series))
+
+(defun make-page (name &rest page-numbers)
+  "Creates a page that is in the series NAME, with the specified PAGE-NUMBERS."
+  (let ((found-page (if (symbolp name)
+                        (find-book name)
+                        name)))
+    (make-instance
+     'book-page
+     :format (book-format found-page)
+     :specificities (specificities found-page)
+     :series (series found-page)
+     :page-numbers (if (= (length page-numbers)
+                          (length (specificities found-page)))
+                       page-numbers
+                       (error "Not enough page numbers for the book ~a"
+                              (series found-page))))))
+
+(defgeneric find-specificity (series specificity)
+  (:documentation "Find if there is a specificity named SPECIFICITY for SERIES.
+
+Return the position of the specificity.")
+  (:method ((series book-series) (specificity symbol))
+    (position specificity (specificities series) :key #'first))
+  (:method ((series symbol) (specificity symbol))
+    (find-specificity (find-book series) specificity)))
+
+;;; Book definitions
+
 (define-book :boc ((:book 1)
                    (:page 1 99)
                    (:subpage 1 26))
@@ -114,38 +151,7 @@ with a definite page number."))
   "Unsorted By Date/" (:date :year "-" (:month 2) " (" :short-month ")") "/"
   "SCAN" (:page :pad 4) ".jpg")
 
-(defun find-book (name)
-  "Finds the book series named NAME from the list"
-  (find name *series-list* :key #'series))
-
-(defun undefine-book (name)
-  "Removes the book series named NAME from the list."
-  (delete name *series-list* :key #'series))
-
-(defun make-page (name &rest page-numbers)
-  "Creates a page that is in the series NAME, with the specified PAGE-NUMBERS."
-  (let ((found-page (if (symbolp name)
-                        (find-book name)
-                        name)))
-    (make-instance
-     'book-page
-     :format (book-format found-page)
-     :specificities (specificities found-page)
-     :series (series found-page)
-     :page-numbers (if (= (length page-numbers)
-                          (length (specificities found-page)))
-                       page-numbers
-                       (error "Not enough page numbers for the book ~a"
-                              (series found-page))))))
-
-(defgeneric find-specificity (series specificity)
-  (:documentation "Find if there is a specificity named SPECIFICITY for SERIES.
-
-Return the position of the specificity.")
-  (:method ((series book-series) (specificity symbol))
-    (position specificity (specificities series) :key #'first))
-  (:method ((series symbol) (specificity symbol))
-    (find-specificity (find-book series) specificity)))
+;;; Formatting a books.
 
 (defun normalise-book-format (page fragment &key unknown-values)
   "Normalise and compute formatting options."
