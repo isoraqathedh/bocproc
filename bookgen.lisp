@@ -20,7 +20,7 @@
 
 (defmethod print-object ((object page-generator) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~{~a~^ ~}" (point object))))
+    (format stream "~a ~{~a~^ ~}" (series object) (point object))))
 
 (defgeneric generator= (gen1 gen2)
   (:documentation "Determines if two generators are at the same state.
