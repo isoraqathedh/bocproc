@@ -31,6 +31,31 @@ have the same locally-ignored list and are at the same point.")
     (and (eql (series gen1) (series gen2))
          )))
 
+(defgeneric point-specificity (gen spec)
+  (:documentation "Find the specificity of the point.")
+  (:method ((gen page-generator) (spec symbol))
+    (nth (position spec (specificities (find-book (series gen)))
+                   :key #'first)
+         (point gen))))
+
+(defmethod specificities ((gen page-generator))
+  (specificities (find-book (series gen))))
+
+;;; Modifying
+
+(defgeneric (setf point-specificity) (value gen spec)
+  (:documentation "Set the SPEC part of GEN's point to VALUE.")
+  (:method (value (gen page-generator) (spec symbol))
+    (if (<= value
+            (third (find spec (specificities gen) :key #'first)))
+     (setf (nth (position spec (specificities gen) :key #'first)
+                (point gen))
+           value)
+     (error "Value ~a out of bounds for specificity ~s: expected ~d to ~d"
+            value spec (second (assoc spec (specificities gen)))
+            (or (third (assoc spec (specificities gen)))
+                "unlimited")))))
+
 (defgeneric next (gen)
   (:documentation "Generate a new page using the generator.
 
