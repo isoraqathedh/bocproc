@@ -1,4 +1,4 @@
-(in-package :bocproc-exp)
+(in-package :bocproc)
 
 (defparameter *series-list* ()
   "List of series that are currently on the system.")
@@ -113,7 +113,7 @@ with a definite page number."))
 
 '(:sequence
   :start-anchor
-  (:non-greedy-repetition 0 1 (namestring bocproc::*books-location*))
+  (:non-greedy-repetition 0 1 (namestring *books-location*))
   "Book of Conworlds/Book "
   (:register (:non-greedy-repetition 1 nil :digit-class))
   #\/
@@ -163,7 +163,7 @@ with a definite page number."))
          ((eql (car fragment) :date)
           (local-time:format-timestring nil (local-time:now)
                                         :format (cdr fragment)
-                                        :timezone (bocproc::get-timezone)))
+                                        :timezone (get-timezone)))
          ((find (car fragment) (specificities page) :key #'first)
           (destructuring-bind (spec &key (pad 0) (type :number)) fragment
             (let ((page-number
@@ -173,7 +173,7 @@ with a definite page number."))
                 (handle-missing-value))
               (case type
                 (:letter
-                 (format nil "~c" (bocproc::number->letter page-number)))
+                 (format nil "~c" (number->letter page-number)))
                 (:number
                  (format nil "~?"
                          (format nil "~~~d,'0d" pad)
@@ -193,7 +193,7 @@ UNKNOWN-VALUES will control what happens next:
 - :GLOB replaces any unknown values with a globbing *.")
   (:method ((page book-page) &key unknown-values)
     (apply #'concatenate 'string
-           (namestring bocproc::*books-location*)
+           (namestring *books-location*)
            (loop for fragment in (book-format page)
                  if (normalise-book-format
                      page fragment :unknown-values unknown-values) collect it

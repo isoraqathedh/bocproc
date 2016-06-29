@@ -1,4 +1,4 @@
-(in-package :bocproc-exp)
+(in-package :bocproc)
 
 (defclass page-generator ()
   ((series
