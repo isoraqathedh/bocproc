@@ -111,21 +111,6 @@ with a definite page number."))
   (:page :pad 2) (:subpage :type :letter) "-"
   :genre "-" :title ".jpg")
 
-'(:sequence
-  :start-anchor
-  (:non-greedy-repetition 0 1 (namestring *books-location*))
-  "Book of Conworlds/Book "
-  (:register (:non-greedy-repetition 1 nil :digit-class))
-  #\/
-  (:register (:non-greedy-repetition 2 nil :digit-class))
-  (:register (:non-greedy-repetition 1 nil :word-char-class))
-  #\-
-  (:register (:non-greedy-repetition 0 nil (:inverted-char-class #\Space)))
-  #\-
-  (:register (:greedy-repetition 0 nil :everything))
-  ".jpg"
-  :end-anchor)
-
 (define-book :purple ((:book 1)
                       (:page 1 99)
                       (:subpage 1 26))
