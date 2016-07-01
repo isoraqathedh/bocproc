@@ -43,18 +43,33 @@ have the same locally-ignored list and are at the same point.")
 
 ;;; Modifying
 
+(define-condition spec-out-of-bounds (error)
+  ((series
+    :reader series
+    :initarg :series)
+   (point
+    :reader point
+    :initarg :point))
+  (:documentation "Error raised when point is out of bounds.")
+  (:report
+   (lambda (condition stream)
+     (format stream "Point ~s out of bounds given by series ~s,~%which is ~s."
+             (point condition)
+             (series condition)
+             (mapcar #'cdr (specificities (find-book (series condition))))))))
+
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
-    (if (<= value
-            (third (find spec (specificities gen) :key #'first)))
-     (setf (nth (position spec (specificities gen) :key #'first)
-                (point gen))
-           value)
-     (error "Value ~a out of bounds for specificity ~s: expected ~d to ~d"
-            value spec (second (assoc spec (specificities gen)))
-            (or (third (assoc spec (specificities gen)))
-                "unlimited")))))
+    (let ((old-value (point gen)))
+      (setf (nth (position spec (specificities gen) :key #'first)
+                 (point gen))
+            value)
+      (when nil
+        (error "Value ~a out of bounds for specificity ~s: expected ~d to ~d"
+               value spec (second (assoc spec (specificities gen)))
+               (or (third (assoc spec (specificities gen)))
+                   "unlimited"))))))
 
 (defgeneric next (gen)
   (:documentation "Generate a new page using the generator.
