@@ -58,6 +58,15 @@ have the same locally-ignored list and are at the same point.")
              (series condition)
              (mapcar #'cdr (specificities (find-book (series condition))))))))
 
+(defgeneric point-in-bounds-p (gen)
+  (:documentation "Check if a generator is in bounds.")
+  (:method ((gen page-generator))
+    (loop for point in (point gen)
+          for (nil min max) in (specificities (find-book (series gen)))
+          always (if max
+                     (<= min point max)
+                     (<= min point)))))
+
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
