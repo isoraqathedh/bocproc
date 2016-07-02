@@ -74,11 +74,31 @@ have the same locally-ignored list and are at the same point.")
       (setf (nth (position spec (specificities gen) :key #'first)
                  (point gen))
             value)
-      (when nil
+      (unless (point-in-bounds-p gen)
         (error "Value ~a out of bounds for specificity ~s: expected ~d to ~d"
                value spec (second (assoc spec (specificities gen)))
                (or (third (assoc spec (specificities gen)))
                    "unlimited"))))))
+
+;;; Generating
+
+(defgeneric point-status (gen)
+  (:documentation "Return the status of the current point.
+
+The output can be one of these three:
+
+- :AVAILABLE, which means that this page number is unused
+  and ready for filling with a page;
+- (:IGNORED SPEC), which means that this page number is ignored
+  at the SPEC level.
+- A pathname, which means that this page number already taken,
+  specifically by this particular file."))
+
+(defgeneric this (gen)
+  (:documentation "Return the page that GEN is pointing to.")
+  (:method ((gen page-generator))
+    (make-instance 'book-page :series (series gen)
+                              :page-numbers (point gen))))
 
 (defgeneric next (gen)
   (:documentation "Generate a new page using the generator.
