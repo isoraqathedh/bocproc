@@ -86,7 +86,7 @@ with a definite page number."))
   "Removes the book series named NAME from the list."
   (delete name *series-list* :key #'series))
 
-(defun make-page (name &rest page-numbers)
+(defun make-page (name page-numbers)
   "Creates a page that is in the series NAME, with the specified PAGE-NUMBERS."
   (let ((found-page (if (symbolp name)
                         (find-book name)

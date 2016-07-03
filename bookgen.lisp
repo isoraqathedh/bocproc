@@ -97,8 +97,7 @@ The output can be one of these three:
 (defgeneric this (gen)
   (:documentation "Return the page that GEN is pointing to.")
   (:method ((gen page-generator))
-    (make-instance 'book-page :series (series gen)
-                              :page-numbers (point gen))))
+    (make-page (series gen) (point gen))))
 
 (defgeneric next (gen)
   (:documentation "Generate a new page using the generator.
