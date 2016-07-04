@@ -81,10 +81,15 @@ have the same locally-ignored list and are at the same point.")
                  (point gen))
             value)
       (unless (point-in-bounds-p gen)
-        (error "Value ~a out of bounds for specificity ~s: expected ~d to ~d"
-               value spec (second (assoc spec (specificities gen)))
-               (or (third (assoc spec (specificities gen)))
-                   "unlimited"))))))
+        (restart-case (error 'spec-out-of-bounds :point (point gen)
+                                                 :series (series gen))
+          (revert ()
+            :report "Cancel the change."
+            (setf (point gen) old-value))
+          (carry ()
+            :report "Perform carry/borrow calculations."
+            ;; But how?
+            ))))))
 
 ;;; Generating
 
