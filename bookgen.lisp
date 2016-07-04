@@ -87,18 +87,6 @@ have the same locally-ignored list and are at the same point.")
   (:method ((gen page-generator))
     (make-page (series gen) (point gen))))
 
-(defgeneric page-ignored-p (page)
-  (:documentation "Check if a page is in the ignored list.")
-  (:method ((page book-page))
-    (find-if
-     (lambda (entry)
-       (and (string= (symbol-name (series page))
-                     (symbol-name (car entry)))
-            (every #'= (page-numbers page) (cdr entry))))
-     (cdr (assoc :ignore-list-6.1 *config*))))
-  (:method ((generator page-generator))
-    (page-ignored-p (this generator))))
-
 (defgeneric point-status (gen)
   (:documentation "Return the status of the current point.
 
