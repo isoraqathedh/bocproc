@@ -82,6 +82,23 @@ have the same locally-ignored list and are at the same point.")
 
 ;;; Generating
 
+(defgeneric this (gen)
+  (:documentation "Return the page that GEN is pointing to.")
+  (:method ((gen page-generator))
+    (make-page (series gen) (point gen))))
+
+(defgeneric page-ignored-p (page)
+  (:documentation "Check if a page is in the ignored list.")
+  (:method ((page book-page))
+    (find-if
+     (lambda (entry)
+       (and (string= (symbol-name (series page))
+                     (symbol-name (car entry)))
+            (every #'= (page-numbers page) (cdr entry))))
+     (cdr (assoc :ignore-list-6.1 *config*))))
+  (:method ((generator page-generator))
+    (page-ignored-p (this generator))))
+
 (defgeneric point-status (gen)
   (:documentation "Return the status of the current point.
 
@@ -92,12 +109,13 @@ The output can be one of these three:
 - (:IGNORED SPEC), which means that this page number is ignored
   at the SPEC level.
 - A pathname, which means that this page number already taken,
-  specifically by this particular file."))
-
-(defgeneric this (gen)
-  (:documentation "Return the page that GEN is pointing to.")
+  specifically by this particular file.")
   (:method ((gen page-generator))
-    (make-page (series gen) (point gen))))
+    (let ((found-file (directory (format-page (make-page (series gen)
+                                                         (point gen))
+                                              :unknown-values :glob))))
+      (cond (found-file found-file)
+            ((cdr (assoc :ignore-list-6.1 *config*)))))))
 
 (defgeneric next (gen)
   (:documentation "Generate a new page using the generator.
