@@ -105,25 +105,34 @@ The output can be one of these three:
 
 - :AVAILABLE, which means that this page number is unused
   and ready for filling with a page;
-- (:IGNORED SPEC), which means that this page number is ignored
+- :IGNORED and an ignore list, which means that this page number is ignored
   at the SPEC level.
-- A pathname, which means that this page number already taken,
+- :OCCUPIED and a pathname, which means that this page number already taken,
   specifically by this particular file.")
   (:method ((gen page-generator))
-    (let ((found-file (directory (format-page (make-page (series gen)
-                                                         (point gen))
-                                              :unknown-values :glob))))
-      (cond (found-file found-file)
-            ((cdr (assoc :ignore-list-6.1 *config*)))))))
+    (let ((found-file
+            (directory
+             (format-page
+              (make-page (series gen) (point gen)) :unknown-values :glob)))
+          (ignored-spec
+            (find-if
+             (lambda (entry)
+               (and (string= (symbol-name (series gen))
+                             (symbol-name (car entry)))
+                    (every #'= (point gen) (cdr entry))))
+             (cdr (assoc :ignore-list-6.1 *config*)))))
+      (cond (found-file (values :occupied (first found-file)))
+            (ignored-spec (values :ignored ignored-spec))
+            (t :available)))))
 
-(defgeneric next (gen)
+(defgeneric next (gen spec)
   (:documentation "Generate a new page using the generator.
 
 Modifies the generator, returns the new page.")
-  (:method ((gen page-generator))
+  (:method ((gen page-generator) (spec symbol))
     ()))
 
-(defgeneric prev (gen)
+(defgeneric prev (gen spec)
   (:documentation "Goes back one page on the generator.
 
 Defined so that (next (prev gen)) or (prev (next gen))
