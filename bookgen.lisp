@@ -67,6 +67,12 @@ have the same locally-ignored list and are at the same point.")
                      (<= min point max)
                      (<= min point)))))
 
+(defgeneric point-specificity (gen spec)
+  (:documentation "Return the SPEC part of GEN's point.")
+  (:method ((gen page-generator) (spec symbol))
+    (nth (position spec (specificities gen) :key #'first)
+         (point gen))))
+
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
