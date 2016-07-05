@@ -73,13 +73,58 @@ have the same locally-ignored list and are at the same point.")
     (nth (position spec (specificities gen) :key #'first)
          (point gen))))
 
+(defun carry-or-borrow (original limits)
+  "Clamp the ORIGINAL list of numbers so each number appears between the LIMITS.
+
+Furthermore, the list of numbers are considered to be a number
+with a variable base,
+which is one more than the difference between the first and second elements
+in each sublist of LIMITS.
+If clamping occurs, the next value is carried to or borrowed from as needed,
+e.g. (3 5 1) ((1 nil) (1 2) (1 3)) yields (5 1 1).
+
+However, some lists are not carriable.
+In this case, the function signals an error."
+  ;; We need to have alternate versions of subtract, modulo and integer division
+  ;; that treat nil as infinity.
+  (flet ((-* (subtractand subtractor)
+           (when subtractand
+             (- subtractand subtractor -1))) ; add 1 back for inclusiveness
+         (mod* (number divisor)
+           (if divisor
+               (mod number divisor)
+               number))
+         (/* (dividend divisor)
+           (if divisor
+               (floor (/ dividend divisor))
+               0)))
+    (let* ((mins   (mapcar #'first limits))
+           (maxs   (mapcar #'second limits))
+           (ranges (mapcar #'-* maxs mins))
+           (working-copy (copy-list original)))
+      (dotimes (i (length original))
+        (setf working-copy
+              (let* ((norm-origs (mapcar #'- working-copy mins))
+                     (remainders (mapcar #'mod* norm-origs ranges))
+                     (carries    (append
+                                  (cdr (mapcar #'/* norm-origs ranges))
+                                  (list 0))))
+                (mapcar #'+ remainders carries mins))))
+      (if (every (lambda (tmin test tmax)
+                   (if tmax
+                       (<= tmin test tmax)
+                       (<= tmin test)))
+                 mins working-copy maxs)
+          working-copy
+          (error "List cannot be carried.")))))
+
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
-    (let ((old-value (point gen)))
-      (setf (nth (position spec (specificities gen) :key #'first)
-                 (point gen))
-            value)
+    (let ((old-value (point gen))
+          (new-value (setf (nth (position spec (specificities gen) :key #'first)
+                                (point gen))
+                           value)))
       (unless (point-in-bounds-p gen)
         (restart-case (error 'spec-out-of-bounds :point (point gen)
                                                  :series (series gen))
@@ -88,8 +133,9 @@ have the same locally-ignored list and are at the same point.")
             (setf (point gen) old-value))
           (carry ()
             :report "Perform carry/borrow calculations."
-            ;; But how?
-            ))))))
+            (setf (point gen)
+                  (carry-or-borrow new-value
+                                   (mapcar #'cdr (specificities gen))))))))))
 
 ;;; Generating
 
