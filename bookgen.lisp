@@ -98,24 +98,29 @@ In this case, the function signals an error."
            (if divisor
                (floor (/ dividend divisor))
                0)))
-    (let* ((mins   (mapcar #'first limits))
-           (maxs   (mapcar #'second limits))
-           (ranges (mapcar #'-* maxs mins))
-           (working-copy (copy-list original)))
-      (dotimes (i (length original))
-        (setf working-copy
-              (let* ((norm-origs (mapcar #'- working-copy mins))
-                     (remainders (mapcar #'mod* norm-origs ranges))
-                     (carries    (append
-                                  (cdr (mapcar #'/* norm-origs ranges))
-                                  (list 0))))
-                (mapcar #'+ remainders carries mins))))
+    (let* ((mins       (mapcar #'first limits))
+           (maxs       (mapcar #'second limits))
+           (ranges     (mapcar #'-* maxs mins))
+           (normalised (mapcar #'- original mins)))
+      ;; Carrying mechanism
+      (loop repeat (length original)    ; Carrying cannot happen
+                                        ; more than once per digit
+            for remainders = (mapcar #'mod* normalised ranges)
+            for carries    = (append
+                              (cdr (mapcar #'/* normalised ranges))
+                              (list 0))
+            for i = (mapcar #'+ remainders carries)
+            do (if (equal i normalised)
+                   (loop-finish)
+                   (setf normalised i))
+            finally (setf normalised (mapcar #'+ normalised mins)))
+      ;; Sanity checking
       (if (every (lambda (tmin test tmax)
                    (if tmax
                        (<= tmin test tmax)
                        (<= tmin test)))
-                 mins working-copy maxs)
-          working-copy
+                 mins normalised maxs)
+          normalised
           (error "List cannot be carried.")))))
 
 (defgeneric (setf point-specificity) (value gen spec)
