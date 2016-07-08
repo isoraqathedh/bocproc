@@ -190,7 +190,11 @@ The output can be one of these three:
 
 Modifies the generator, returns the new page.")
   (:method ((gen page-generator) (spec symbol))
-    ()))
+    (loop do (handler-bind (spec-out-of-bounds
+                            (lambda (condition)
+                              (invoke-restart 'carry)))
+               (incf (point-specificity gen spec)))
+          until (eql (point-status gen) :available))))
 
 (defgeneric prev (gen spec)
   (:documentation "Goes back one page on the generator.
