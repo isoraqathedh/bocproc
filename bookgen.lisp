@@ -1,26 +1,16 @@
 (in-package :bocproc)
 
-(defclass page-generator ()
-  ((series
-    :initform nil
-    :initarg :series
-    :reader series
-    :documentation "The series from which the page numbers are drawn from.")
-   (locally-ignored
+(defclass page-generator (book-page)
+  ((locally-ignored
     :initform nil
     :initarg :locally-ignored
     :accessor locally-ignored
-    :documentation "A list of page numbers that are locally ignored.")
-   (point
-    :initform nil
-    :initarg :point
-    :accessor point
-    :documentation "The current page of the generator."))
+    :documentation "A list of page numbers that are locally ignored."))
   (:documentation "A generator of page numbers."))
 
 (defmethod print-object ((object page-generator) stream)
   (print-unreadable-object (object stream :type t)
-    (format stream "~a ~{~a~^ ~}" (series object) (point object))))
+    (format stream "~a ~{~a~^ ~}" (series object) (page-numbers object))))
 
 (defgeneric generator= (gen1 gen2)
   (:documentation "Determines if two generators are at the same state.
@@ -36,7 +26,7 @@ have the same locally-ignored list and are at the same point.")
   (:method ((gen page-generator) (spec symbol))
     (nth (position spec (specificities (find-book (series gen)))
                    :key #'first)
-         (point gen))))
+         (page-numbers gen))))
 
 (defmethod specificities ((gen page-generator))
   (specificities (find-book (series gen))))
@@ -47,21 +37,21 @@ have the same locally-ignored list and are at the same point.")
   ((series
     :reader series
     :initarg :series)
-   (point
-    :reader point
-    :initarg :point))
+   (page-numbers
+    :reader page-numbers
+    :initarg :page-numbers))
   (:documentation "Error raised when point is out of bounds.")
   (:report
    (lambda (condition stream)
      (format stream "Point ~s out of bounds given by series ~s,~%which is ~s."
-             (point condition)
+             (page-numbers condition)
              (series condition)
              (mapcar #'cdr (specificities (find-book (series condition))))))))
 
 (defgeneric point-in-bounds-p (gen)
   (:documentation "Check if a generator is in bounds.")
   (:method ((gen page-generator))
-    (loop for point in (point gen)
+    (loop for point in (page-numbers gen)
           for (nil min max) in (specificities (find-book (series gen)))
           always (if max
                      (<= min point max)
@@ -126,19 +116,19 @@ In this case, the function signals an error."
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
-    (let ((old-value (point gen))
+    (let ((old-value (page-numbers gen))
           (new-value (setf (nth (position spec (specificities gen) :key #'first)
-                                (point gen))
+                                (page-numbers gen))
                            value)))
       (unless (point-in-bounds-p gen)
-        (restart-case (error 'spec-out-of-bounds :point (point gen)
+        (restart-case (error 'spec-out-of-bounds :point (page-numbers gen)
                                                  :series (series gen))
           (revert ()
             :report "Cancel the change."
-            (setf (point gen) old-value))
+            (setf (page-numbers gen) old-value))
           (carry ()
             :report "Perform carry/borrow calculations."
-            (setf (point gen)
+            (setf (page-numbers gen)
                   (carry-or-borrow new-value
                                    (mapcar #'cdr (specificities gen))))))))))
 
@@ -147,7 +137,7 @@ In this case, the function signals an error."
 (defgeneric this (gen)
   (:documentation "Return the page that GEN is pointing to.")
   (:method ((gen page-generator))
-    (make-page (series gen) (point gen))))
+    (make-page (series gen) (page-numbers gen))))
 
 (defun find-pattern-in-list (wild-pathname)
   "Find a pathname in *exists-list*, or query the disk if it is empty."
@@ -184,7 +174,7 @@ The output can be one of these three:
              (lambda (entry)
                (and (string= (symbol-name (series gen))
                              (symbol-name (car entry)))
-                    (every #'= (point gen) (cdr entry))))
+                    (every #'= (page-numbers gen) (cdr entry))))
              (cdr (assoc :ignore-list-6.1 *config*)))))
       (cond (found-file (values :occupied (first found-file)))
             (ignored-spec (values :ignored ignored-spec))
@@ -211,6 +201,9 @@ that the ignore list will allow."))
 
 (defun make-generator (name)
   "Make a generator."
-  (make-instance 'page-generator
-                 :series name
-                 :point (mapcar #'second (specificities (find-book name)))))
+  (let ((corresponding-book (find-book name)))
+    (make-instance
+     'page-generator
+     :series name
+     :page-numbers (mapcar #'second (specificities corresponding-book))
+     :format (book-format corresponding-book))))
