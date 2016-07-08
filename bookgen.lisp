@@ -121,7 +121,7 @@ In this case, the function signals an error."
                                 (page-numbers gen))
                            value)))
       (unless (point-in-bounds-p gen)
-        (restart-case (error 'spec-out-of-bounds :point (page-numbers gen)
+        (restart-case (error 'spec-out-of-bounds :page-numbers (page-numbers gen)
                                                  :series (series gen))
           (revert ()
             :report "Cancel the change."
