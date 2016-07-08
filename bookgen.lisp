@@ -61,7 +61,7 @@ have the same locally-ignored list and are at the same point.")
   (:documentation "Return the SPEC part of GEN's point.")
   (:method ((gen page-generator) (spec symbol))
     (nth (position spec (specificities gen) :key #'first)
-         (point gen))))
+         (page-numbers gen))))
 
 (defun carry-or-borrow (original limits)
   "Clamp the ORIGINAL list of numbers so each number appears between the LIMITS.
