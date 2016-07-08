@@ -149,6 +149,23 @@ In this case, the function signals an error."
   (:method ((gen page-generator))
     (make-page (series gen) (point gen))))
 
+(defun find-pattern-in-list (wild-pathname)
+  "Find a pathname in *exists-list*, or query the disk if it is empty."
+  (if *exists-list*
+      (find-if (lambda (file)
+                 (pathname-match-p file wild-pathname))
+               *exists-list*)
+      (directory wild-pathname)))
+
+(defgeneric find-page (gen)
+  (:documentation "Find the file represented by point in the generator.
+
+If there is no file, then return nil.")
+  (:method ((page book-page))
+    (find-pattern-in-list (format-page page :unknown-values :glob)))
+  (:method ((gen page-generator))
+    (find-pattern-in-list (format-page (this gen) :unknown-values :glob))))
+
 (defgeneric point-status (gen)
   (:documentation "Return the status of the current point.
 
@@ -161,10 +178,7 @@ The output can be one of these three:
 - :OCCUPIED and a pathname, which means that this page number already taken,
   specifically by this particular file.")
   (:method ((gen page-generator))
-    (let ((found-file
-            (directory
-             (format-page
-              (make-page (series gen) (point gen)) :unknown-values :glob)))
+    (let ((found-file (find-page gen))
           (ignored-spec
             (find-if
              (lambda (entry)
