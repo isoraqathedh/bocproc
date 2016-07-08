@@ -63,6 +63,17 @@ have the same locally-ignored list and are at the same point.")
     (nth (position spec (specificities gen) :key #'first)
          (page-numbers gen))))
 
+(define-condition uncarriable-list (error)
+  ((original :reader original
+             :initarg :original)
+   (limits :reader limits
+           :initarg :limits))
+  (:documentation "Error signalled when the list cannot be carried.")
+  (:report (lambda (c s)
+             (format s "List ~s cannot be coerced into limits ~s."
+                     (original c)
+                     (limits c)))))
+
 (defun carry-or-borrow (original limits)
   "Clamp the ORIGINAL list of numbers so each number appears between the LIMITS.
 
@@ -111,7 +122,21 @@ In this case, the function signals an error."
                        (<= tmin test)))
                  mins normalised maxs)
           normalised
-          (error "List cannot be carried.")))))
+          (restart-case (error 'uncarriable-list
+                               :original original
+                               :limits limits)
+            (do-nothing ()
+              :report "Do nothing to the original value."
+              original)
+            (set-minimum ()
+              :report "Set to the smallest available value."
+              mins)
+            (use-value (value)
+              :report "Write in a new value."
+              :interactive (lambda ()
+                             (format t "Enter a value to use: ")
+                             (read))
+              value))))))
 
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
