@@ -116,21 +116,26 @@ In this case, the function signals an error."
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.")
   (:method (value (gen page-generator) (spec symbol))
-    (let ((old-value (page-numbers gen))
-          (new-value (setf (nth (position spec (specificities gen) :key #'first)
-                                (page-numbers gen))
-                           value)))
+    (let ((old-value (page-numbers gen)))
+      ;; Actual setting
+      (setf (nth (position spec (specificities gen) :key #'first)
+                 (page-numbers gen))
+            value)
+      ;; Bounds checking
       (unless (point-in-bounds-p gen)
-        (restart-case (error 'spec-out-of-bounds :page-numbers (page-numbers gen)
-                                                 :series (series gen))
+        (restart-case (error 'spec-out-of-bounds
+                             :page-numbers (page-numbers gen)
+                             :series (series gen))
           (revert ()
             :report "Cancel the change."
             (setf (page-numbers gen) old-value))
           (carry ()
             :report "Perform carry/borrow calculations."
             (setf (page-numbers gen)
-                  (carry-or-borrow new-value
-                                   (mapcar #'cdr (specificities gen))))))))))
+                  (carry-or-borrow (page-numbers gen)
+                                   (mapcar #'cdr (specificities gen)))))))
+      ;; Return something useful
+      (page-numbers gen))))
 
 ;;; Generating
 
