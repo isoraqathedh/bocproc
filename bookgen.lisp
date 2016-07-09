@@ -139,7 +139,12 @@ In this case, the function signals an error."
               value))))))
 
 (defgeneric (setf point-specificity) (value gen spec)
-  (:documentation "Set the SPEC part of GEN's point to VALUE.")
+  (:documentation "Set the SPEC part of GEN's point to VALUE.
+
+After setting, perform bounds checking.
+Attempt to keep the value in bounds; if it cannot then do not perform changes.
+Keeping the value in bounds can mean performing carrying and borrowing
+or clamping the values in between the maximum and minimum allowed values.")
   (:method (value (gen page-generator) (spec symbol))
     (let ((old-value (page-numbers gen)))
       ;; Actual setting
@@ -154,11 +159,25 @@ In this case, the function signals an error."
           (revert ()
             :report "Cancel the change."
             (setf (page-numbers gen) old-value))
+          (clamp ()
+            :report "Constrain value to the limits of the book."
+            (setf (page-numbers gen)
+                  (mapcar (lambda (vals lims)
+                            (if (third lims)
+                                (min (second lims) vals)
+                                (max (third lims) (min (second lims) vals))))
+                          (page-numbers gen)
+                          (specificities gen))))
           (carry ()
             :report "Perform carry/borrow calculations."
             (setf (page-numbers gen)
-                  (carry-or-borrow (page-numbers gen)
-                                   (mapcar #'cdr (specificities gen)))))))
+                  (handler-bind ((uncarriable-list
+                                   (lambda (c)
+                                     (declare (ignore c))
+                                     (use-value old-value))))
+                    (carry-or-borrow
+                     (page-numbers gen)
+                     (mapcar #'cdr (specificities gen))))))))
       ;; Return something useful
       (page-numbers gen))))
 
