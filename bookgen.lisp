@@ -12,15 +12,6 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~a ~{~a~^ ~}" (series object) (page-numbers object))))
 
-(defgeneric generator= (gen1 gen2)
-  (:documentation "Determines if two generators are at the same state.
-
-Two generators are equal if they are generating from the same series,
-have the same locally-ignored list and are at the same point.")
-  (:method ((gen1 page-generator) (gen2 page-generator))
-    (and (eql (series gen1) (series gen2))
-         )))
-
 (defgeneric point-specificity (gen spec)
   (:documentation "Find the specificity of the point.")
   (:method ((gen page-generator) (spec symbol))
