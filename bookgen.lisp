@@ -137,26 +137,29 @@ Attempt to keep the value in bounds; if it cannot then do not perform changes.
 Keeping the value in bounds can mean performing carrying and borrowing
 or clamping the values in between the maximum and minimum allowed values.")
   (:method (value (gen page-generator) (spec symbol))
-    (let ((old-value (page-numbers gen)))
+    (let ((old-value (copy-list (page-numbers gen))))
       ;; Actual setting
       (setf (nth (position spec (specificities gen) :key #'first)
                  (page-numbers gen))
             value)
       ;; Bounds checking
       (unless (point-in-bounds-p gen)
+        (setf (page-numbers gen) old-value)
         (restart-case (error 'spec-out-of-bounds
                              :page-numbers (page-numbers gen)
                              :series (series gen))
           (revert ()
             :report "Cancel the change."
-            (setf (page-numbers gen) old-value))
+            nil)
           (clamp ()
             :report "Constrain value to the limits of the book."
             (setf (page-numbers gen)
                   (mapcar (lambda (vals lims)
-                            (if (third lims)
-                                (min (second lims) vals)
-                                (max (third lims) (min (second lims) vals))))
+                            (destructuring-bind (name low &optional high) lims
+                              (declare (ignore name))
+                              (if high
+                                  (max low (min high vals))
+                                  (max low vals))))
                           (page-numbers gen)
                           (specificities gen))))
           (carry ()
