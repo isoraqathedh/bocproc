@@ -187,7 +187,7 @@ or clamping the values in between the maximum and minimum allowed values.")
       (find-if (lambda (file)
                  (pathname-match-p file wild-pathname))
                *exists-list*)
-      (directory wild-pathname)))
+      (first (directory wild-pathname))))
 
 (defgeneric find-page (gen)
   (:documentation "Find the file represented by point in the generator.
@@ -218,7 +218,7 @@ The output can be one of these three:
                              (symbol-name (car entry)))
                     (every #'= (page-numbers gen) (cdr entry))))
              (cdr (assoc :ignore-list-6.1 *config*)))))
-      (cond (found-file (values :occupied (first found-file)))
+      (cond (found-file (values :occupied found-file))
             (ignored-spec (values :ignored ignored-spec))
             (t :available)))))
 
