@@ -144,13 +144,12 @@ or clamping the values in between the maximum and minimum allowed values.")
             value)
       ;; Bounds checking
       (unless (point-in-bounds-p gen)
-        (setf (page-numbers gen) old-value)
         (restart-case (error 'spec-out-of-bounds
                              :page-numbers (page-numbers gen)
                              :series (series gen))
           (revert ()
             :report "Cancel the change."
-            nil)
+            (setf (page-numbers gen) old-value))
           (clamp ()
             :report "Constrain value to the limits of the book."
             (setf (page-numbers gen)
