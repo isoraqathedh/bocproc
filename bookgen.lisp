@@ -243,7 +243,10 @@ should be GENERATOR= to gen."))
   (:documentation "Reset the generator.
 
 This means that the point is moved to the closest page
-that the ignore list will allow."))
+that the ignore list will allow.")
+  (:method ((gen page-generator))
+    (setf (locally-ignored gen) ()
+          (page-numbers gen) (mapcar #'second (specificities gen)))))
 
 (defun make-generator (name)
   "Make a generator."
