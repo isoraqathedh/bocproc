@@ -173,10 +173,10 @@ with a definite page number."))
 If there are any parts that are not specified,
 UNKNOWN-VALUES will control what happens next:
 
-- NIL, the default, simply makes the function return nil.
+- NIL simply makes the function return nil.
 - :ERROR causes an error to be raised.
-- :GLOB replaces any unknown values with a globbing *.")
-  (:method ((page book-page) &key unknown-values)
+- :GLOB, the default, replaces any unknown values with a globbing *.")
+  (:method ((page book-page) &key (unknown-values :glob))
     (apply #'concatenate 'string
            (namestring *books-location*)
            (loop for fragment in (book-format page)
