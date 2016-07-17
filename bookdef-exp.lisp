@@ -129,7 +129,7 @@ with a definite page number."))
 
 ;;; Formatting a books.
 
-(defun normalise-book-format (page fragment &key unknown-values)
+(defun normalise-book-format (page fragment &key unknown-values limit)
   "Normalise and compute formatting options."
   (flet ((handle-missing-value ()
            (case unknown-values
@@ -151,11 +151,15 @@ with a definite page number."))
                                         :timezone (get-timezone)))
          ((find (car fragment) (specificities page) :key #'first)
           (destructuring-bind (spec &key (pad 0) (type :number)) fragment
-            (let ((page-number
-                    (nth (position spec (specificities page) :key #'first)
-                         (page-numbers page))))
-              (unless page-number
-                (handle-missing-value))
+            (let* ((spec-pos (position spec (specificities page) :key #'first))
+                   (page-number
+                     (nth spec-pos (page-numbers page))))
+              (when (or (not page-number)
+                        (and limit
+                             (< (position limit (specificities page)
+                                          :key #'first)
+                                spec-pos)))
+                    (handle-missing-value))
               (case type
                 (:letter
                  (format nil "~c" (number->letter page-number)))
@@ -168,7 +172,7 @@ with a definite page number."))
                 (handle-missing-value))
               (format nil "~a" property-value))))))))
 
-(defgeneric format-page (page &key unknown-values)
+(defgeneric format-page (page &key unknown-values limit)
   (:documentation "Takes a PAGE and derives its filename from it.
 If there are any parts that are not specified,
 UNKNOWN-VALUES will control what happens next:
@@ -176,12 +180,13 @@ UNKNOWN-VALUES will control what happens next:
 - NIL simply makes the function return nil.
 - :ERROR causes an error to be raised.
 - :GLOB, the default, replaces any unknown values with a globbing *.")
-  (:method ((page book-page) &key (unknown-values :glob))
+  (:method ((page book-page) &key (unknown-values :glob) limit)
     (apply #'concatenate 'string
            (namestring *books-location*)
            (loop for fragment in (book-format page)
                  if (normalise-book-format
-                     page fragment :unknown-values unknown-values) collect it
+                     page fragment :unknown-values unknown-values
+                                   :limit limit) collect it
                  else do (return-from format-page)))))
 
 
