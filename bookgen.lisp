@@ -200,10 +200,10 @@ or clamping the values in between the maximum and minimum allowed values.")
 If there is no file, then return nil.
 If SPEC is defined, then if there is any one object
 that matches GEN up to SPEC then return that.")
-  (:method ((page book-page))
-    (find-pattern-in-list (format-page page)))
-  (:method ((gen page-generator))
-    (find-pattern-in-list (format-page (this gen)))))
+  (:method ((page book-page) &optional spec)
+    (find-pattern-in-list (format-page page :limit spec)))
+  (:method ((gen page-generator)  &optional spec)
+    (find-pattern-in-list (format-page (this gen) :limit spec))))
 
 (defgeneric point-status (gen &optional spec)
   (:documentation "Return the status of the current point.
