@@ -234,19 +234,32 @@ if there is any one page there then all pages are.")
 
 (defgeneric latest-spec (gen spec)
   (:documentation "Finds the largest occupied value in spec.")
-  (:method ((gen page-generator) spec)
-    (loop with (nil min max) = (find spec (specificities gen) :key #'first)
-          with failsafe = 10000
-          initially (setf (get-specificity gen spec) min)
-          for i from min to (or max failsafe)
-          do (incf (get-specificity gen spec))
-          when (eql (point-status gen) :available) return gen)))
+  (:method ((gen page-generator) spec &aux (failsafe 10000))
+    (destructuring-bind (min max) (cdr (assoc spec (specificities gen)))
+      (if max
+          (loop with latest-occupied = min
+                for i from min to max
+                do (setf (point-specificity gen spec) i)
+                   (if (eql (point-status gen spec) :occupied)
+                       (setf latest-occupied i))
+                finally (setf (point-specificity gen spec) latest-occupied)
+                        (return gen))
+          (loop with latest-occupied = min
+                for i from min to failsafe
+                do (setf (point-specificity gen spec) i)
+                   (case (point-status gen spec)
+                     (:occupied
+                      (setf latest-occupied i))
+                     (:available
+                      (setf (point-specificity gen spec) latest-occupied)
+                      (return gen))))))))
 
 (defgeneric latest (gen)
-  (:documentation "Finds the largest occupied value.")
+  (:documentation "Find the largest occupied value.")
   (:method ((gen page-generator))
-    ;; (loop for )
-    ))
+    (loop for i in (specificities gen)
+          do (latest-spec gen (car i))
+          finally (return gen))))
 
 (defgeneric next (gen spec)
   (:documentation "Generate a new page using the generator.
