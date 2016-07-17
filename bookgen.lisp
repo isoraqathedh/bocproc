@@ -194,16 +194,18 @@ or clamping the values in between the maximum and minimum allowed values.")
                *exists-list*)
       (first (directory wild-pathname))))
 
-(defgeneric find-page (gen)
+(defgeneric find-page (gen &optional spec)
   (:documentation "Find the file represented by point in the generator.
 
-If there is no file, then return nil.")
+If there is no file, then return nil.
+If SPEC is defined, then if there is any one object
+that matches GEN up to SPEC then return that.")
   (:method ((page book-page))
-    (find-pattern-in-list (format-page page :unknown-values :glob)))
+    (find-pattern-in-list (format-page page)))
   (:method ((gen page-generator))
-    (find-pattern-in-list (format-page (this gen) :unknown-values :glob))))
+    (find-pattern-in-list (format-page (this gen)))))
 
-(defgeneric point-status (gen)
+(defgeneric point-status (gen &optional spec)
   (:documentation "Return the status of the current point.
 
 The output can be one of these three:
@@ -213,9 +215,12 @@ The output can be one of these three:
 - :IGNORED and an ignore list, which means that this page number is ignored
   at the SPEC level.
 - :OCCUPIED and a pathname, which means that this page number already taken,
-  specifically by this particular file.")
-  (:method ((gen page-generator))
-    (let ((found-file (find-page gen))
+  specifically by this particular file.
+
+If SPEC is a specificity, then for the purposes of find-page
+if there is any one page there then all pages are.")
+  (:method ((gen page-generator) &optional spec)
+    (let ((found-file (find-page gen spec))
           (ignored-spec
             (find-if
              (lambda (entry)
