@@ -232,6 +232,22 @@ if there is any one page there then all pages are.")
             (ignored-spec (values :ignored ignored-spec))
             (t :available)))))
 
+(defgeneric latest-spec (gen spec)
+  (:documentation "Finds the largest occupied value in spec.")
+  (:method ((gen page-generator) spec)
+    (loop with (nil min max) = (find spec (specificities gen) :key #'first)
+          with failsafe = 10000
+          initially (setf (get-specificity gen spec) min)
+          for i from min to (or max failsafe)
+          do (incf (get-specificity gen spec))
+          when (eql (point-status gen) :available) return gen)))
+
+(defgeneric latest (gen)
+  (:documentation "Finds the largest occupied value.")
+  (:method ((gen page-generator))
+    ;; (loop for )
+    ))
+
 (defgeneric next (gen spec)
   (:documentation "Generate a new page using the generator.
 
