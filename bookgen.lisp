@@ -268,15 +268,25 @@ Modifies the generator, returns the new page.")
   (:method ((gen page-generator) (spec symbol))
     (loop do (handler-bind ((spec-out-of-bounds
                               (lambda (condition)
+                                (declare (ignore condition))
                                 (invoke-restart 'carry))))
                (incf (point-specificity gen spec)))
-          until (eql (point-status gen) :available))))
+          until (eql (point-status gen) :available)
+          finally (return gen))))
 
 (defgeneric prev (gen spec)
   (:documentation "Goes back one page on the generator.
 
 Defined so that (next (prev gen)) or (prev (next gen))
-should be GENERATOR= to gen."))
+should be GENERATOR= to gen.")
+  (:method ((gen page-generator) (spec symbol))
+    (loop do (handler-bind ((spec-out-of-bounds
+                              (lambda (condition)
+                                (declare (ignore condition))
+                                (invoke-restart 'carry))))
+               (decf (point-specificity gen spec)))
+          until (eql (point-status gen) :available)
+          finally (return gen))))
 
 (defgeneric reset (gen)
   (:documentation "Reset the generator.
