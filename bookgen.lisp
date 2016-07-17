@@ -39,14 +39,19 @@
              (series condition)
              (mapcar #'cdr (specificities (find-book (series condition))))))))
 
+(defun point-in-bounds-p% (test bounds)
+  "Check if TEST is in BOUNDS."
+  (loop for point in test
+        for (min max) in bounds
+        always (or (null point)
+                   (if max
+                       (<= min point max)
+                       (<= min point)))))
+
 (defgeneric point-in-bounds-p (gen)
   (:documentation "Check if a generator is in bounds.")
   (:method ((gen page-generator))
-    (loop for point in (page-numbers gen)
-          for (nil min max) in (specificities (find-book (series gen)))
-          always (if max
-                     (<= min point max)
-                     (<= min point)))))
+    (point-in-bounds-p% (page-numbers gen) (mapcar #'cdr (specificities gen)))))
 
 (defgeneric point-specificity (gen spec)
   (:documentation "Return the SPEC part of GEN's point.")
