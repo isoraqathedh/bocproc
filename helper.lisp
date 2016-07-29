@@ -66,3 +66,12 @@ Returns number of files detected, as this can be very large."
 (defun books-location-subdir (&rest folder-names)
   (make-subdirectory-pathname
    *books-location* folder-names))
+
+(defun ensure-keyword (symbol)
+  "Coerces SYMBOL into a keyword."
+  (or (find-symbol (symbol-name symbol) "KEYWORD")
+      (intern (symbol-name symbol) "KEYWORD")))
+
+(defun symbol-name-assoc-cdr (keyform alist)
+  "Like ASSOC, but compares only symbol names (case-insensitively)."
+  (cdr (assoc keyform alist :test #'string-equal :key #'symbol-name)))

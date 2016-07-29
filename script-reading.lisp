@@ -74,15 +74,6 @@ and invokes the restart RESTART-NAME."
   "Sets *state* to be a fresh new processor."
   (setf *state* (make-instance 'bocproc-state :version version-numbers)))
 
-(defun ensure-keyword (symbol)
-  "Coerces SYMBOL into a keyword."
-  (or (find-symbol (symbol-name symbol) "KEYWORD")
-      (intern (symbol-name symbol) "KEYWORD")))
-
-(defun symbol-name-assoc-cdr (keyform alist)
-  "Like ASSOC, but compares only symbol names (case-insensitively)."
-  (cdr (assoc keyform alist :test #'string-equal :key #'symbol-name)))
-
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
   "Constructs and forms a wandering-page from the arguments."
