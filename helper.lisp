@@ -49,7 +49,9 @@ and NAME and TYPE is as in `make-pathname'."
   (with-open-file (s *config-file* :external-format :utf-8)
     (setf *config*
           (let ((*package* (find-package '#:bocproc)))
-            (read s)))))
+            (read s)))
+    (loop for (name specs . format) in (cdr (assoc :books *config*))
+          do (define-book% name format specs))))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
