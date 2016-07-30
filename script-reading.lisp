@@ -17,6 +17,8 @@ and interprets it as commands. |#
                      :accessor files-to-process)
    (current-page :initform (make-hash-table :test #'equal)
                  :accessor current-page)
+   (generator :initarg :generator
+              :accessor generator)
    (exiftool-file :accessor exiftool-file
                   :documentation "Exiftool ARGFILE.")
    (verbose :initform t
@@ -34,7 +36,10 @@ and interprets it as commands. |#
          :bocproc
          (local-time:format-timestring
           nil (local-time:now) :format '((:month 2) (:day 2) (:hour 2)))
-         :type "txt")))
+         :type "txt")
+
+        (generator instance)
+        (make-generator (name instance))))
 
 (defgeneric get-current-page (state series)
   (:documentation "Gets the latest accessed page number in the series.")
