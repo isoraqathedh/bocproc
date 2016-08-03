@@ -77,3 +77,10 @@ Returns number of files detected, as this can be very large."
 (defun symbol-name-assoc-cdr (keyform alist)
   "Like ASSOC, but compares only symbol names (case-insensitively)."
   (cdr (assoc keyform alist :test #'string-equal :key #'symbol-name)))
+
+(defun setup ()
+  "Runs the functions that read configuration files."
+  (load-config-file)
+  (local-time:reread-timezone-repository)
+  (scan-for-files)
+  t)
