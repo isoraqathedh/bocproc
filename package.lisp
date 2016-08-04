@@ -1,7 +1,7 @@
 ;;;; package.lisp
 
 (defpackage #:info.isoraqathedh.bocproc
-  (:use #:cl #:thread-expr #:alexandria #:local-time)
+  (:use #:cl #:thread-expr #:alexandria)
   (:nicknames #:bocproc)
   (:export #:main #:load-script #:load-config-file))
 
