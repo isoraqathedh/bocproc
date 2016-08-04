@@ -131,14 +131,6 @@ and invokes the restart RESTART-NAME."
                                `',parameter-args
                                `',(car parameter-args)))))))
 
-(defun bpc:loud (&optional (on-off nil on-off-supplied-p))
-  "Turns on or off verbosity in *state*."
-  (setf (verbosep *state*)
-        (cond
-          (on-off-supplied-p (not (verbosep *state*)))
-          (on-off t)
-          (t nil))))
-
 ;;; Processing facilities
 (defgeneric move-pages (pages-to-move)
   (:documentation "Performs a page move to an automatically determined path.")
