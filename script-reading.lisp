@@ -32,12 +32,10 @@ and interprets it as commands. |#
 (defmethod initialize-instance :after ((instance bocproc-state)
                                        &key &allow-other-keys)
   (setf (exiftool-file instance)
-        (asdf:system-relative-pathname
-         :bocproc
+        (uiop:xdg-cache-home
+         "bocproc"
          (local-time:format-timestring
-          nil (local-time:now) :format '((:month 2) (:day 2) (:hour 2)))
-         :type "txt")
-
+          nil (local-time:now) :format '((:month 2) (:day 2) (:hour 2))))
         (generator instance)
         (make-generator (name instance))))
 
