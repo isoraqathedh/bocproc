@@ -8,8 +8,6 @@
   :serial t
   :components ((:file "package")
                (:file "helper")
-               (:file "books-and-pages")
-               (:file "wandering-pages")
-               (:file "script-reading")
-               (:file "bookdef-exp")
-               (:file "bookgen")))
+               (:file "bookdef")
+               (:file "bookgen")
+               (:file "script-reading")))
