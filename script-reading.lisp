@@ -179,6 +179,5 @@ and invokes the restart RESTART-NAME."
 (defun main (args)
   "Entry point to bocproc."
   (load-script
-   (loop for i in args
-         when (string-equal (pathname-type i) "bpc")
-         return i)))
+   (or (find "bpc" args :key #'pathname-type :test #'string-equal)
+       *standard-input*)))
