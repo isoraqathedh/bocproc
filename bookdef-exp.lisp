@@ -102,31 +102,6 @@ with a definite page number."))
                        (error "Not enough page numbers for the book ~a"
                               (series found-page))))))
 
-;;; Book definitions
-
-(define-book :boc ((:book 1)
-                   (:page 1 99)
-                   (:subpage 1 26))
-  "Book of Conworlds/Book " :book "/"
-  (:page :pad 2) (:subpage :type :letter) "-"
-  :genre "-" :title ".jpg")
-
-(define-book :purple ((:book 1)
-                      (:page 1 99)
-                      (:subpage 1 26))
-  "Book of Conworlds/Book p" :book "/"
-  (:page :pad 2) (:subpage :type :letter) "-"
-  :genre "-" :title ".jpg")
-
-(define-book :nboc ((:page 1 9999))
-  "Book of Conworlds/Non-BoC/"
-  (:date :year "-" (:month 2) " (" :short-month ")") "/"
-  "SCAN" (:page :pad 4) ".jpg")
-
-(define-book :uncategorised ((:page 1 9999))
-  "Unsorted By Date/" (:date :year "-" (:month 2) " (" :short-month ")") "/"
-  "SCAN" (:page :pad 4) ".jpg")
-
 ;;; Formatting a books.
 
 (defun normalise-book-format (page fragment &key unknown-values limit)
