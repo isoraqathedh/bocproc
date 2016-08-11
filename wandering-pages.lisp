@@ -30,63 +30,6 @@
  (get :title :default) "Untitled"
  (get :overwritable :default) :overwrite)
 
-;;; The class
-(defclass wandering-page ()
-  ((file :initarg :file
-         :initform *books-location*
-         :reader file
-         :documentation "The file name that the wandering-page is tied to.")
-   (processing-parameters :initform (make-hash-table)
-                          :accessor processing-parameters)
-   (paging-series :initarg :series
-                  :initform ""
-                  :accessor paging-series
-                  :documentation "Which series this page belongs to.")
-   (paging-behaviour :initarg :paging-behaviour
-                     :initform ()
-                     :accessor paging-behaviour
-                     :documentation "How this page should be paged."))
-  (:documentation "Represents a wandering page –
-pages whose page numbers are unknown.
-This is because they are tied to filenames that don't match any standard ones.
-However, they often hold more information than their static counterparts –
-they have titles, categories, genres, and all the stuff
-that would be in the metadata (that can then be injected via exiftool.)"))
-
-(defgeneric get-parameter (object parameter)
-  (:method ((object wandering-page) parameter)
-    (gethash parameter (processing-parameters object))))
-
-(defgeneric (setf get-parameter) (value object parameter)
-  (:method (value (object wandering-page) parameter)
-    (setf (gethash parameter (processing-parameters object)) value)))
-
-(defmethod initialize-instance :after ((object wandering-page)
-                                       &rest initargs
-                                       &key file paging-behaviour
-                                       &allow-other-keys)
-  (setf (slot-value object 'file)
-        (etypecase file
-          (string (uiop:parse-native-namestring file))
-          (pathname file)
-          (null *books-location*))
-        (paging-behaviour object) paging-behaviour)
-  (dolist (parameter *processing-parameters*)
-    (setf (get-parameter object parameter)
-          (getf initargs parameter (get parameter :default)))))
-
-(defgeneric %format-wandering-page (object)
-  (:method ((object wandering-page))
-    (format nil "~:[no-filename~*~;~:*~a.~a~]~:[~;†~] \"~a\" ~a"
-            (pathname-name (file object))
-            (pathname-type (file object))
-            (get-parameter object :overwritable)
-            (get-parameter object :title)
-            (get-parameter object :tags))))
-
-(defmethod print-object ((object wandering-page) stream)
-  (print-unreadable-object (object stream :type t)
-    (princ (%format-wandering-page object) stream)))
 
 ;;; Category determination
 (defun tag-type (tag)
@@ -138,46 +81,6 @@ which it then returns. If all of them return nil, then nil is returned."
            (first tags-less-specials)
            filename)))))
 
-;;; Filename conjoinment
-(defun get-timezone ()
-  "Retrieves the timezone as set by the configuration variable."
-  ;; Ensure that the timezone repository is read.
-  (when (zerop (hash-table-count local-time::*location-name->timezone*))
-    (local-time:reread-timezone-repository))
-  ;; Now get the timezone.
-  (with-expression-threading ()
-    *config*
-    (assoc :timezone :||)
-    #'cdr
-    #'local-time:find-timezone-by-location-name))
-
-(defgeneric construct-filename-with-metadata (page-slot wandering-page)
-  (:documentation "Constructs the filename with the metadata provided.")
-  (:method ((page-slot book-of-conworlds-page) (wandering-page wandering-page))
-    (specificity-bind ((page :page) (subpage :subpage)) page-slot
-      (format nil "~2,'0d~c-~a-~a"
-              page
-              (number->letter subpage)
-              (-> wandering-page
-                (get-parameter :tags)
-                tag-manifestations
-                (getf :filename))
-              (get-parameter wandering-page :title))))
-  (:method ((page-slot page) wandering-page)
-    (declare (ignore wandering-page))
-    ;; For the others, the metadata does not impact the filename
-    (construct-filename page-slot)))
-
-(defgeneric get-path-with-metadata (page-slot wandering-page)
-  (:documentation "Constructs the complete path with the metadata provided.")
-  (:method ((page-slot page) (wandering-page wandering-page))
-    (merge-pathnames
-     (make-pathname
-      :directory (list :relative (construct-folder-name page-slot))
-      :name (construct-filename-with-metadata page-slot wandering-page)
-      :type (pathname-type (file wandering-page)))
-     (root page-slot))))
-
 ;;; Make argument:
 (defun write-argument (stream option &optional operator (value ""))
   "Writes an argument of the form -OPTION=VALUE into STREAM.
@@ -207,7 +110,7 @@ and then appends each value to the thing."
       (write-exiftool-argument
        stream (get option :exiftool-arg) :set value\(s\))))
 
-(defun %dump-exiftool-args (stream wandering-page)
+(defun %dump-exiftool-args (stream page)
   "Dumps all exiftool args to some stream."
   ;; Time
   (format-exiftool-args
@@ -219,33 +122,33 @@ and then appends each value to the thing."
     :timezone (get-timezone)))
   ;; Title
   (format-exiftool-args
-   stream :title (get-parameter wandering-page :title))
+   stream :title (get-page-property page :title))
   ;; Comments
   (format-exiftool-args
-   stream :comment (get-parameter wandering-page :comment))
+   stream :comment (get-page-property page :comment))
   ;; Tags/Categories/Subjects
   (format-exiftool-args
-   stream :tags (-> wandering-page
-                  (get-parameter :tags)
+   stream :tags (-> page
+                  (get-page-property :tags)
                   tag-manifestations
                   (getf :metadata)))
   ;; Overwrite or not
-  (case (get-parameter wandering-page :overwritable)
+  (case (get-page-property page :overwritable)
     (:overwrite-preserving-metadata
      (write-exiftool-argument stream "overwrite_original_in_place"))
     (:overwrite
      (write-exiftool-argument stream "overwrite_original")))
   ;; The file name to be processed
   (format stream "~a~%"
-          (-> wandering-page file namestring uiop:native-namestring))
+          (-> page file namestring uiop:native-namestring))
   ;; Filename separator
   (write-exiftool-argument stream "execute"))
 
-(defun dump-exiftool-args (file wandering-page &optional (newp t))
+(defun dump-exiftool-args (file page &optional (newp t))
   "Dumps all exiftool args to some file,
 that exiftool can then read again through the -@ option."
   (with-open-file (open-file file :direction :output
                                   :if-does-not-exist :create
                                   :if-exists (if newp :supersede :append)
                                   :external-format :utf-8)
-    (%dump-exiftool-args open-file wandering-page)))
+    (%dump-exiftool-args open-file page)))

@@ -84,3 +84,15 @@ Returns number of files detected, as this can be very large."
   (local-time:reread-timezone-repository)
   (scan-for-files)
   t)
+
+(defun get-timezone ()
+  "Retrieves the timezone as set by the configuration variable."
+  ;; Ensure that the timezone repository is read.
+  (when (zerop (hash-table-count local-time::*location-name->timezone*))
+    (local-time:reread-timezone-repository))
+  ;; Now get the timezone.
+  (with-expression-threading ()
+    *config*
+    (assoc :timezone :||)
+    #'cdr
+    #'local-time:find-timezone-by-location-name))
