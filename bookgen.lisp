@@ -300,11 +300,18 @@ that the ignore list will allow.")
     (setf (locally-ignored gen) ()
           (page-numbers gen) (mapcar #'second (specificities gen)))))
 
-(defun make-generator (name)
-  "Make a generator."
-  (let ((corresponding-book (find-book name)))
-    (make-instance
-     'page-generator
-     :series name
-     :page-numbers (mapcar #'second (specificities corresponding-book))
-     :format (book-format corresponding-book))))
+(defun make-generator (name &optional jump-to-latest)
+  "Make a generator.
+
+If JUMP-TO-LATEST is true,
+then set the point of the generator to the latest page."
+  (let* ((corresponding-book (find-book name))
+         (gen
+           (make-instance
+            'page-generator
+            :series name
+            :page-numbers (mapcar #'second (specificities corresponding-book))
+            :format (book-format corresponding-book))))
+    (when jump-to-latest
+      (latest gen))
+    gen))
