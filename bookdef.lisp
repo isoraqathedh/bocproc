@@ -7,7 +7,6 @@
   "List of files currently in the base directory.")
 
 ;;; Basic objects and accessors
-
 (defclass book-series ()
   ((series
     :type symbol
@@ -102,8 +101,7 @@ with a definite page number."))
                        (error "Not enough page numbers for the book ~a"
                               (series found-page))))))
 
-;;; Formatting a books.
-
+;;; Formatting books and their title.
 (defun normalise-book-format (page fragment &key unknown-values limit)
   "Normalise and compute formatting options."
   (flet ((handle-missing-value ()
