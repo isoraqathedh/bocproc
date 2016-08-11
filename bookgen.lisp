@@ -24,6 +24,7 @@
 
 ;;; Modifying
 
+;; Out-of-bounds correction
 (define-condition spec-out-of-bounds (error)
   ((series
     :reader series
@@ -134,6 +135,8 @@ In this case, the function signals an error."
                              (read))
               value))))))
 
+
+;; Modifying things.
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.
 
