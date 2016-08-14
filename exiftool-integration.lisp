@@ -18,7 +18,7 @@
  ;; Corresponding Exiftool arguments.
  (get :title :exiftool-arg) "Title"
  (get :tags :exiftool-arg) "Subject"
- (get :comment :exiftool-arg) "Comments"
+ (get :comment :exiftool-arg) "Comment"
  (get :date-of-creation :exiftool-arg) "CreateDate"
 
  ;; Some arguments can contain compound values
