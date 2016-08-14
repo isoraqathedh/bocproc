@@ -116,7 +116,7 @@ and then appends each value to the thing."
   (format-exiftool-args
    stream :date-of-creation
    (local-time:format-timestring
-    nil (local-time:now)
+    nil (or (get-page-property page :date-of-creation) (local-time:now))
     :format '((:year 4) #\: (:month 2) #\: (:day 2) #\Space
               (:hour 2) #\: (:min 2) #\: (:sec 2) :gmt-offset)
     :timezone (get-timezone)))

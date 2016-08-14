@@ -105,7 +105,8 @@ The generator will always be set to be at the latest page."
                                   else do (error "Spec ~s is not a number: ~s"
                                                  spec page-number)))))))
     ;; Assign the file
-    (setf (get-page-property instance :file) file)
+    (setf (get-page-property instance :file) file
+          (get-page-property instance :date-of-creation) (local-time:now))
     ;; Grab properties
     (loop for parameter in *processing-parameters*
           for parameter-args = (getf options parameter)
