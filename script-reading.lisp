@@ -157,7 +157,7 @@ The generator will always be set to be at the latest page."
               for parameter-args = (symbol-name-assoc-cdr parameter options)
               when parameter-args
               append (list parameter
-                           (if (get parameter :compound-value)
+                           (if (get parameter 'compound-value)
                                `',parameter-args
                                `',(car parameter-args)))))))
 

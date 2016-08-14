@@ -16,19 +16,19 @@
 ;; but may they'll graduate to full objects or structures.
 (setf
  ;; Corresponding Exiftool arguments.
- (get :title :exiftool-arg) "Title"
- (get :tags :exiftool-arg) "Subject"
- (get :comment :exiftool-arg) "Comment"
- (get :date-of-creation :exiftool-arg) "CreateDate"
+ (get :title 'exiftool-arg) "Title"
+ (get :tags 'exiftool-arg) "Subject"
+ (get :comment 'exiftool-arg) "Comment"
+ (get :date-of-creation 'exiftool-arg) "CreateDate"
 
  ;; Some arguments can contain compound values
  ;; which are represented in list.
  ;; It is useful to have that marked out.
- (get :tags :compound-value) t
+ (get :tags 'compound-value) t
 
  ;; Default values for tags.
- (get :title :default) "Untitled"
- (get :overwritable :default) :overwrite)
+ (get :title 'default) "Untitled"
+ (get :overwritable 'default) :overwrite)
 
 
 ;;; Category determination
@@ -102,13 +102,13 @@ and then appends each value to the thing."
   (if (listp value\(s\))
       ;; A list of values means that appending is needed.
       (loop initially (write-exiftool-argument
-                       stream (get option :exiftool-arg) :set)
+                       stream (get option 'exiftool-arg) :set)
             for i in value\(s\)
             do (write-exiftool-argument
-                stream (get option :exiftool-arg) :append i))
+                stream (get option 'exiftool-arg) :append i))
       ;; else just set it directly
       (write-exiftool-argument
-       stream (get option :exiftool-arg) :set value\(s\))))
+       stream (get option 'exiftool-arg) :set value\(s\))))
 
 (defun %dump-exiftool-args (stream page)
   "Dumps all exiftool args to some stream."
