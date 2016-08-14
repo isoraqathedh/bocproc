@@ -1,3 +1,16 @@
+;;;; Book definitions
+
+#| Defines what a book and its associated page is.
+
+A "page" is simply an arbitrary JPEG file that
+contains (or purports to contain) some conworlding information.
+A "series" is a collection of such pages with a common file name convention.
+This convention typically includes a serial number,
+which due to the physical manifestations of the image files
+have many parts and are better understood as a list of numbers
+rather than just a single number.
+|#
+
 (in-package :bocproc)
 
 (defparameter *series-list* ()
@@ -161,7 +174,6 @@ UNKNOWN-VALUES will control what happens next:
                      page fragment :unknown-values unknown-values
                                    :limit limit) collect it
                  else do (return-from format-page)))))
-
 
 (defun load-directory-contents ()
   (length

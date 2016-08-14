@@ -1,3 +1,16 @@
+;;;; Book page number generator
+
+#| This file deals with calculating page numbers for potential files.
+For this to happen, it uses generators.
+
+Generators here represent movable page numbers.
+They can at any time spawn a static page number using `this',
+or they can destructively alter themselves to nearby pages `next' or `prev'.
+They respect specificity boundaries,
+and attempt to avoid a page number that is either used or ignored.
+They also have their own ignore list, but for the moment it is unused.
+|#
+
 (in-package :bocproc)
 
 (defclass page-generator (book-page)
@@ -136,7 +149,7 @@ In this case, the function signals an error."
               value))))))
 
 
-;; Modifying things.
+;; Actual modification.
 (defgeneric (setf point-specificity) (value gen spec)
   (:documentation "Set the SPEC part of GEN's point to VALUE.
 
@@ -183,7 +196,6 @@ or clamping the values in between the maximum and minimum allowed values.")
       (page-numbers gen))))
 
 ;;; Generating
-
 (defgeneric this (gen)
   (:documentation "Return the page that GEN is pointing to.")
   (:method ((gen page-generator))
@@ -300,6 +312,7 @@ that the ignore list will allow.")
     (setf (locally-ignored gen) ()
           (page-numbers gen) (mapcar #'second (specificities gen)))))
 
+;;; Constructor
 (defun make-generator (name &optional jump-to-latest)
   "Make a generator.
 
