@@ -77,16 +77,40 @@ and invokes the restart RESTART-NAME."
   "Sets *state* to be a fresh new processor."
   (setf *state* (make-instance 'bocproc-state :version version-numbers)))
 
+(defun ensure-generator (name state)
+  "Return a generator for that state, making one if necessary.
+
+The generator will always be set to be at the latest page."
+  (or (find name (generators state) :key #'series)
+      (let ((new-generator (make-generator name t)))
+        (push new-generator (generators state))
+        new-generator)))
+
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
   "Constructs and forms a wandering-page from the arguments."
-  (let ((instance (make-instance 'wandering-page :file file)))
-    (setf (paging-series instance) series
-          (paging-behaviour instance) paging-behaviour)
+  (let (;; Find a generator
+        (generator (ensure-generator series *state*))
+        ;; Make the instance
+        (instance
+          (cond ((eql (car paging-behaviour :next))
+                 (next generator (cadr paging-behaviour))
+                 (this generator))
+                (t
+                 (make-page series
+                            (loop for (spec nil nil) in (specificities generator)
+                                  for page-number = (getf paging-behaviour spec)
+                                  if (numberp page-number)
+                                  collect page-number
+                                  else do (error "Spec ~s is not a number: ~s"
+                                                 spec page-number)))))))
+    ;; Assign the file
+    (setf (get-page-property instance :file) file)
+    ;; Grab properties
     (loop for parameter in *processing-parameters*
           for parameter-args = (getf options parameter)
           when parameter-args
-          do (setf (get-parameter instance parameter)
+          do (setf (get-page-property instance parameter)
                    (getf options parameter)))
     (if *state*
         (push instance (files-to-process *state*))
@@ -113,6 +137,11 @@ and invokes the restart RESTART-NAME."
           :report "Make a new state and overwrite the old one."
           (set-state version-numbers)))
       (set-state version-numbers)))
+
+(defun bpc:next (series spec &optional (amount 1))
+  "Directly increment the specified generator by AMOUNT times."
+  (loop repeat amount
+        do (next (ensure-generator series *state*) spec)))
 
 (defmacro bpc:process-file (file &body options)
   "Thin wrapper around `%process-file',
