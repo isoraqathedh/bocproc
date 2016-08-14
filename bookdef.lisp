@@ -132,9 +132,9 @@ with a definite page number."))
       (list
        (cond
          ((eql (car fragment) :date)
-          (local-time:format-timestring nil (local-time:now)
-                                        :format (cdr fragment)
-                                        :timezone (get-timezone)))
+          (format-timestring nil (now)
+                             :format (cdr fragment)
+                             :timezone (get-timezone)))
          ((find (car fragment) (specificities page) :key #'first)
           (destructuring-bind (spec &key (pad 0) (type :number)) fragment
             (let* ((spec-pos (position spec (specificities page) :key #'first))

@@ -34,8 +34,8 @@ and interprets it as commands. |#
   (setf (exiftool-file instance)
         (uiop:xdg-cache-home
          "bocproc"
-         (local-time:format-timestring
-          nil (local-time:now) :format '((:month 2) (:day 2) (:hour 2))))
+         (format-timestring
+          nil (now) :format '((:month 2) (:day 2) (:hour 2))))
         (generator instance)
         (make-generator (name instance))))
 
@@ -106,7 +106,7 @@ The generator will always be set to be at the latest page."
                                                  spec page-number)))))))
     ;; Assign the file
     (setf (get-page-property instance :file) file
-          (get-page-property instance :date-of-creation) (local-time:now))
+          (get-page-property instance :date-of-creation) (now))
     ;; Grab properties
     (loop for parameter in *processing-parameters*
           for parameter-args = (getf options parameter)
