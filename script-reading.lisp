@@ -194,10 +194,10 @@ The generator will always be set to be at the latest page."
 (defun load-script (bpc-location &optional (new-state-p t))
   "Loads the script from the file."
   (handler-bind ((state-already-there (if new-state-p
-                                          (make-restart-lambda 'continue)
+                                          (continue)
                                           (constantly nil))))
     (let ((*package* (find-package :bpc))
-          (*state* (bpc:version 6))
+          (*state* nil)
           (*config* (load-config-file))
           (*read-eval* nil))
       (load (or bpc-location *standard-input*))
