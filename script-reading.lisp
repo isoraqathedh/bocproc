@@ -169,8 +169,6 @@ The generator will always be set to be at the latest page."
     (dolist (page (files-to-process pages-to-move))
       (let* ((old-name (truename (namestring (get-page-property page :file))))
              (new-name (format-page page :unknown-values :error)))
-        (setf (get-current-page pages-to-move (paging-series page))
-              corresponding-page)
         (when (verbosep pages-to-move)
           (format t "Moving ~s to ~s~%" old-name new-name))
         (ensure-directories-exist new-name :verbose t)
