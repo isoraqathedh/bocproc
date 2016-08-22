@@ -166,13 +166,8 @@ The generator will always be set to be at the latest page."
   (:documentation "Performs a page move to an automatically determined path.")
   (:method ((pages-to-move bocproc-state))
     (dolist (page (files-to-process pages-to-move))
-      (let* ((corresponding-page
-               (construct-book-object (paging-series page)
-                                      (paging-behaviour page)
-                                      (get-current-page pages-to-move
-                                                        (paging-series page))))
-             (old-name (truename (namestring (file page))))
-             (new-name (get-path-with-metadata corresponding-page page)))
+      (let* ((old-name (truename (namestring (get-page-property page :file))))
+             (new-name (format-page page :unknown-values :error)))
         (setf (get-current-page pages-to-move (paging-series page))
               corresponding-page)
         (when (verbosep pages-to-move)
