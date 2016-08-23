@@ -88,28 +88,29 @@ The generator will always be set to be at the latest page."
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
   "Constructs and forms a wandering-page from the arguments."
-  (let (;; Find a generator
-        (generator (ensure-generator series *state*))
-        ;; Make the instance
-        (instance
-          (cond ((eql (car paging-behaviour :next))
-                 (next generator (cadr paging-behaviour))
-                 (this generator))
-                (t
-                 (make-page
-                  series
-                  (loop for (spec nil nil) in (specificities generator)
-                        for page-number = (getf paging-behaviour spec)
-                        if (numberp page-number)
-                        collect page-number
-                        else do (error "Spec ~s is not a number: ~s"
-                                       spec page-number)))))))
+  (let* (;; Find a generator
+         (generator (ensure-generator series *state*))
+         ;; Make the instance
+         (instance
+           (cond ((eql (car paging-behaviour) :next)
+                  (next generator (second paging-behaviour))
+                  (this generator))
+                 (t
+                  (make-page
+                   series
+                   (loop for (spec nil nil) in (specificities generator)
+                         for page-number = (getf paging-behaviour spec)
+                         if (numberp page-number)
+                         collect page-number
+                         else do (error "Spec ~s is not a number: ~s"
+                                        spec page-number)))))))
     ;; Assign the file
     (setf (get-page-property instance :file) file
           (get-page-property instance :date-of-creation) (now))
     ;; Grab properties
     (loop for parameter in *processing-parameters*
-          for parameter-args = (getf options parameter)
+          for parameter-args = (or (getf options parameter)
+                                   (get parameter 'default))
           when parameter-args
           do (setf (get-page-property instance parameter)
                    (getf options parameter)))
@@ -152,7 +153,7 @@ The generator will always be set to be at the latest page."
       (symbol-name-assoc-cdr :paging options)
     `(%process-file
       ,file
-      :series ,series
+      :series (find-symbol (symbol-name ',series) "BOCPROC")
       :paging-behaviour ',paging-behaviour
       ,@(loop for parameter in *processing-parameters*
               for parameter-args = (symbol-name-assoc-cdr parameter options)
@@ -177,7 +178,9 @@ The generator will always be set to be at the latest page."
 (defgeneric run-exiftool (pages-to-move)
   (:documentation "Dumps all arguments to a file and run exiftool with it.")
   (:method ((pages-to-move bocproc-state))
-    (let ((associated-file (exiftool-file pages-to-move)))
+    (let ((associated-file (ensure-directories-exist
+                            (exiftool-file pages-to-move)
+                            :verbose t)))
       (loop for page in (files-to-process pages-to-move)
             for newp = t then nil
             do (dump-exiftool-args associated-file page newp))
@@ -192,7 +195,6 @@ The generator will always be set to be at the latest page."
                                           (constantly nil))))
     (let ((*package* (find-package :bpc))
           (*state* nil)
-          (*config* (load-config-file))
           (*read-eval* nil))
       (load (or bpc-location *standard-input*))
       (setf (files-to-process *state*) (reverse (files-to-process *state*)))
@@ -202,6 +204,7 @@ The generator will always be set to be at the latest page."
 
 (defun main (args)
   "Entry point to bocproc."
+  (setup)
   (load-script
    (or (find "bpc" args :key #'pathname-type :test #'string-equal)
        *standard-input*)))
