@@ -85,6 +85,11 @@ Returns number of files detected, as this can be very large."
   (scan-for-files)
   t)
 
+(defun clear ()
+  "Removes all setup information."
+  (setf *exists-list* ()
+        *series-list* ()))
+
 (defun get-timezone ()
   "Retrieves the timezone as set by the configuration variable."
   ;; Ensure that the timezone repository is read.
