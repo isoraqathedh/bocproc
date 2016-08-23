@@ -62,7 +62,7 @@ with a definite page number."))
       (format stream "~a ~a" (series object) (page-numbers object))
       (loop for k being the hash-keys of properties
             for v being the hash-values of properties
-            do (format stream " ~a ~a" k v)))))
+            do (format stream "~_~s ~s" k v)))))
 
 (defgeneric get-page-property (object name)
   (:documentation "Retrieves the page property from a page object.")
