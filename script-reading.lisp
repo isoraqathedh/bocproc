@@ -97,13 +97,14 @@ The generator will always be set to be at the latest page."
                  (next generator (cadr paging-behaviour))
                  (this generator))
                 (t
-                 (make-page series
-                            (loop for (spec nil nil) in (specificities generator)
-                                  for page-number = (getf paging-behaviour spec)
-                                  if (numberp page-number)
-                                  collect page-number
-                                  else do (error "Spec ~s is not a number: ~s"
-                                                 spec page-number)))))))
+                 (make-page
+                  series
+                  (loop for (spec nil nil) in (specificities generator)
+                        for page-number = (getf paging-behaviour spec)
+                        if (numberp page-number)
+                        collect page-number
+                        else do (error "Spec ~s is not a number: ~s"
+                                       spec page-number)))))))
     ;; Assign the file
     (setf (get-page-property instance :file) file
           (get-page-property instance :date-of-creation) (now))
