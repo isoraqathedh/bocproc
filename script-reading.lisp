@@ -36,9 +36,7 @@ and interprets it as commands. |#
         (uiop:xdg-cache-home
          "bocproc"
          (format-timestring
-          nil (now) :format '((:month 2) (:day 2) (:hour 2))))
-        (generator instance)
-        (make-generator (name instance))))
+          nil (now) :format '((:month 2) (:day 2) (:hour 2))))))
 
 (defgeneric get-current-page (state series)
   (:documentation "Gets the latest accessed page number in the series.")
