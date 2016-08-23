@@ -18,7 +18,8 @@ and interprets it as commands. |#
    (current-page :initform (make-hash-table :test #'equal)
                  :accessor current-page)
    (generator :initarg :generator
-              :accessor generator)
+              :initform nil
+              :accessor generators)
    (exiftool-file :accessor exiftool-file
                   :documentation "Exiftool ARGFILE.")
    (verbose :initform t
