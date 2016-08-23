@@ -199,7 +199,7 @@ or clamping the values in between the maximum and minimum allowed values.")
 (defgeneric this (gen)
   (:documentation "Return the page that GEN is pointing to.")
   (:method ((gen page-generator))
-    (make-page (series gen) (page-numbers gen))))
+    (make-page (series gen) (copy-list (page-numbers gen)))))
 
 (defun find-pattern-in-list (wild-pathname)
   "Find a pathname in *exists-list*, or query the disk if it is empty."
