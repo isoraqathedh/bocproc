@@ -152,15 +152,3 @@ that exiftool can then read again through the -@ option."
                                   :if-exists (if newp :supersede :append)
                                   :external-format :utf-8)
     (%dump-exiftool-args open-file page)))
-
-;;; Genre tagging
-;; Technically not part of exiftool integration
-;; but there's no better place to put it in.
-(defgeneric set-genre (page)
-  (:documentation "Computes and sets the genre property on a given page.")
-  (:method ((page book-page))
-    (setf (get-page-property page :genre)
-          (-> page
-            (get-page-property :tags)
-            tag-manifestations
-            (getf :filename)))))
