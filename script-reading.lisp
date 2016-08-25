@@ -113,7 +113,7 @@ The generator will always be set to be at the latest page."
                                    (get parameter 'default))
           when parameter-args
           do (setf (get-page-property instance parameter)
-                   (getf options parameter)))
+                   parameter-args))
     (set-genre instance)
     (if *state*
         (push instance (files-to-process *state*))
