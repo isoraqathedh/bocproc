@@ -281,13 +281,22 @@ if there is any one page there then all pages are.")
 
 Modifies the generator, returns the new page.")
   (:method ((gen page-generator) (spec symbol))
+    ;; Increment
     (loop do (handler-bind ((spec-out-of-bounds
                               (lambda (condition)
                                 (declare (ignore condition))
                                 (invoke-restart 'carry))))
                (incf (point-specificity gen spec)))
-          until (eql (point-status gen) :available)
-          finally (return gen))))
+          until (eql (point-status gen) :available))
+    ;; Reset lower specificities to their minimum
+    (loop with total-specs = (specificities gen)
+          for (lower-specs nil nil) in total-specs
+          when (< (position spec total-specs :key #'first)
+                  (position lower-specs total-specs :key #'first))
+          do (setf (point-specificity gen lower-specs)
+                   (second (find lower-specs total-specs :key #'first))))
+    ;; Return
+    gen))
 
 (defgeneric prev (gen spec)
   (:documentation "Goes back one page on the generator.
