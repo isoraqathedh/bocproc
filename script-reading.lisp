@@ -173,7 +173,8 @@ The generator will always be set to be at the latest page."
         (when (verbosep pages-to-move)
           (format t "Moving ~s to ~s~%" old-name new-name))
         (ensure-directories-exist new-name :verbose t)
-        (rename-file old-name new-name)))))
+        (rename-file old-name new-name)
+        (push new-name *exists-list*)))))
 
 (defgeneric run-exiftool (pages-to-move)
   (:documentation "Dumps all arguments to a file and run exiftool with it.")
