@@ -189,8 +189,8 @@ The generator will always be set to be at the latest page."
       (delete-file associated-file))))
 
 ;;; Finally, load files
-(defun load-script (bpc-location &optional (new-state-p t))
-  "Loads the script from the file."
+(defun read-script (bpc-location &optional (new-state-p t))
+  "Read the script from the file, but do not do any actions just yet."
   (handler-bind ((state-already-there (if new-state-p
                                           (continue)
                                           (constantly nil))))
@@ -199,9 +199,14 @@ The generator will always be set to be at the latest page."
           (*read-eval* nil))
       (load (or bpc-location *standard-input*))
       (setf (files-to-process *state*) (reverse (files-to-process *state*)))
-      ;; handle stuff here
-      (run-exiftool *state*)
-      (move-pages *state*))))
+      *state*)))
+
+(defun load-script (bpc-location &optional (new-state-p t))
+  "Loads the script from the file."
+  (let ((bocproc-state (read-script bpc-location new-state-p)))
+    ;; handle stuff here
+    (run-exiftool bocproc-state)
+    (move-pages bocproc-state)))
 
 (defun main (args)
   "Entry point to bocproc."
