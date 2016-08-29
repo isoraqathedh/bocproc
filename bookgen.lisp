@@ -18,7 +18,11 @@ They also have their own ignore list, but for the moment it is unused.
     :initform nil
     :initarg :locally-ignored
     :accessor locally-ignored
-    :documentation "A list of page numbers that are locally ignored."))
+    :documentation "A list of page numbers that are locally ignored.")
+   (fresh
+    :initform nil
+    :accessor fresh
+    :documentation "A flag showing whether or not there are no pages filled."))
   (:documentation "A generator of page numbers."))
 
 (defmethod print-object ((object page-generator) stream)
@@ -252,13 +256,16 @@ if there is any one page there then all pages are.")
   (:method ((gen page-generator) spec &aux (failsafe 10000))
     (destructuring-bind (min max) (cdr (assoc spec (specificities gen)))
       (loop with latest-occupied = min
+            with freshp = t
             for i from min to (or max failsafe)
             do (setf (point-specificity gen spec) i)
                (case (point-status gen spec)
                  (:occupied
-                  (setf latest-occupied i))
+                  (setf latest-occupied i
+                        occupiedp nil))
                  (:available
-                  (setf (point-specificity gen spec) latest-occupied)
+                  (setf (point-specificity gen spec) latest-occupied
+                        (fresh gen) freshp)
                   (return gen)))))))
 
 (defgeneric latest (gen)
@@ -268,25 +275,32 @@ if there is any one page there then all pages are.")
           do (latest-spec gen (car i))
           finally (return gen))))
 
+(defun reset-lower-specs (gen spec)
+  "Set every specificity lower than SPEC in GEN to their minimums."
+  (loop with total-specs = (specificities gen)
+        for (lower-specs nil nil) in total-specs
+        when (< (position spec total-specs :key #'first)
+                (position lower-specs total-specs :key #'first))
+        do (setf (point-specificity gen lower-specs)
+                 (second (find lower-specs total-specs :key #'first)))))
+
 (defgeneric next (gen spec)
   (:documentation "Generate a new page using the generator.
 
 Modifies the generator, returns the new page.")
   (:method ((gen page-generator) (spec symbol))
-    ;; Increment
-    (loop do (handler-bind ((spec-out-of-bounds
-                              (lambda (condition)
-                                (declare (ignore condition))
-                                (invoke-restart 'carry))))
-               (incf (point-specificity gen spec)))
-          until (eql (point-status gen) :available))
-    ;; Reset lower specificities to their minimum
-    (loop with total-specs = (specificities gen)
-          for (lower-specs nil nil) in total-specs
-          when (< (position spec total-specs :key #'first)
-                  (position lower-specs total-specs :key #'first))
-          do (setf (point-specificity gen lower-specs)
-                   (second (find lower-specs total-specs :key #'first))))
+    (if (fresh gen)
+        ;; There is no occupation - just clear the flag.
+        (setf (fresh gen) nil)
+        ;; Else, do the increment.
+        (progn
+          (loop do (handler-bind ((spec-out-of-bounds
+                                    (lambda (condition)
+                                      (declare (ignore condition))
+                                      (invoke-restart 'carry))))
+                     (incf (point-specificity gen spec)))
+                until (eql (point-status gen) :available))
+          (reset-lower-specs gen spec)))
     ;; Return
     gen))
 
@@ -301,8 +315,9 @@ should be GENERATOR= to gen.")
                                 (declare (ignore condition))
                                 (invoke-restart 'carry))))
                (decf (point-specificity gen spec)))
-          until (eql (point-status gen) :available)
-          finally (return gen))))
+          until (eql (point-status gen) :available))
+    (reset-lower-specs gen spec)
+    gen))
 
 (defgeneric reset (gen)
   (:documentation "Reset the generator.
