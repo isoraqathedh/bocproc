@@ -262,7 +262,7 @@ if there is any one page there then all pages are.")
                (case (point-status gen spec)
                  (:occupied
                   (setf latest-occupied i
-                        occupiedp nil))
+                        freshp nil))
                  (:available
                   (setf (point-specificity gen spec) latest-occupied
                         (fresh gen) freshp)
