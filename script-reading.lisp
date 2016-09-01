@@ -153,7 +153,7 @@ The generator will always be set to be at the latest page."
       (symbol-name-assoc-cdr :paging options)
     `(%process-file
       ,file
-      :series (find-symbol (symbol-name ',series) "BOCPROC")
+      :series (find-symbol (symbol-name ',series) "BPC")
       :paging-behaviour ',paging-behaviour
       ,@(loop for parameter in *processing-parameters*
               for parameter-args = (symbol-name-assoc-cdr parameter options)
