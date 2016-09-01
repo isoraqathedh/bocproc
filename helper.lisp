@@ -90,7 +90,8 @@ Returns number of files detected, as this can be very large."
 (defun clear ()
   "Removes all setup information."
   (setf *exists-list* ()
-        *series-list* ()))
+        *series-list* ()
+        *config* ()))
 
 (defun get-timezone ()
   "Retrieves the timezone as set by the configuration variable."
