@@ -36,7 +36,7 @@
   "Finds the tag plist relating to the given tag."
   (with-expression-threading () *config*
     (assoc :tags :||) #'cdr
-    (assoc tag :|| :test #'string=) #'cdr))
+    (assoc tag :||) #'cdr))
 
 (defun genre (tags)
   "Finds the genre/type of all the tags given."
@@ -78,7 +78,7 @@ which it then returns. If all of them return nil, then nil is returned."
                 (-> a tag-type (getf :type) (eql :special)))
               tags)))
        (if (= 1 (length tags-less-specials))
-           (first tags-less-specials)
+           (funcall (get-name-variants :symbol) (first tags-less-specials))
            filename)))))
 
 ;;; Make argument:
