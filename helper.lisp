@@ -47,9 +47,11 @@ and NAME and TYPE is as in `make-pathname'."
 (defun load-config-file ()
   "Reads the config file into *config*."
   (with-open-file (s *config-file* :external-format :utf-8)
-    (setf *config*
-          (let ((*package* (find-package '#:bocproc)))
-            (read s)))
+    (let ((*package* (find-package '#:bpc)))
+      (setf *config* (read s))
+      (loop for i in (append (cdr (assoc :tags *config*))
+                             (cdr (assoc :books *config*)))
+            do (export (car i))))
     (loop for (name specs . format) in (cdr (assoc :books *config*))
           do (define-book% name format specs))))
 
