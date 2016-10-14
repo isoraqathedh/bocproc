@@ -4,7 +4,7 @@
   :description "Processing incoming scans"
   :author "Isoraķatheð Zorethan <isoraqathedh.zorethan@gmail.com>"
   :license "MIT"
-  :depends-on (#:local-time #:thread-expr #:alexandria)
+  :depends-on (#:local-time #:thread-expr #:alexandria #:humbler)
   :serial t
   :components ((:file "package")
                (:file "helper")
