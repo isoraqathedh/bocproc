@@ -188,6 +188,34 @@ The generator will always be set to be at the latest page."
       (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
       (delete-file associated-file))))
 
+(defgeneric post-to-tumblr (pages-to-move)
+  (:documentation "Post all the marked images to Tumblr.")
+  (:method ((pages-to-move bocproc-state))
+    (dolist (page (files-to-process pages-to-move))
+      (when (get-page-property page :tumblr)
+        (setf (get-page-property page :image-url)
+              ;; Save the URL that was produced, for later.
+              (humbler:url
+               (humbler:post
+                (humbler:blog/post-photo
+                 ;; The actual "post a photo" bit
+                 (cdr (assoc :blog *config*))
+                 (get-page-property page :file)
+                 :state :queue
+                 :caption (get-page-property page :comment)
+                 :tags (-> page
+                         (get-page-property :tags)
+                         tag-manifestations
+                         (getf :tumblr))))))
+        (when (verbosep pages-to-move)
+          (format t "Posted ~s to Tumblr with URL ~s~%"
+                  (get-page-property page :file)
+                  (get-page-property page :image-url)))))))
+
+(defgeneric dump-URLs (pages-to-move)
+  (:documentation "Dump the URLs that are posted on Tumblr to some file.")
+  (:method ((pages-to-move bocproc-state))))
+
 ;;; Finally, load files
 (defun read-script (bpc-location &optional (new-state-p t))
   "Read the script from the file, but do not do any actions just yet."

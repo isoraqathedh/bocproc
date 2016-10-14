@@ -44,8 +44,12 @@ and NAME and TYPE is as in `make-pathname'."
   (when (and number (<= 1 number 26))
     (char +alphabet+ (1- number))))
 
+(defun token (token-key)
+  "Retrieve the token named TOKEN-KEY."
+  (getf (cdr (assoc :tokens *config*)) token-key))
+
 (defun load-config-file ()
-  "Reads the config file into *config*."
+  "Read the config file into *config*, and set up external variables."
   (with-open-file (s *config-file* :external-format :utf-8)
     (let ((*package* (find-package '#:bpc)))
       (setf *config* (read s))
@@ -53,7 +57,12 @@ and NAME and TYPE is as in `make-pathname'."
                              (cdr (assoc :books *config*)))
             do (export (car i))))
     (loop for (name specs . format) in (cdr (assoc :books *config*))
-          do (define-book% name format specs))))
+          do (define-book% name format specs))
+    (setf south:*oauth-api-key*       (token :tumblr-api-key)
+          south:*oauth-api-secret*    (token :tumblr-api-sec)
+          south:*oauth-access-token*  (token :tumblr-oauth-acc-key)
+          south:*oauth-access-secret* (token :tumblr-oauth-acc-sec)
+          humblr:*user*               (humbler:myself))))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
@@ -91,7 +100,11 @@ Returns number of files detected, as this can be very large."
   "Removes all setup information."
   (setf *exists-list* ()
         *series-list* ()
-        *config* ()))
+        *config* ()
+        south:*oauth-api-key* nil
+        south:*oauth-api-secret* nil
+        south:*oauth-access-token* nil
+        south:*oauth-access-secret* nil))
 
 (defun get-timezone ()
   "Retrieves the timezone as set by the configuration variable."
