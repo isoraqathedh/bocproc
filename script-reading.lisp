@@ -164,17 +164,17 @@ The generator will always be set to be at the latest page."
                                `',(car parameter-args)))))))
 
 ;;; Processing facilities
-(defmacro define-action-all (name &body body &aux doc)
+(defmacro define-action-all (name (&optional (arg (gensym)))
+                             &body body &aux doc)
   "Specifies what to do with the completely parsed bocproc form."
   ;; Docstring handling
   (when (stringp (first body))
     (setf doc (pop body)))
   ;; Template
-  (alexandria:with-gensyms (pages-to-move^)
-    `(defgeneric ,name (,pages-to-move^)
-       ,@(when doc `((:documentation ,doc)))
-       (:method ((,pages-to-move^ bocproc-state))
-         ,@body))))
+  `(defgeneric ,name (,arg)
+     ,@(when doc `((:documentation ,doc)))
+     (:method ((,arg bocproc-state))
+       ,@body)))
 
 (defmacro define-action (name page &body body &aux doc)
   "Specify an action to do for every page in a completely parsed bocproc form."
@@ -197,7 +197,7 @@ The generator will always be set to be at the latest page."
     (rename-file old-name new-name)
     (push new-name *exists-list*)))
 
-(define-action-all run-exiftool
+(define-action-all run-exiftool (pages-to-move)
   "Dumps all arguments to a file and run exiftool with it."
   (let ((associated-file (ensure-directories-exist
                           (exiftool-file pages-to-move)
@@ -230,9 +230,16 @@ The generator will always be set to be at the latest page."
               (get-page-property page :file)
               (get-page-property page :image-url)))))
 
-(defgeneric dump-URLs (pages-to-move)
-  (:documentation "Dump the URLs that are posted on Tumblr to some file.")
-  (:method ((pages-to-move bocproc-state))))
+(define-action-all dump-URLs (pages-to-move)
+  "Dump the URLs that are posted on Tumblr to some file."
+  (with-open-file (dump-file (cdr (assoc :dump-file *config))
+                             :direction :output
+                             :external-foramt :utf-8
+                             :if-does-not-exist :create
+                             :if-exists :overwrite)
+    (dolist (page (files-to-process pages-to-move))
+      (when (get-page-property page :image-url)
+        (format dump-file "~a~%" (get-property page :image-url))))))
 
 ;;; Finally, load files
 (defun read-script (bpc-location &optional (new-state-p t))
