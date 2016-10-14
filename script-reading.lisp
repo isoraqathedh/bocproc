@@ -164,53 +164,71 @@ The generator will always be set to be at the latest page."
                                `',(car parameter-args)))))))
 
 ;;; Processing facilities
-(defgeneric move-pages (pages-to-move)
-  (:documentation "Performs a page move to an automatically determined path.")
-  (:method ((pages-to-move bocproc-state))
-    (dolist (page (files-to-process pages-to-move))
-      (let* ((old-name (truename (namestring (get-page-property page :file))))
-             (new-name (format-page page :unknown-values :error)))
-        (when (verbosep pages-to-move)
-          (format t "Moving ~s to ~s~%" old-name new-name))
-        (ensure-directories-exist new-name :verbose t)
-        (rename-file old-name new-name)
-        (push new-name *exists-list*)))))
+(defmacro define-action-all (name &body body &aux doc)
+  "Specifies what to do with the completely parsed bocproc form."
+  ;; Docstring handling
+  (when (stringp (first body))
+    (setf doc (pop body)))
+  ;; Template
+  (alexandria:with-gensyms (pages-to-move^)
+    `(defgeneric ,name (,pages-to-move^)
+       ,@(when doc `((:documentation ,doc)))
+       (:method ((,pages-to-move^ bocproc-state))
+         ,@body))))
 
-(defgeneric run-exiftool (pages-to-move)
-  (:documentation "Dumps all arguments to a file and run exiftool with it.")
-  (:method ((pages-to-move bocproc-state))
-    (let ((associated-file (ensure-directories-exist
-                            (exiftool-file pages-to-move)
-                            :verbose t)))
-      (loop for page in (files-to-process pages-to-move)
-            for newp = t then nil
-            do (dump-exiftool-args associated-file page newp))
-      (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
-      (delete-file associated-file))))
+(defmacro define-action (name page &body body &aux doc)
+  "Specify an action to do for every page in a completely parsed bocproc form."
+  ;; Docstring handling
+  (when (stringp (first body))
+    (setf doc (pop body)))
+  (alexandria:with-gensyms (pages-to-move^)
+    `(define-action-all ,name
+       ,doc
+       (dolist (,page (files-to-process ,pages-to-move^))
+         ,@body))))
 
-(defgeneric post-to-tumblr (pages-to-move)
-  (:documentation "Post all the marked images to Tumblr.")
-  (:method ((pages-to-move bocproc-state))
-    (dolist (page (files-to-process pages-to-move))
-      (when (get-page-property page :tumblr)
-        (setf (get-page-property page :image-url)
-              ;; Save the URL that was produced, for later.
-              (humbler:url
-               (humbler:post
-                (humbler:blog/post-photo
-                 ;; The actual "post a photo" bit
-                 (cdr (assoc :blog *config*))
-                 (get-page-property page :file)
-                 :state :queue
-                 :caption (get-page-property page :comment)
-                 :tags (-> page
-                         (get-page-property :tags)
-                         tag-manifestations
-                         (getf :tumblr))))))
-        (when (verbosep pages-to-move)
-          (format t "Posted ~s to Tumblr with URL ~s~%"
-                  (get-page-property page :file)
-                  (get-page-property page :image-url)))))))
+(define-action move-pages page
+  "Performs a page move to an automatically determined path."
+  (let* ((old-name (truename (namestring (get-page-property page :file))))
+         (new-name (format-page page :unknown-values :error)))
+    (when (verbosep pages-to-move)
+      (format t "Moving ~s to ~s~%" old-name new-name))
+    (ensure-directories-exist new-name :verbose t)
+    (rename-file old-name new-name)
+    (push new-name *exists-list*)))
+
+(define-action-all run-exiftool
+  "Dumps all arguments to a file and run exiftool with it."
+  (let ((associated-file (ensure-directories-exist
+                          (exiftool-file pages-to-move)
+                          :verbose t)))
+    (loop for page in (files-to-process pages-to-move)
+          for newp = t then nil
+          do (dump-exiftool-args associated-file page newp))
+    (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
+    (delete-file associated-file)))
+
+(define-action post-to-tumblr page
+  "Post all the marked images to Tumblr."
+  (when (get-page-property page :tumblr)
+    (setf (get-page-property page :image-url)
+          ;; Save the URL that was produced, for later.
+          (humbler:url
+           (humbler:post
+            (humbler:blog/post-photo
+             ;; The actual "post a photo" bit
+             (cdr (assoc :blog *config*))
+             (get-page-property page :file)
+             :state :queue
+             :caption (get-page-property page :comment)
+             :tags (-> page
+                     (get-page-property :tags)
+                     tag-manifestations
+                     (getf :tumblr))))))
+    (when (verbosep pages-to-move)
+      (format t "Posted ~s to Tumblr with URL ~s~%"
+              (get-page-property page :file)
+              (get-page-property page :image-url)))))
 
 (defgeneric dump-URLs (pages-to-move)
   (:documentation "Dump the URLs that are posted on Tumblr to some file.")
