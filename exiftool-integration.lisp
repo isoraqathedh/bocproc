@@ -7,7 +7,7 @@
 
 ;;; Parameters
 (defparameter *processing-parameters*
-  '(:title :tags :comment :overwritable #|:rotate :crop|#)
+  '(:title :tags :comment :overwritable :tumblr #|:rotate :crop|#)
   "List of currently active tags.")
 
 ;; Each processing parameter has a handful of details
