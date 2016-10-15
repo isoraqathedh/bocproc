@@ -217,14 +217,15 @@ The generator will always be set to be at the latest page."
            (humbler:post
             (humbler:blog/post-photo
              ;; The actual "post a photo" bit
-             (cdr (assoc :blog *config*))
-             (get-page-property page :file)
+             (config :blog)
+             (pathname (get-page-property page :file))
              :state :queue
              :caption (get-page-property page :comment)
              :tags (-> page
                      (get-page-property :tags)
                      tag-manifestations
-                     (getf :tumblr))))))
+                     (getf :tumblr)))
+            (config :blog))))
     (when (verbosep pages-to-move)
       (format t "Posted ~s to Tumblr with URL ~s~%"
               (get-page-property page :file)

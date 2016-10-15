@@ -44,25 +44,29 @@ and NAME and TYPE is as in `make-pathname'."
   (when (and number (<= 1 number 26))
     (char +alphabet+ (1- number))))
 
+(defun config (key)
+  "Retrieve KEY from the config."
+  (cdr (assoc key *config*)))
+
 (defun token (token-key)
   "Retrieve the token named TOKEN-KEY."
-  (getf (cdr (assoc :tokens *config*)) token-key))
+  (getf (config :tokens) token-key))
 
 (defun load-config-file ()
   "Read the config file into *config*, and set up external variables."
   (with-open-file (s *config-file* :external-format :utf-8)
     (let ((*package* (find-package '#:bpc)))
       (setf *config* (read s))
-      (loop for i in (append (cdr (assoc :tags *config*))
-                             (cdr (assoc :books *config*)))
+      (loop for i in (append (config :tags)
+                             (config :books))
             do (export (car i))))
-    (loop for (name specs . format) in (cdr (assoc :books *config*))
+    (loop for (name specs . format) in (config :books)
           do (define-book% name format specs))
     (setf south:*oauth-api-key*       (token :tumblr-api-key)
           south:*oauth-api-secret*    (token :tumblr-api-sec)
           south:*oauth-access-token*  (token :tumblr-oauth-acc-key)
           south:*oauth-access-secret* (token :tumblr-oauth-acc-sec)
-          humblr:*user*               (humbler:myself))))
+          humbler:*user*              (humbler:myself))))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
@@ -113,7 +117,6 @@ Returns number of files detected, as this can be very large."
     (reread-timezone-repository))
   ;; Now get the timezone.
   (with-expression-threading ()
-    *config*
-    (assoc :timezone :||)
-    #'cdr
+    :timezone
+    #'config
     #'find-timezone-by-location-name))
