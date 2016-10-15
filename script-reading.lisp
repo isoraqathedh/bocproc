@@ -176,18 +176,18 @@ The generator will always be set to be at the latest page."
      (:method ((,arg bocproc-state))
        ,@body)))
 
-(defmacro define-action (name page &body body &aux doc)
+(defmacro define-action (name (page &optional (arg (gensym)))
+                         &body body &aux doc)
   "Specify an action to do for every page in a completely parsed bocproc form."
   ;; Docstring handling
   (when (stringp (first body))
     (setf doc (pop body)))
-  (alexandria:with-gensyms (pages-to-move^)
-    `(define-action-all ,name
-       ,doc
-       (dolist (,page (files-to-process ,pages-to-move^))
-         ,@body))))
+  `(define-action-all ,name (,arg)
+     ,doc
+     (dolist (,page (files-to-process ,arg))
+       ,@body)))
 
-(define-action move-pages page
+(define-action move-pages (page pages-to-move)
   "Performs a page move to an automatically determined path."
   (let* ((old-name (truename (namestring (get-page-property page :file))))
          (new-name (format-page page :unknown-values :error)))
@@ -208,7 +208,7 @@ The generator will always be set to be at the latest page."
     (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
     (delete-file associated-file)))
 
-(define-action post-to-tumblr page
+(define-action post-to-tumblr (page pages-to-move)
   "Post all the marked images to Tumblr."
   (when (get-page-property page :tumblr)
     (setf (get-page-property page :image-url)
