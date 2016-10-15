@@ -233,14 +233,14 @@ The generator will always be set to be at the latest page."
 
 (define-action-all dump-URLs (pages-to-move)
   "Dump the URLs that are posted on Tumblr to some file."
-  (with-open-file (dump-file (cdr (assoc :dump-file *config))
+  (with-open-file (dump-file (config :dump-file)
                              :direction :output
-                             :external-foramt :utf-8
+                             :external-format :utf-8
                              :if-does-not-exist :create
                              :if-exists :overwrite)
     (dolist (page (files-to-process pages-to-move))
       (when (get-page-property page :image-url)
-        (format dump-file "~a~%" (get-property page :image-url))))))
+        (format dump-file "~a~%" (get-page-property page :image-url))))))
 
 ;;; Finally, load files
 (defun read-script (bpc-location &optional (new-state-p t))
@@ -259,8 +259,11 @@ The generator will always be set to be at the latest page."
   "Loads the script from the file."
   (let ((bocproc-state (read-script bpc-location new-state-p)))
     ;; handle stuff here
-    (run-exiftool bocproc-state)
-    (move-pages bocproc-state)))
+    (dolist (action (list #'run-exiftool
+                          #'post-to-tumblr
+                          #'dump-URLs
+                          #'move-pages))
+      (funcall action bocproc-state))))
 
 (defun main (args)
   "Entry point to bocproc."
