@@ -225,6 +225,7 @@ The generator will always be set to be at the latest page."
             ;; Retrieve the blog object after it's been posted
             (humbler:post (config :blog))
             humbler:photos
+            first ; Take only the first photo
             humbler:sizes
             first ; The first size is the original size
             humbler:url))
