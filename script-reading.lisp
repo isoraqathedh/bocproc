@@ -212,20 +212,22 @@ The generator will always be set to be at the latest page."
   "Post all the marked images to Tumblr."
   (when (get-page-property page :tumblr)
     (setf (get-page-property page :image-url)
-          ;; Save the URL that was produced, for later.
-          (humbler:url
-           (humbler:post
-            (humbler:blog/post-photo
-             ;; The actual "post a photo" bit
-             (config :blog)
-             (pathname (get-page-property page :file))
-             :state :queue
-             :caption (get-page-property page :comment)
-             :tags (-> page
-                     (get-page-property :tags)
-                     tag-manifestations
-                     (getf :tumblr)))
-            (config :blog))))
+          (-> (humbler:blog/post-photo
+               ;; The actual "post a photo" bit
+               (config :blog)
+               (pathname (get-page-property page :file))
+               :state :queue
+               :caption (get-page-property page :comment)
+               :tags (-> page
+                       (get-page-property :tags)
+                       tag-manifestations
+                       (getf :tumblr)))
+            ;; Retrieve the blog object after it's been posted
+            (humbler:post (config :blog))
+            humbler:photos
+            humbler:sizes
+            first ; The first size is the original size
+            humbler:url))
     (when (verbosep pages-to-move)
       (format t "Posted ~s to Tumblr with URL ~s~%"
               (get-page-property page :file)
