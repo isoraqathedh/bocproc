@@ -124,7 +124,4 @@ Returns number of files detected, as this can be very large."
   (when (zerop (hash-table-count local-time::*location-name->timezone*))
     (reread-timezone-repository))
   ;; Now get the timezone.
-  (with-expression-threading ()
-    :timezone
-    #'config
-    #'find-timezone-by-location-name))
+  (-> :timezone config find-timezone-by-location-name))
