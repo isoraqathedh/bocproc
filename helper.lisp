@@ -59,14 +59,20 @@ and NAME and TYPE is as in `make-pathname'."
       (setf *config* (read s))
       (loop for i in (append (config :tags)
                              (config :books))
-            do (export (car i))))
-    (loop for (name specs . format) in (config :books)
-          do (define-book% name format specs))
-    (setf south:*oauth-api-key*       (token :tumblr-api-key)
-          south:*oauth-api-secret*    (token :tumblr-api-sec)
-          south:*oauth-access-token*  (token :tumblr-oauth-acc-key)
-          south:*oauth-access-secret* (token :tumblr-oauth-acc-sec)
-          humbler:*user*              (humbler:myself))))
+            do (export (car i))))))
+
+(defun create-book-definitions ()
+  "Make the book definitions as in *config*."
+  (loop for (name specs . format) in (config :books)
+        do (define-book% name format specs)))
+
+(defun log-in-to-tumblr ()
+  "Log in to tumblr by setting access keys and the user object."
+  (setf south:*oauth-api-key*       (token :tumblr-api-key)
+        south:*oauth-api-secret*    (token :tumblr-api-sec)
+        south:*oauth-access-token*  (token :tumblr-oauth-acc-key)
+        south:*oauth-access-secret* (token :tumblr-oauth-acc-sec)
+        humbler:*user*              (humbler:myself)))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
@@ -96,6 +102,8 @@ Returns number of files detected, as this can be very large."
 (defun setup ()
   "Runs the functions that read configuration files."
   (load-config-file)
+  (create-book-definitions)
+  (log-in-to-tumblr)
   (reread-timezone-repository)
   (scan-for-files)
   t)
