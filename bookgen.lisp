@@ -254,7 +254,7 @@ if there is any one page there then all pages are.")
 (defgeneric latest-spec (gen spec)
   (:documentation "Finds the largest occupied value in spec.")
   (:method ((gen page-generator) spec &aux (failsafe 10000))
-    (destructuring-bind (min max) (cdr (assoc spec (specificities gen)))
+    (destructuring-bind (min max) (aget spec (specificities gen))
       (loop with latest-occupied = min
             with freshp = t
             for i from min to (or max failsafe)

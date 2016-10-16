@@ -5,6 +5,8 @@
   (:nicknames #:bocproc)
   (:export #:main #:load-script #:load-config-file))
 
+(import 'humbler::aget '#:bocproc)
+
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
   (:export #:version #:process-file #:next)

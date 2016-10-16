@@ -34,10 +34,7 @@
 ;;; Category determination
 (defun tag-type (tag)
   "Finds the tag plist relating to the given tag."
-  (with-expression-threading ()
-    :tags
-    #'config
-    (assoc tag :||) #'cdr))
+  (aget tag (config :tags)))
 
 (defun genre (tags)
   "Finds the genre/type of all the tags given."
@@ -60,9 +57,7 @@ which it then returns. If all of them return nil, then nil is returned."
 (defun tag-manifestations (tags)
   "Computes the exact tag combination for all tags in the list."
   (destructuring-bind (&key metadata tumblr filename)
-      (with-expression-threading () :tag-props
-        #'config
-        (assoc (genre tags) :||) #'cdr)
+      (aget (genre tags) (config :tag-props))
     (list
      :metadata
      (cons metadata

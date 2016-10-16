@@ -46,7 +46,7 @@ and NAME and TYPE is as in `make-pathname'."
 
 (defun config (key)
   "Retrieve KEY from the config."
-  (cdr (assoc key *config*)))
+  (aget key *config*))
 
 (defun token (token-key)
   "Retrieve the token named TOKEN-KEY."
