@@ -26,7 +26,7 @@ Currently there are four series:
 
 Typically, pages doesn't just have one page number,
 they have multiple page numbers.
-For instance, a certain page might have page number `#(1 5 6)`,
+For instance, a certain page might have page number `(1 5 6)`,
 which means that it is part 1, subpart 5, sub-subpart 6.
 
 In order to identify them, each number also has a name attached to it.
@@ -48,6 +48,7 @@ Example:
 
     (version 6)
 
+<!--
 # Verbosity #
 
 Lambda list: `LOUD (&OPTIONAL ON-OFF)`
@@ -60,6 +61,7 @@ Otherwise, it is turned off if `nil`, and on if non-`nil`.
 
 Additionally, if verbosity is turned on,
 execution is paused for two seconds at the end to allow reading of the output.
+-->
 
 # Single file processing #
 
@@ -107,6 +109,15 @@ Currently there are the following options.
   Names a list of tags understood by their short names in the config file.
   Ensures that the `Subject` metadata field on the file is set to those values.
   Existing metadata might be overwritten.
+* `(:TUMBLR TUMBLR-P)`
+  Determines whether or not this particular image should be posted to Tumblr.
+  Tumblr-p should be either T (for posting) or NIL (for not-posting).
+  In the future this may accept other symbols
+  that allow for the creation of photo sets.
+  
+  If this option is enabled,
+  additionally dump the URLs that the copies live in to a file indicated by the config option
+  `:dump-file` in a special (idiosyncratic) format.  
 
 Example:
 
@@ -117,9 +128,7 @@ Example:
       (:tags "EP" "SX" "RSGN")
       (:rotate 90)
       (:crop 15 15 -120 -120)
-      (:export-to
-        (:csv "~/path/to/output.csv")
-        (:tumblr)))
+      (:tumblr t))
 
 Future options:
 
@@ -143,37 +152,7 @@ Future options:
   then those two are specified from the bottom-right corner.
   Can be restricted to multiples of 8 or 16
   to ensure lossless rotation.
-* `(:EXPORT-TO &REST EXPORT-DESTINATIONS)`:
-  This option enables sending processing results to other places.
-  Each destination has its own parameters and identifying keyword.
-  They are:
-  * `(:CSV CSV-FILENAME)`:
-
-    *scheduled for version 6.1*
-
-    Writes a CSV file to CSV-FILENAME.
-    This will, for each file, write the following values to its own line,
-    in this order:
-    * Page numbers, separated by pipes.
-    * Title
-    * Comment
-    * An image URL, if `TUMBLR` is present.
-
-  * `(:TUMBLR)`:
-
-    *scheduled for version 7, if at all*
-
-    If present, posts to Tumblr via Humbler.
-  * `(:IMGUR)`:
-
-    *scheduled for version 7, if at all*
-
-    If present, posts the image to Imgur,
-    potentially in an album if many are processed at the same time.
-
-Sending posts to internet services is not at all easy,
-and those options may not be implemented at all.
-
+  
 ## Other commands ##
 
 None of these commands are planned out into the program yet,
