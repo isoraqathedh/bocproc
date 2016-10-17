@@ -105,7 +105,7 @@ The generator will always be set to be at the latest page."
                          else do (error "Spec ~s is not a number: ~s"
                                         spec page-number)))))))
     ;; Assign the file
-    (setf (get-page-property instance :file) file
+    (setf (get-page-property instance :file) (pathname file)
           (get-page-property instance :date-of-creation) (now))
     ;; Grab properties
     (loop for parameter in *processing-parameters*
@@ -215,7 +215,7 @@ The generator will always be set to be at the latest page."
           (-> (humbler:blog/post-photo
                ;; The actual "post a photo" bit
                (config :blog)
-               (pathname (get-page-property page :file))
+               (get-page-property page :file)
                :state :queue
                :caption (get-page-property page :comment)
                :tags (-> page
