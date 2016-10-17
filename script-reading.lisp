@@ -107,6 +107,8 @@ The generator will always be set to be at the latest page."
     ;; Assign the file
     (setf (get-page-property instance :file) (pathname file)
           (get-page-property instance :date-of-creation) (now))
+    (unless (probe-file (pathname file))
+      (error "File not found: ~s" file))
     ;; Grab properties
     (loop for parameter in *processing-parameters*
           for parameter-args = (or (getf options parameter)
