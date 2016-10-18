@@ -195,7 +195,7 @@ The generator will always be set to be at the latest page."
          (new-name (format-page page :unknown-values :error)))
     (when (verbosep pages-to-move)
       (format t "Moving ~s to ~s~%" old-name new-name))
-    (ensure-directories-exist new-name :verbose t)
+    (ensure-directories-exist new-name :verbose (verbosep pages-to-move))
     (rename-file old-name new-name)
     (push new-name *exists-list*)))
 
