@@ -273,7 +273,13 @@ The generator will always be set to be at the latest page."
 
 (defun main (args)
   "Entry point to bocproc."
-  (setup)
-  (load-script
-   (or (find "bpc" args :key #'pathname-type :test #'string-equal)
-       *standard-input*)))
+  ;; This should only be run non-interactively
+  ;; (i.e. as a shell script entry point.)
+  ;; If you run this interactively, you might break Lisp
+  ;; Because it automatically kills the image if *any* errors show up.
+  (handler-bind ((error (lambda (condition)
+                          (uiop:die 1 "Error: ~a" condition))))
+    (setup)
+    (load-script
+     (or (find "bpc" args :key #'pathname-type :test #'string-equal)
+         *standard-input*))))
