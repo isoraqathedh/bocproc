@@ -115,9 +115,12 @@ Currently there are the following options.
   In the future this may accept other symbols
   that allow for the creation of photo sets.
   
+  Posting will use the `:COMMENT` and `:TAGS` field as well,
+  to provide the caption and the tags respectively.
+  
   If this option is enabled,
   additionally dump the URLs that the copies live in to a file indicated by the config option
-  `:dump-file` in a special (idiosyncratic) format.  
+  `:dump-file` in a special (idiosyncratic) format.
 
 Example:
 
@@ -134,8 +137,6 @@ Future options:
 
 * `(:ROTATE ROTATE-SPEC)`:
 
-  *scheduled for version 6.1*
-
   The image must be rotated according to `ROTATE-SPEC`.
   `ROTATE-SPEC` must be one of the following:
       * No rotation: nil
@@ -143,8 +144,6 @@ Future options:
       * 180°: 180, U
       * 90° anticlockwise: -90, 270, CCW, L
 * `(:CROP TOP-LEFT-X TOP-LEFT-Y BOTTOM-RIGHT-X BOTTOM-RIGHT-Y)`:
-
-  *scheduled for version 6.2*
 
   Specifies that the image should be cropped using the coordinates provided.
   All numbers should be specified in pixels, measured from the top-left corner
@@ -172,3 +171,8 @@ by placing it into the ignore list in the configuration file.
 lambda-list: `ADD-TAG (TAG-SHORT-NAME &KEY NAME &ALLOW-OTHER-KEYS)`
 
 Adds a tag to the configuration file.
+
+### Multiple posting ###
+
+Lambda-list `POST-TO-TUMBLR (&OPTIONAL COMMENT &REST NAMES)`
+
