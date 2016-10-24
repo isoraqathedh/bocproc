@@ -78,9 +78,25 @@ The generator will always be set to be at the latest page."
         (push new-generator (generators state))
         new-generator)))
 
+(defun ensure-state ()
+  "Ensures that a state is in *state*. Errors otherwise."
+  (unless *state*
+    (restart-case (error 'state-not-there)
+      (make-state (version-numbers)
+        :report "Set up a state."
+        :interactive (lambda ()
+                       (format *query-io* "A list of version numbers: ")
+                       (let ((test-version (read)))
+                         (assert (every #'numberp test-version)
+                                 (test-version)
+                                 "Must be a list of numbers.")
+                         test-version))
+        (set-state version-numbers)))))
+
 (defun %process-file (file &rest options
                       &key series paging-behaviour &allow-other-keys)
   "Constructs and forms a wandering-page from the arguments."
+  (ensure-state)
   (let* (;; Find a generator
          (generator (ensure-generator series *state*))
          ;; Make the instance
@@ -110,19 +126,7 @@ The generator will always be set to be at the latest page."
           do (setf (get-page-property instance parameter)
                    parameter-args))
     (set-genre instance)
-    (if *state*
-        (push instance (files-to-process *state*))
-        (restart-case (error 'state-not-there)
-          (make-state (version-numbers)
-            :report "Set up a state."
-            :interactive (lambda ()
-                           (format *query-io* "A list of version numbers: ")
-                           (let ((test-version (read)))
-                             (assert (every #'numberp test-version)
-                                     (test-version)
-                                     "Must be a list of numbers.")
-                             test-version))
-            (set-state version-numbers))))))
+    (push instance (files-to-process *state*))))
 
 ;;; The functions that the processor understands.
 (defun bpc:version (&rest version-numbers)
