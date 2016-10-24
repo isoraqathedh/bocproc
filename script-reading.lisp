@@ -64,13 +64,6 @@ and interprets it as commands. |#
   (:documentation
    "Error indicating that there is no processor currently active."))
 
-(defun make-restart-lambda (restart-name)
-  "Creates a lambda function that that takes in one argument, ignores it,
-and invokes the restart RESTART-NAME."
-  (lambda (condition)
-    (declare (ignore condition))
-    (invoke-restart restart-name)))
-
 ;;; Utility functions for processing the script, not exported
 (defun set-state (version-numbers)
   "Sets *state* to be a fresh new processor."

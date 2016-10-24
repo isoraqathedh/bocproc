@@ -304,21 +304,6 @@ Modifies the generator, returns the new page.")
     ;; Return
     gen))
 
-(defgeneric prev (gen spec)
-  (:documentation "Goes back one page on the generator.
-
-Defined so that (next (prev gen)) or (prev (next gen))
-should be GENERATOR= to gen.")
-  (:method ((gen page-generator) (spec symbol))
-    (loop do (handler-bind ((spec-out-of-bounds
-                              (lambda (condition)
-                                (declare (ignore condition))
-                                (invoke-restart 'carry))))
-               (decf (point-specificity gen spec)))
-          until (eql (point-status gen) :available))
-    (reset-lower-specs gen spec)
-    gen))
-
 (defgeneric reset (gen)
   (:documentation "Reset the generator.
 
