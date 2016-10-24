@@ -1,5 +1,6 @@
 (in-package :bocproc)
 
+;;; Variables
 (defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz"
   ;; It's actually a constant
   ;; but using defvar makes redefinition warnings makes the errors go away.
@@ -34,6 +35,7 @@ and NAME and TYPE is as in `make-pathname'."
 (defparameter *exists-list* ()
   "List for finding which files are there and not.")
 
+;;; Misc functions
 (defun letter->number (letter)
   (let ((maybe-position (position letter +alphabet+)))
     (if maybe-position
@@ -44,6 +46,15 @@ and NAME and TYPE is as in `make-pathname'."
   (when (and number (<= 1 number 26))
     (char +alphabet+ (1- number))))
 
+(defun get-timezone ()
+  "Retrieves the timezone as set by the configuration variable."
+  ;; Ensure that the timezone repository is read.
+  (when (zerop (hash-table-count local-time::*location-name->timezone*))
+    (reread-timezone-repository))
+  ;; Now get the timezone.
+  (-> :timezone config find-timezone-by-location-name))
+
+;;; Config file parsing
 (defun config (key)
   "Retrieve KEY from the config."
   (aget key *config*))
@@ -117,11 +128,3 @@ Returns number of files detected, as this can be very large."
         south:*oauth-api-secret* nil
         south:*oauth-access-token* nil
         south:*oauth-access-secret* nil))
-
-(defun get-timezone ()
-  "Retrieves the timezone as set by the configuration variable."
-  ;; Ensure that the timezone repository is read.
-  (when (zerop (hash-table-count local-time::*location-name->timezone*))
-    (reread-timezone-repository))
-  ;; Now get the timezone.
-  (-> :timezone config find-timezone-by-location-name))
