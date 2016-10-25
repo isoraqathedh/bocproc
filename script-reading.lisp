@@ -20,8 +20,6 @@ and interprets it as commands. |#
    (generator :initarg :generator
               :initform nil
               :accessor generators)
-   (exiftool-file :accessor exiftool-file
-                  :documentation "Exiftool ARGFILE.")
    (verbose :initform t
             :accessor verbosep
             :documentation #.(concatenate
@@ -29,14 +27,6 @@ and interprets it as commands. |#
                               "Determines whether or not "
                               "the motions should be printed.")))
   (:documentation "An object that represents the state of the processor."))
-
-(defmethod initialize-instance :after ((instance bocproc-state)
-                                       &key &allow-other-keys)
-  (setf (exiftool-file instance)
-        (uiop:xdg-cache-home
-         "bocproc"
-         (format-timestring
-          nil (now) :format '((:month 2) (:day 2) (:hour 2))))))
 
 (defgeneric get-current-page (state series)
   (:documentation "Gets the latest accessed page number in the series.")
@@ -197,15 +187,13 @@ The generator will always be set to be at the latest page."
     (push new-name *exists-list*)))
 
 (define-action-all run-exiftool (pages-to-move)
-  "Dumps all arguments to a file and run exiftool with it."
-  (let ((associated-file (ensure-directories-exist
-                          (exiftool-file pages-to-move)
-                          :verbose t)))
-    (loop for page in (files-to-process pages-to-move)
-          for newp = t then nil
-          do (dump-exiftool-args associated-file page newp))
-    (uiop:run-program `("exiftool" "-@" ,(namestring associated-file)))
-    (delete-file associated-file)))
+  "Dumps all arguments to a string and run exiftool with it."
+  (with-input-from-string
+      (send-stream
+       (with-output-to-string (receive-stream)
+         (dolist (page (files-to-process pages-to-move))
+           (dump-exiftool-args receive-stream page))))
+    (uiop:run-program '("exiftool" "-@" "-") :input send-stream)))
 
 (define-action post-to-tumblr (page pages-to-move)
   "Post all the marked images to Tumblr."

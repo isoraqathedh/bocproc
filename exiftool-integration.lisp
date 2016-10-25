@@ -106,7 +106,7 @@ and then appends each value to the thing."
       (write-exiftool-argument
        stream (get option 'exiftool-arg) :set value\(s\))))
 
-(defun %dump-exiftool-args (stream page)
+(defun dump-exiftool-args (stream page)
   "Dumps all exiftool args to some stream."
   ;; Time
   (format-exiftool-args
@@ -139,12 +139,3 @@ and then appends each value to the thing."
           (-> page (get-page-property :file) namestring uiop:native-namestring))
   ;; Filename separator
   (write-exiftool-argument stream "execute"))
-
-(defun dump-exiftool-args (file page &optional (newp t))
-  "Dumps all exiftool args to some file,
-that exiftool can then read again through the -@ option."
-  (with-open-file (open-file file :direction :output
-                                  :if-does-not-exist :create
-                                  :if-exists (if newp :supersede :append)
-                                  :external-format :utf-8)
-    (%dump-exiftool-args open-file page)))
