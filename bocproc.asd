@@ -10,6 +10,7 @@
                (:file "helper")
                (:file "objects")
                (:file "exiftool-integration")
+               (:file "tumblr-integration")
                (:file "bookdef")
                (:file "bookgen")
                (:file "script-reading")))
