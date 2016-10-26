@@ -8,6 +8,7 @@
   :serial t
   :components ((:file "package")
                (:file "helper")
+               (:file "objects")
                (:file "exiftool-integration")
                (:file "bookdef")
                (:file "bookgen")

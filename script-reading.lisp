@@ -9,25 +9,6 @@ and interprets it as commands. |#
 ;;; = = = = = = = = = = = = = = = = = =
 
 ;;; Processor states.
-(defclass bocproc-state ()
-  ((version :initarg :version
-            :initform nil
-            :reader state-version)
-   (files-to-process :initform ()
-                     :accessor files-to-process)
-   (current-page :initform (make-hash-table :test #'equal)
-                 :accessor current-page)
-   (generator :initarg :generator
-              :initform nil
-              :accessor generators)
-   (verbose :initform t
-            :accessor verbosep
-            :documentation #.(concatenate
-                              'string
-                              "Determines whether or not "
-                              "the motions should be printed.")))
-  (:documentation "An object that represents the state of the processor."))
-
 (defgeneric get-current-page (state series)
   (:documentation "Gets the latest accessed page number in the series.")
   (:method ((state bocproc-state) (series string))

@@ -13,22 +13,7 @@ They also have their own ignore list, but for the moment it is unused.
 
 (in-package :bocproc)
 
-(defclass page-generator (book-page)
-  ((locally-ignored
-    :initform nil
-    :initarg :locally-ignored
-    :accessor locally-ignored
-    :documentation "A list of page numbers that are locally ignored.")
-   (fresh
-    :initform nil
-    :accessor fresh
-    :documentation "A flag showing whether or not there are no pages filled."))
-  (:documentation "A generator of page numbers."))
-
-(defmethod print-object ((object page-generator) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "~a ~{~a~^ ~}" (series object) (page-numbers object))))
-
+;;; Basic accessors
 (defgeneric point-specificity (gen spec)
   (:documentation "Find the specificity of the point.")
   (:method ((gen page-generator) (spec symbol))
