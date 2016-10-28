@@ -3,6 +3,7 @@
 (asdf:defsystem #:bocproc
   :description "Processing incoming scans"
   :author "Isoraķatheð Zorethan <isoraqathedh.zorethan@gmail.com>"
+  :version "6.2"
   :license "MIT"
   :depends-on (#:local-time #:thread-expr #:alexandria #:humbler)
   :serial t
