@@ -82,3 +82,22 @@ with a definite page number."))
                               "Determines whether or not "
                               "the motions should be printed.")))
   (:documentation "An object that represents the state of the processor."))
+
+(defclass multi-image-tumblr-post ()
+  ((files-to-process :initarg :files-to-process
+                     :initform nil
+                     :reader files-to-process)
+   (net-caption :initarg :net-caption
+                :initform nil
+                :reader net-caption
+                :documentation "The overall caption that the post will have.")
+   (net-tags :initarg :net-tags
+             :initform nil
+             :reader net-tags
+             :documentation "The overall tags that the post will have."))
+  (:documentation "An object representing a multiple-image tumblr post.
+
+FILES-TO-PROCESS contain a list of regular page objects
+which all have their usual properties.
+NET-CAPTION and NET-TAGS represent the overall caption and tags
+that the final image post will have."))
