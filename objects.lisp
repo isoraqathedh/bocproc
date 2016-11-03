@@ -2,6 +2,8 @@
 
 #| File for defining objects. |#
 
+(in-package #:bocproc)
+
 ;;; Books and series
 (defclass book-series ()
   ((series
