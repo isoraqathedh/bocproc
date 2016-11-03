@@ -23,11 +23,49 @@
   "Retrieve the image URLs of the tumblr post."
   (mapcar #'tumblr-photos-size (humbler:photos post)))
 
-(defun construct-tumblr-post (images caption tags)
-  "Create a tumblr image post using the Humbler API."
-  (humbler:blog/post-photo )
-  (make-instance
-   'humbler:photo-post
-   :photos (make-instance 'humbler:photo )
-   :state :queue
-   :caption ))
+(defun find-name (name state)
+  "Find the book-page with name NAME in STATE."
+  (find name (files-to-process state)
+        :key (lambda (book-page)
+               (get-page-property book-page :name))))
+
+(defun find-names (names state)
+  "Find the book-pages with name NAMES in STATE."
+  (loop for i in names
+        collect (or (find-name i state)
+                    (cerror "Name ~s not found in ~s" i state))))
+
+(defun construct-multi-post (book-pages override-caption override-tags)
+  "Make a multiple-image tumblr post template."
+  (make-instance 'multi-image-tumblr-post
+                 :files-to-process
+                 (mapcar (get-page-property-function :file) book-pages)
+                 :net-caption
+                 (or override-caption
+                     (with-expression-threading ()
+                       (mapcar (get-page-property-function :comment) book-pages)
+                       (remove "" :||)
+                       (remove nil :||)
+                       (if (or (= 1 (length :||))
+                               (every #'string= :|| (cdr :||)))
+                           (first :||)
+                           (error "Conflicting captions found: ~s" :||))))
+                 :net-tags
+                 (or override-tags
+                     (reduce #'union book-pages
+                             :key (get-page-property-function :tags)))))
+
+(defgeneric %post-to-tumblr (thing)
+  (:documentation "Post THING to tumblr.
+
+If it is a single book-page, create a post with one image in it.
+If it is a multi-image-tumblr-post, post that image.")
+  (:method ((thing book-page))
+    (when (get-page-property thing :tumblr)
+      (post-image-to-tumblr (get-page-property thing :file)
+                            (get-page-property thing :comment)
+                            (get-page-property thing :tags))))
+  (:method ((thing multi-image-tumblr-post))
+    (post-image-to-tumblr (files-to-process thing)
+                          (net-caption thing)
+                          (net-tags thing))))

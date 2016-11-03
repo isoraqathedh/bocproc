@@ -30,6 +30,11 @@ rather than just a single number.
   (:method (value (object book-page) name)
     (setf (gethash name (properties object)) value)))
 
+(defun get-page-property-function (property)
+  "Create a get-page-property function."
+  (lambda (page)
+    (get-page-property page property)))
+
 (defun define-book% (name format specificities)
   (push (make-instance
          'book-series
