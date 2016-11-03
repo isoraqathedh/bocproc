@@ -2,15 +2,15 @@
 
 (in-package #:bocproc)
 
-(defun post-to-tumblr (file comments tags)
+(defun post-image-to-tumblr (file comments tags)
   "Post image(s) to tumblr, and retrieve the post object."
-  (humblr:post
+  (humbler:post
    (humbler:blog/post-photo
     (config :blog)
     file
     :state :queue
     :caption comments
-    :tags tags)
+    :tags (getf (tag-manifestations tags) :tumblr))
    (config :blog)))
 
 (defun tumblr-photos-size (photo)
