@@ -48,7 +48,8 @@ rather than just a single number.
 
 (defun find-book (name)
   "Finds the book series named NAME from the list"
-  (find name *series-list* :key #'series))
+  (or (find name *series-list* :key #'series)
+      (error "Book not found: ~s" name)))
 
 (defun undefine-book (name)
   "Removes the book series named NAME from the list."
