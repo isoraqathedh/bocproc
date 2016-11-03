@@ -11,7 +11,7 @@ have many parts and are better understood as a list of numbers
 rather than just a single number.
 |#
 
-(in-package :bocproc)
+(in-package #:bocproc)
 
 (defparameter *series-list* ()
   "List of series that are currently on the system.")
