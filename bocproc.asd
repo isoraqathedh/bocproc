@@ -5,7 +5,7 @@
   :author "Isoraķatheð Zorethan <isoraqathedh.zorethan@gmail.com>"
   :version "6.2"
   :license "MIT"
-  :depends-on (#:local-time #:thread-expr #:alexandria #:humbler)
+  :depends-on (#:local-time #:thread-expr #:alexandria #:humbler #:apply-argv)
   :serial t
   :components ((:file "package")
                (:file "helper")
