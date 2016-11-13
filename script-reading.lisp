@@ -178,13 +178,11 @@ The generator will always be set to be at the latest page."
 
 (define-action post-to-tumblr (page pages-to-move)
   "Post all the marked images to Tumblr."
-  (let ((resulting-post  (%post-to-tumblr page)))
-    (when resulting-post
-      (setf )
-      (when (verbosep pages-to-move)
-        (format t "Posted ~s to Tumblr with URL ~s~%"
-                (get-page-property page :file)
-                (get-page-property page :image-url))))))
+  (let ((resulting-post (%post-to-tumblr page)))
+    (when (verbosep pages-to-move)
+      (format t "Posted ~s to Tumblr with URL ~s~%"
+              (get-page-property page :file)
+              (get-page-property page :image-url)))))
 
 (define-action-all dump-URLs (pages-to-move)
   "Dump the URLs that are posted on Tumblr to some file."
