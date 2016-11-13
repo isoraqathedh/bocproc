@@ -194,9 +194,10 @@ The generator will always be set to be at the latest page."
                              :if-does-not-exist :create
                              :if-exists :overwrite)
     (format dump-file "Today: ~{~a~^ | ~}"
-            (mapcar (lambda (page)
-                      (get-page-property page :image-url))
-                    (files-to-process pages-to-move)))))
+            (remove nil
+                    (mapcar (lambda (page)
+                       (get-page-property page :image-url))
+                     (files-to-process pages-to-move))))))
 
 ;;; Finally, load files
 (defun read-script (bpc-location &optional (new-state-p t))
