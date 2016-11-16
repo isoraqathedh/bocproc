@@ -103,3 +103,9 @@ FILES-TO-PROCESS contain a list of regular page objects
 which all have their usual properties.
 NET-CAPTION and NET-TAGS represent the overall caption and tags
 that the final image post will have."))
+
+(defmethod print-object ((object multi-image-tumblr-post) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~{~a~^ ~}"
+            (mapcar (rcurry #'get-page-property :name)
+                    (files-to-process object)))))
