@@ -133,6 +133,19 @@ The generator will always be set to be at the latest page."
                                `',parameter-args
                                `',(car parameter-args)))))))
 
+(defmacro bpc:multi-post ((&optional caption tags) &body names)
+  "Declare that the following names are going to be posted into one large post."
+  `(push (files-to-process *state*)
+         (construct-multi-post
+          (mapcar (lambda (name)
+                    (find name (files-to-process *state*)
+                          :key (lambda (page)
+                                 (and (typep page 'book-page)
+                                      (get-page-property page :name)))))
+                  ,names)
+          ,caption
+          ,tags)))
+
 ;;; Processing facilities
 (defmacro define-action-all (name (&optional (arg (gensym)))
                              &body body &aux doc)

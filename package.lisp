@@ -9,7 +9,7 @@
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
-  (:export #:version #:process-file #:next)
+  (:export #:version #:process-file #:next #:multi-post)
   (:import-from #:cl #:nil #:t)
   (:documentation "Special package for .bpc files.
 
