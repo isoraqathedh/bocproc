@@ -172,13 +172,14 @@ The generator will always be set to be at the latest page."
 
 (define-action move-pages (page pages-to-move)
   "Performs a page move to an automatically determined path."
-  (let* ((old-name (truename (namestring (get-page-property page :file))))
-         (new-name (format-page page :unknown-values :error)))
-    (when (verbosep pages-to-move)
-      (format t "Moving ~s to ~s~%" old-name new-name))
-    (ensure-directories-exist new-name :verbose (verbosep pages-to-move))
-    (rename-file old-name new-name)
-    (push new-name *exists-list*)))
+  (when (typep page 'book-page)
+    (let* ((old-name (truename (namestring (get-page-property page :file))))
+           (new-name (format-page page :unknown-values :error)))
+      (when (verbosep pages-to-move)
+        (format t "Moving ~s to ~s~%" old-name new-name))
+      (ensure-directories-exist new-name :verbose (verbosep pages-to-move))
+      (rename-file old-name new-name)
+      (push new-name *exists-list*))))
 
 (define-action-all run-exiftool (pages-to-move)
   "Dumps all arguments to a string and run exiftool with it."
@@ -191,11 +192,13 @@ The generator will always be set to be at the latest page."
 
 (define-action post-to-tumblr (page pages-to-move)
   "Post all the marked images to Tumblr."
-  (let ((resulting-post (%post-to-tumblr page)))
-    (when (verbosep pages-to-move)
-      (format t "Posted ~s to Tumblr with URL ~s~%"
-              (get-page-property page :file)
-              (get-page-property page :image-url)))))
+  (when (or (typep page 'multi-image-tumblr-post)
+            (get-page-property page :tumblr))
+    (let ((resulting-post (%post-to-tumblr page)))
+      (when (verbosep pages-to-move)
+        (format t "Posted ~s to Tumblr with URL ~s~%"
+                (get-page-property page :file)
+                (get-page-property page :image-url))))))
 
 (define-action-all dump-URLs (pages-to-move)
   "Dump the URLs that are posted on Tumblr to some file."
@@ -206,8 +209,8 @@ The generator will always be set to be at the latest page."
                              :if-exists :overwrite)
     (format dump-file "Today: ~{~a~^ | ~}"
             (remove nil
-                    (mapcar (lambda (page)
-                       (get-page-property page :image-url))
+                    (mapcar
+                     (rcurry #'get-page-property :image-url)
                      (files-to-process pages-to-move))))))
 
 ;;; Finally, load files
