@@ -170,6 +170,15 @@ The generator will always be set to be at the latest page."
      (dolist (,page (files-to-process ,arg))
        ,@body)))
 
+(define-action rotate-image (page pages-to-rotate)
+  "Rotates an image based on its rotation parameter."
+  (when (get-page-property page :rotate)
+    (uiop:run-program (list "mogrify" "-rotate"
+                            (get-page-property page :rotate)
+                            (get-page-property page :file)))
+    (when (verbosep pages-to-rotate)
+      (format t "Rotated image ~f" (get-page-property page :file)))))
+
 (define-action move-pages (page pages-to-move)
   "Performs a page move to an automatically determined path."
   (let* ((old-name (truename (namestring (get-page-property page :file))))
@@ -227,7 +236,8 @@ The generator will always be set to be at the latest page."
   "Loads the script from the file."
   (let ((bocproc-state (read-script bpc-location new-state-p)))
     ;; handle stuff here
-    (dolist (action (list #'run-exiftool
+    (dolist (action (list #'rotate-image
+                          #'run-exiftool
                           #'post-to-tumblr
                           #'dump-URLs
                           #'move-pages))
