@@ -178,7 +178,7 @@ The generator will always be set to be at the latest page."
            (format nil "~d" (get-page-property page :rotate))
            (namestring (truename (get-page-property page :file)))))
     (when (verbosep pages-to-rotate)
-      (format t "Rotated image ~s" (get-page-property page :file)))))
+      (format t "Rotated image ~s~%" (get-page-property page :file)))))
 
 (define-action move-pages (page pages-to-move)
   "Performs a page move to an automatically determined path."
