@@ -210,6 +210,7 @@ The generator will always be set to be at the latest page."
 
 (define-action-all dump-URLs (pages-to-move)
   "Dump the URLs that are posted on Tumblr to some file."
+  (delete-file (config :dump-file))
   (with-open-file (dump-file (config :dump-file)
                              :direction :output
                              :external-format :utf-8
