@@ -1,3 +1,4 @@
 *.bpc
 \#*#
 .\#*
+.tramp_history
