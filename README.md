@@ -128,7 +128,7 @@ Example:
       (:paging "boc" :next :page)
       (:title "Example title")
       (:comment "This is an example comment.")
-      (:tags "EP" "SX" "RSGN")
+      (:tags egonyota-pasaru serkafph-xaxex road-signs)
       (:rotate 90)
       (:crop 15 15 -120 -120)
       (:tumblr t))
