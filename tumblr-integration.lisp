@@ -10,6 +10,7 @@
     file
     :state :queue
     :caption comments
+    :tweet (format nil "~a [URL]" comments)
     :tags (getf (tag-manifestations tags) :tumblr))
    (config :blog)))
 
