@@ -79,11 +79,12 @@ and NAME and TYPE is as in `make-pathname'."
 
 (defun log-in-to-tumblr ()
   "Log in to tumblr by setting access keys and the user object."
-  (setf south:*oauth-api-key*       (token :tumblr-api-key)
-        south:*oauth-api-secret*    (token :tumblr-api-sec)
-        south:*oauth-access-token*  (token :tumblr-oauth-acc-key)
-        south:*oauth-access-secret* (token :tumblr-oauth-acc-sec)
-        humbler:*user*              (humbler:myself)))
+  (setf humbler:*client*
+        (make-instance 'humbler:client
+                       :key (token :tumblr-api-key)
+                       :secret (token :tumblr-api-sec)
+                       :token (token :tumblr-oauth-acc-key)
+                       :token-secret (token :tumblr-oauth-acc-sec))))
 
 (defun scan-for-files ()
   "Detects and stores all files in *BOOKS-LOCATION*.
@@ -124,7 +125,4 @@ Returns number of files detected, as this can be very large."
   (setf *exists-list* ()
         *series-list* ()
         *config* ()
-        south:*oauth-api-key* nil
-        south:*oauth-api-secret* nil
-        south:*oauth-access-token* nil
-        south:*oauth-access-secret* nil))
+        humbler:*client* nil))
