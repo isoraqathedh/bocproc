@@ -1,0 +1,12 @@
+#+Title: Book of Conworlds Processing System v. 7
+#+Date: 2019-12-19
+
+This is the seventh generation of the Book of Conworlds Scan Processing System
+(typically called ~bocproc~).
+Unlike the previous generations, which was largely focused on individual scans,
+this new generation will attempt to handle everything there is
+to do with these conlanging notebooks,
+including searching, versions and the ~bpc~ script
+in a modular manner with separation of concerns.
+
+As such, the system will be divided as such:
