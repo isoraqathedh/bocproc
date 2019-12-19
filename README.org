@@ -9,4 +9,79 @@ to do with these conlanging notebooks,
 including searching, versions and the ~bpc~ script
 in a modular manner with separation of concerns.
 
-As such, the system will be divided as such:
+* Components
+These are the planned components.
+It is defined as such to be expandable to delay the appearance of generation 8
+for as long as possible.
+
+** Core
+The Core package (~info.isoraqathedh.bocproc.core~)
+is where pages are defined, categorised and grouped together.
+Anything that is intrinsic to a page,
+such as its title, page number and any additional comments,
+will live in the core component,
+as are the more abstract concepts such as books, tags and affinities.
+The configuration file will also be processed here,
+which works as a rudimentary data store.
+
+The core also defines a number of hooks that the other layers can use.
+
+** Data store
+The data store component
+(~info.isoraqathedh.bocproc.data-store~, a.k.a. ~bocdb~)
+is where the abstract pages are realised into various storage systems,
+including the file system where the data are actually stored,
+and a cache file where metadata is stored for faster retrieval.
+
+It is also responsible for reading from and writing to those formats,
+and making sure they sync up.
+
+In the future this might include a full-on database solution,
+but this is not deemed necessary at the present time.
+
+** Publication
+The publication package (~info.isoraqathedh.publication~)
+is the component responsible for pushing processed scans
+to the rest of the world,
+including websites such as Tumblr and Twitter.
+It will use libraries to that effect.
+
+The difference between the publication and data store components
+is the restricted-access nature of publications
+it is not guaranteed that one can edit or delete a published post,
+only to write it.
+Each publication target can choose to support it or not.
+
+** Script
+The script package (~info.isoraqathedh.bocproc.script~)
+handles reading of the ~bpc~ script,
+which itself uses the package ~info.isoraqathedh.bocproc.bpc-parser~,
+as in previous iterations.
+It will also call on other programs to do proper rotation and metadata imbuing,
+as with in the sixth generation.
+
+This component will also be the part that requires an executable to be made.
+This would most likely be handled via ~sclript~
+(or it will be developed here and then moved to the ~sclript~ project,
+which is the more likely outcome.)
+The executable will then be the interpreter for ~bpc~ scripts.
+
+As a whole the script will be more programmatic in nature,
+with the order of things now mattering
+and some functions being available in different contexts.
+However it would remain broadly compatible with the old version.
+
+** Web interface
+The web interface package
+(~info.isoraqathedh.bocproc.web~, a.k.a ~bocdar~)
+will eventually be a way to view pages in a convenient web-based format.
+As of now, this is the least-well defined component.
+It could be a ~radiance~ module, or just a generator of HTML pages.
+This will probably be left for later definition.
+
+* Concepts
+
+* Reuse
+Although the code is currently freely licensed,
+it is highly specialised to my needs
+and therefore the ability for actual reuse as-is is somewhat limited.
