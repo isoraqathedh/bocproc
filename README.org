@@ -80,6 +80,9 @@ It could be a ~radiance~ module, or just a generator of HTML pages.
 This will probably be left for later definition.
 
 * Concepts
+** Key terms
+
+** Expected usage
 
 * Reuse
 Although the code is currently freely licensed,
