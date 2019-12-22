@@ -1,11 +1,22 @@
 ;;;; package.lisp
 
 (defpackage #:info.isoraqathedh.bocproc
-  (:use #:cl #:thread-expr #:alexandria #:local-time)
-  (:nicknames #:bocproc)
-  (:export #:main #:load-script #:load-config-file))
+  (:use #:cl)
+  (:documentation "General package for bocproc."))
 
-(import 'humbler::aget '#:bocproc)
+(defpackage #:info.isoraqathedh.bocproc.core
+  (:use #:cl #:info.isoraqathedh.bocproc #:local-time)
+  (:documentation "Core concepts for bocproc."))
+
+(defpackage #:info.isoraqathedh.bocproc.data-store
+  (:use #:cl #:info.isoraqathedh.bocproc #:local-time)
+  (:documentation "Component for managing Book of Conworlds data."))
+
+(defpackage #:info.isoraqathedh.bocproc.script
+  (:use #:cl #:info.isoraqathedh.bocproc)
+  (:documentation "Component for reading bpc files."))
+
+(import 'humbler::aget '#:info.isoraqathedh.bocproc)
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)
