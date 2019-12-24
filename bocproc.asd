@@ -9,4 +9,5 @@
                             #:uuid)
   :serial t
   :components ((:file "package")
-               (:file "classes")))
+               (:file "classes")
+               (:file "docs")))

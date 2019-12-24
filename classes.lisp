@@ -1,8 +1,7 @@
 (in-package #:info.isoraqathedh.bocproc.core)
 
 (defvar +bocproc-uuid+
-  (uuid:make-uuid-from-string "87832309-5EE5-48D0-B2C7-41E88531B360")
-  "UUID to make page UUIDs out of.")
+  (uuid:make-uuid-from-string "87832309-5EE5-48D0-B2C7-41E88531B360"))
 
 (defclass affinity ()
   ((name :accessor name
