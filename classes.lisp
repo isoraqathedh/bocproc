@@ -40,3 +40,20 @@
             :initarg :comment)
    (create-date :accessor create-date
                 :initform (local-time:now))))
+
+(defclass series (stable-entity)
+  ((name :accessor name
+         :initarg :name)
+   (root :accessor root
+         :initarg :root)
+   (filename-syntax :accessor filename-syntax
+                    :initarg :filename-syntax)
+   (page-specification :accessor page-specification
+                       :initarg :page-specification)))
+
+(defclass page-number ()
+  ((base :accessor base
+         :initarg :base)
+   (numbers :accessor numbers)))
+
+(defparameter *stable-entities* ())
