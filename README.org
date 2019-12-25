@@ -80,6 +80,46 @@ It could be a ~radiance~ module, or just a generator of HTML pages.
 This will probably be left for later definition.
 
 * Concepts
+** Goal
+The goal of ~bocproc~ is to organise and add metadata to a bunch of files.
+The metadata should be useful enough that they should act as categories,
+and one should be able to search and retrieve files by those categories.
+Additionally, adding files into the system should be easy and routine,
+as this happens frequently;
+and searching should be flexible –
+this is a more common task that has become more prominent as of recently.
+
+These files are in the original incarnation of the system
+scans of notebook pages discussing constructed worlds and languages,
+which steers much of the design and terminology of the system even up to today.
+
+The key work flows are as such:
+
+*** Induction
+Adding files into the system is an important part of ~bocproc~,
+and this is done by defining their role through ~bpc~ files.
+The specification for these files will be published at a later date,
+but will be broadly the same as the generation 6 syntax.
+However, it is expected to remain to be in a similar (poor) sandbox.
+
+A formal specification of ~bpc~ will be written at a later date,
+but is expected to cover at least what the generation 6 script did:
+
+- Rotate the image
+- Add EXIF metadata into a file
+- Publish to social media websites
+
+It should also now be able to:
+
+- Crop the image (perhaps marking the crop point(s) in a GUI)
+- Add the image to a database for searching
+
+*** Search
+The search facility should be merged together with the rest of ~bpc~,
+but the old language used by ~bocsearch~ should be kept as a legacy form.
+
+A formal specification of both languages will be written.
+
 ** Key terms
 - Entity :: An object that ~bocproc~ manages directly.
 - Stable entity :: An entity that is not expected to change very much or very quickly
@@ -116,6 +156,10 @@ This will probably be left for later definition.
          or a name that uses ASCII but has no other restrictions, and so on;
          as well as other associations that the tag might have.
          Those are stored in a plist that each tag has.
+- Page :: The centre of attention for ~bocproc~.
+          It consists of a bunch of images (or any files) that
+          has metadata to store and search.
+          Such metadata
 
 ** Expected usage
 
