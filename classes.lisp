@@ -8,12 +8,10 @@
                 :initarg :slug-symbol
                 :type 'symbol)))
 
-(defmethod print-object :around ((object stable-entity) stream)
-  (print-unreadable-object (object stream :type t)
-    (call-next-method)))
-
 (defmethod print-object ((object stable-entity) stream)
-  (format stream "~s" (slug-symbol object)))
+  (print-unreadable-object (object stream :type t)
+    (format stream "~s" (slug-symbol object))))
+
 
 (defclass affinity (stable-entity)
   ((name :accessor name
@@ -28,6 +26,11 @@
    (other-properties :initform ()
                      :initarg :props)))
 
+(defmethod print-object ((object tag) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~s @ ~s"
+            (slug-symbol object)
+            (slug-symbol (affinity object)))))
 (defclass page ()
   ((page-number :accessor :name
                 :initarg :page-number)
