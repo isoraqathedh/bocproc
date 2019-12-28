@@ -12,6 +12,7 @@
   (print-unreadable-object (object stream :type t)
     (format stream "~s" (slug-symbol object))))
 
+(defparameter *stable-entities* ())
 
 (defclass affinity (stable-entity)
   ((name :accessor name
@@ -31,6 +32,17 @@
     (format stream "~s @ ~s"
             (slug-symbol object)
             (slug-symbol (affinity object)))))
+
+(defclass series (stable-entity)
+  ((name :accessor name
+         :initarg :name)
+   (root :accessor root
+         :initarg :root)
+   (filename-syntax :accessor filename-syntax
+                    :initarg :filename-syntax)
+   (page-specification :accessor page-specification
+                       :initarg :page-specification)))
+
 (defclass page ()
   ((page-number :accessor :name
                 :initarg :page-number)
@@ -44,19 +56,7 @@
    (create-date :accessor create-date
                 :initform (local-time:now))))
 
-(defclass series (stable-entity)
-  ((name :accessor name
-         :initarg :name)
-   (root :accessor root
-         :initarg :root)
-   (filename-syntax :accessor filename-syntax
-                    :initarg :filename-syntax)
-   (page-specification :accessor page-specification
-                       :initarg :page-specification)))
-
 (defclass page-number ()
   ((base :accessor base
          :initarg :base)
    (numbers :accessor numbers)))
-
-(defparameter *stable-entities* ())
