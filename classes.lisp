@@ -14,6 +14,14 @@
 
 (defparameter *stable-entities* ())
 
+(defun define-stable-entity (thing name)
+  (let ((new-thing (make-instance thing :slug-symbol name)))
+    (pushnew new-thing *stable-entities* :key #'slug-symbol)
+    new-thing))
+
+(defun get-stable-entity (name)
+  (find name *stable-entities* :key #'slug-symbol))
+
 (defclass affinity (stable-entity)
   ((name :accessor name
          :initarg :name)))
