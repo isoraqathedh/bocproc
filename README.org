@@ -168,6 +168,16 @@ A formal specification of both languages will be written.
           has metadata to store and search.
           Such metadata
 
+** Other terms
+- Slug :: Slugs are names with a restricted set of characters
+          that are easy for both humans and machines to read.
+          To wit, they are case insensitive strings of letters and digits
+          that may also have the following characters: !@#$%^&<>+-*/_.
+
+          A more restrictive definition only allows - and _
+          along with the letters and digits,
+          with - not being the first character.
+
 ** Expected usage
 
 * Reuse
