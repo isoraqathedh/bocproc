@@ -128,7 +128,14 @@ A formal specification of both languages will be written.
                    with which both humans and computers can refer to it by
                    and most importantly are not concrete –
                    their existence is entirely within the system.
-                   They generally have short names, called slugs.
+                   They generally have short names
+                   that are both human- and machine-readable, called slugs,
+                   though they can have other names.
+
+                   Regardless of their existence,
+                   they all have read syntax so they can be stored as Lisp lists
+                   in a basic text file.
+                   This property is used to help create some of configuration.
 - Affinity :: A tag for tags –
               a particular nature that it shares with other tags,
               in a non-mutually-exclusive manner.
