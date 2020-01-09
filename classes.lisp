@@ -22,22 +22,10 @@
 
 (defparameter *stable-entities* ())
 
-(defun push-stable-entity (stable-entity)
-  (pushnew stable-entity *stable-entities* :key #'slug-symbol))
-
 (defun get-stable-entity (name &optional type)
   (let ((thing (find name *stable-entities* :key #'slug-symbol)))
     (if (null type) thing
         (and (typep thing type) thing))))
-
-(defclass affinity (stable-entity)
-  ((name :accessor name
-         :initarg :name)))
-
-(defun simple-character-p (character)
-  (find character (concatenate 'string
-                       (string-upcase +alphabet+)
-                       "0123456789-_")))
 
 (defun slugify (string)
   (let* ((slug-package '#:info.isoraqathedh.bocproc.entities)
@@ -66,7 +54,16 @@
           (push instance *stable-entities*)
           instance))))
 
+(defun simple-character-p (character)
+  (find character (concatenate 'string
+                               (string-upcase +alphabet+)
+                               "0123456789-_")))
+
 ;;; Affinity
+(defclass affinity (stable-entity)
+  ((name :accessor name
+         :initarg :name)))
+
 (defun define-affinity (name &optional slug)
   (push-stable-entity name slug 'affinity))
 
