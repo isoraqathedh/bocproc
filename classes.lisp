@@ -5,6 +5,7 @@
 
 (defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz")
 
+;;; Generic : Stable entity
 (defclass stable-entity ()
   ((slug-symbol :accessor slug-symbol
                 :initarg :slug-symbol
@@ -60,9 +61,11 @@
           (push instance *stable-entities*)
           instance))))
 
+;;; Affinity
 (defun define-affinity (name &optional slug)
   (push-stable-entity name slug 'affinity))
 
+;;; Tag
 (defclass tag (stable-entity)
   ((name :accessor name
          :initarg :name)
@@ -87,6 +90,7 @@
             (slug-symbol object)
             (slug-symbol (affinity object)))))
 
+;;; Series
 (defclass series (stable-entity)
   ((name :accessor name
          :initarg :name)
@@ -97,6 +101,7 @@
    (page-specification :accessor page-specification
                        :initarg :page-specification)))
 
+;;; Page
 (defclass page ()
   ((page-number :accessor :name
                 :initarg :page-number)
@@ -110,6 +115,7 @@
    (create-date :accessor create-date
                 :initform (local-time:now))))
 
+;;; Page number
 (defclass page-number ()
   ((base :accessor base
          :initarg :base)
