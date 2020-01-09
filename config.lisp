@@ -1,11 +1,11 @@
 (in-package #:info.isoraqathedh.bocproc.core)
 
 (defvar *config-file*
-  (make-subdirectory-pathname
-   (uiop:xdg-config-home) '("bocproc")
-   :name "config"
-   :type "lisp")
+  (uiop:xdg-config-home "bocproc" "config.lisp")
   "Location of the file that holds the config file.")
+
+(defvar *entities-file*
+  (uiop:xdg-data-home "bocproc" "entities.lisp"))
 
 (defparameter *books-location*
   (make-subdirectory-pathname
@@ -55,3 +55,23 @@
       (loop for i in (append (config :tags)
                              (config :books))
             do (export (car i))))))
+
+;;; Entity parsing
+(defun dump-entities ()
+  (uiop:ensure-all-directories-exist (list *entities-file*))
+  (with-open-file (entity-file *entities-file* :direction :output
+                                               :external-format :utf-8
+                                               :if-exists :supersede
+                                               :if-does-not-exist :create)
+    (let ((*package* (find-package 'bpc-entities)))
+      (prin1 *stable-entities* entity-file))))
+
+(defun read-entities (&optional preservep)
+  (with-open-file (entity-file *entities-file* :direction :input
+                                               :external-format :utf-8
+                                               :if-does-not-exist :error)
+    (unless preservep
+      (setf *stable-entities* (list)))
+    (dolist (entity (let ((*package* (find-package 'bpc-entities)))
+                      (read entity-file)))
+      (store-stable-entity entity))))
