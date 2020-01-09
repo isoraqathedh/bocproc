@@ -11,9 +11,14 @@
                 :initarg :slug-symbol
                 :type 'symbol)))
 
+(defgeneric listify (object)
+  (:method-combination append :most-specific-last)
+  (:method append ((object stable-entity))
+    (list (slugify (symbol-name (type-of object)))
+          (slug-symbol object))))
+
 (defmethod print-object ((object stable-entity) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "~s" (slug-symbol object))))
+  (prin1 (listify object) stream))
 
 (defparameter *stable-entities* ())
 
@@ -65,6 +70,9 @@
 (defun define-affinity (name &optional slug)
   (push-stable-entity name slug 'affinity))
 
+(defmethod listify append ((object affinity))
+  (list :name ,(name object)))
+
 ;;; Tag
 (defclass tag (stable-entity)
   ((name :accessor name
@@ -75,6 +83,11 @@
    (other-properties :initform ()
                      :initarg :props)))
 
+(defmethod listify append ((object tag))
+  `(:name ,(name object)
+    :affinity ,(slug-symbol (affinity object))
+    ,@(slot-value object 'other-properties)))
+
 (defun define-tag (name affinity &optional slug)
   (let ((affinity (get-stable-entity affinity 'affinity))
         (true-slug (etypecase slug
@@ -83,12 +96,6 @@
                      (symbol slug))))
     (or (get-stable-entity true-slug 'tag)
         )))
-
-(defmethod print-object ((object tag) stream)
-  (print-unreadable-object (object stream :type t)
-    (format stream "~s @ ~s"
-            (slug-symbol object)
-            (slug-symbol (affinity object)))))
 
 ;;; Series
 (defclass series (stable-entity)
@@ -100,6 +107,12 @@
                     :initarg :filename-syntax)
    (page-specification :accessor page-specification
                        :initarg :page-specification)))
+
+(defmethod listify append ((object series))
+  (list :name (name object)
+        :root (root object)
+        :filename-syntax (filename-syntax object)
+        :page-specification (page-specification object)))
 
 ;;; Page
 (defclass page ()
