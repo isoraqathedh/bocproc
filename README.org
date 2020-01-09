@@ -165,8 +165,10 @@ A formal specification of both languages will be written.
          Those are stored in a plist that each tag has.
 - Page :: The centre of attention for ~bocproc~.
           It consists of a bunch of images (or any files) that
-          has metadata to store and search.
-          Such metadata
+          has metadata to store and search for.
+          Such metadata consists of things like strings, numbers,
+          times, and collections of these in any heterogeneous format,
+          arranged in key-value pairs.
 
 ** Other terms
 - Slug :: Slugs are names with a restricted set of characters
