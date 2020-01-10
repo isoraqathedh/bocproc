@@ -20,7 +20,7 @@
   (:use #:cl #:info.isoraqathedh.bocproc)
   (:documentation "Component for reading bpc files."))
 
-(import 'humbler::aget '#:info.isoraqathedh.bocproc)
+(import 'humbler::aget '#:info.isoraqathedh.bocproc.core)
 
 (defpackage #:info.isoraqathedh.bocproc.bpc-parser
   (:nicknames #:bpc)

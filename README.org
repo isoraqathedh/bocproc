@@ -182,6 +182,9 @@ A formal specification of both languages will be written.
 
 ** Expected usage
 
+** Configuration and storage files
+The following files shall be used to store configuration, entities and pages.
+
 * Reuse
 Although the code is currently freely licensed,
 it is highly specialised to my needs

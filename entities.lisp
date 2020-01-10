@@ -1,10 +1,5 @@
 (in-package #:info.isoraqathedh.bocproc.core)
 
-(defvar +bocproc-uuid+
-  (uuid:make-uuid-from-string "87832309-5EE5-48D0-B2C7-41E88531B360"))
-
-(defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz")
-
 ;;; Generic : Stable entity
 (defclass stable-entity ()
   ((slug-symbol :accessor slug-symbol
@@ -18,7 +13,9 @@
           (slug-symbol object))))
 
 (defmethod print-object ((object stable-entity) stream)
-  (prin1 (listify object) stream))
+  (if *print-readably*
+      (prin1 (listify object) stream)
+      (call-next-method)))
 
 (defparameter *stable-entities* ())
 
@@ -27,35 +24,31 @@
     (if (null type) thing
         (and (typep thing type) thing))))
 
-(defun push-stable-entity (name slug type &rest type-initargs)
-  (let ((true-slug (etypecase slug
-                     (null (slugify name))
-                     (string (slugify slug))
-                     (symbol slug)))
-        instance)
-    (or (get-stable-entity true-slug type)
-        (progn
-          (setf instance (apply #'make-instance type :name name
-                                                     :slug true-slug
-                                                     type-initargs))
-          (push instance *stable-entities*)
-          instance))))
-
 (defun simple-character-p (character)
   (find character (concatenate 'string
                                (string-upcase +alphabet+)
                                "0123456789-_")))
+
+(defgeneric make-stable-entity (type args))
+
+(defun store-stable-entity (serialised-entity)
+  (pushnew (make-stable-entity (first serialised-entity)
+                               (rest serialised-entity))
+           *stable-entities*
+           :key #'slug-symbol))
 
 ;;; Affinity
 (defclass affinity (stable-entity)
   ((name :accessor name
          :initarg :name)))
 
-(defun define-affinity (name &optional slug)
-  (push-stable-entity name slug 'affinity))
-
 (defmethod listify append ((object affinity))
-  (list :name ,(name object)))
+  (list :name (name object)))
+
+(defmethod make-stable-entity ((affinity (eql 'bpc-entities::affinity)) args)
+  (destructuring-bind (slug-symbol &key name) args
+    (make-instance 'affinity :slug-symbol slug-symbol
+                             :name name)))
 
 ;;; Tag
 (defclass tag (stable-entity)
@@ -72,14 +65,16 @@
     :affinity ,(slug-symbol (affinity object))
     ,@(slot-value object 'other-properties)))
 
-(defun define-tag (name affinity &optional slug)
-  (let ((affinity (get-stable-entity affinity 'affinity))
-        (true-slug (etypecase slug
-                     (null (slugify name))
-                     (string (slugify slug))
-                     (symbol slug))))
-    (or (get-stable-entity true-slug 'tag)
-        )))
+(defmethod make-stable-entity ((tag (eql 'bpc-entities::tag)) args)
+  (destructuring-bind (slug-symbol
+                       &rest all-args &key name affinity &allow-other-keys) args
+    (remf all-args :name)
+    (remf all-args :affinity)
+    (make-instance 'tag
+                   :affinity (get-stable-entity affinity 'affinity)
+                   :slug-symbol slug-symbol
+                   :name name
+                   :props all-args)))
 
 ;;; Series
 (defclass series (stable-entity)

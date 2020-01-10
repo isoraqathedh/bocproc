@@ -1,9 +1,11 @@
 (in-package #:info.isoraqathedh.bocproc.core)
 
-(defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz"
-  ;; It's actually a constant
-  ;; but using defvar makes redefinition warnings makes the errors go away.
-  "The alphabet as required in the subpage specifications.")
+(defvar +alphabet+ "abcdefghijklmnopqrstuvwxyz")
+
+(defvar +bocproc-uuid+
+  (uuid:make-uuid-from-string "87832309-5EE5-48D0-B2C7-41E88531B360"))
+
+(defvar *entities-package-symbol* '#:info.isoraqathedh.bocproc.entities)
 
 (defun letter->number (letter)
   (let ((maybe-position (position letter +alphabet+)))
@@ -24,14 +26,24 @@
   (-> :timezone config find-timezone-by-location-name))
 
 (defun slugify (string)
-  (let* ((slug-package '#:info.isoraqathedh.bocproc.entities)
-         (slug-symbol
+  (let* ((slug-symbol
            (thread-expr:with-expression-threading (x)
              (string-upcase string)
              (substitute #\- #\Space x)
              (substitute-if-not #\_ #'simple-character-p x)
              (string-trim "-" x)
-             (or (find-symbol x slug-package)
-                 (intern x slug-package)))))
-    (export slug-symbol slug-package)
+             (or (find-symbol x *entities-package-symbol*)
+                 (intern x *entities-package-symbol*)))))
+    (export slug-symbol *entities-package-symbol*)
     slug-symbol))
+
+(defun make-subdirectory-pathname (root directories &key name type)
+  "Creates pathname representing a file name or subdirectory in ROOT.
+
+DIRECTORIES is a list of strings that represent folder names,
+and NAME and TYPE is as in `make-pathname'."
+  (merge-pathnames
+   (make-pathname :directory (cons :relative directories)
+                  :name name
+                  :type type)
+   root))

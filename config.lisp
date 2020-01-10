@@ -18,7 +18,7 @@
 ;;; Config file parsing
 (defun config (key)
   "Retrieve KEY from the config."
-  (aget key *config*))
+  (humbler::aget key *config*))
 
 (defun token (token-key)
   "Retrieve the token named TOKEN-KEY."
@@ -40,10 +40,11 @@
                                                :external-format :utf-8
                                                :if-exists :supersede
                                                :if-does-not-exist :create)
-    (let ((*package* (find-package 'bpc-entities)))
+    (let ((*package* (find-package 'bpc-entities))
+          (*print-readably* t))
       (prin1 *stable-entities* entity-file))))
 
-(defun read-entities (&optional preservep)
+(defun load-entities (&optional preservep)
   (with-open-file (entity-file *entities-file* :direction :input
                                                :external-format :utf-8
                                                :if-does-not-exist :error)
@@ -51,4 +52,5 @@
       (setf *stable-entities* (list)))
     (dolist (entity (let ((*package* (find-package 'bpc-entities)))
                       (read entity-file)))
+      (export (second entity) *entities-package-symbol*)
       (store-stable-entity entity))))
