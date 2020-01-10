@@ -27,19 +27,6 @@
     (if (null type) thing
         (and (typep thing type) thing))))
 
-(defun slugify (string)
-  (let* ((slug-package '#:info.isoraqathedh.bocproc.entities)
-         (slug-symbol
-           (thread-expr:with-expression-threading (x)
-             (string-upcase string)
-             (substitute #\- #\Space x)
-             (substitute-if-not #\_ #'simple-character-p x)
-             (string-trim "-" x)
-             (or (find-symbol x slug-package)
-                 (intern x slug-package)))))
-    (export slug-symbol slug-package)
-    slug-symbol))
-
 (defun push-stable-entity (name slug type &rest type-initargs)
   (let ((true-slug (etypecase slug
                      (null (slugify name))
