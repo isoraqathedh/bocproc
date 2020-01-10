@@ -15,7 +15,8 @@
 (defmethod print-object ((object stable-entity) stream)
   (if *print-readably*
       (prin1 (listify object) stream)
-      (call-next-method)))
+      (print-unreadable-object (object stream :type t)
+        (format stream "~s" (slug-symbol object)))))
 
 (defparameter *stable-entities* ())
 
