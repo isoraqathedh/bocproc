@@ -9,5 +9,7 @@
                             #:uuid)
   :serial t
   :components ((:file "package")
-               (:file "classes")
+               (:file "utils")
+               (:file "entities")
+               (:file "config")
                (:file "docs")))
