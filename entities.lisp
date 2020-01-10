@@ -67,10 +67,9 @@
     ,@(slot-value object 'other-properties)))
 
 (defmethod make-stable-entity ((tag (eql 'bpc-entities::tag)) args)
-  (destructuring-bind (slug-symbol
-                       &rest all-args &key name affinity &allow-other-keys) args
+  (destructuring-bind (slug-symbol  affinity
+                       &rest all-args &key name &allow-other-keys) args
     (remf all-args :name)
-    (remf all-args :affinity)
     (make-instance 'tag
                    :affinity (get-stable-entity affinity 'affinity)
                    :slug-symbol slug-symbol
@@ -94,6 +93,15 @@
         :filename-syntax (filename-syntax object)
         :page-specification (page-specification object)))
 
+(defmethod make-stable-entity ((tag (eql 'bpc-entities::series)) args)
+  (destructuring-bind (slug-symbol
+                       &key root filename-syntax page-specification)
+      args
+    (make-instance 'series :slug-symbol slug-symbol
+                           :root root
+                           :filename-syntax filename-syntax
+                           :page-specification page-specification)))
+
 ;;; Page
 (defclass page ()
   ((page-number :accessor :name
@@ -113,3 +121,6 @@
   ((base :accessor base
          :initarg :base)
    (numbers :accessor numbers)))
+
+(defmethod listify append ((object page-number))
+  (cons (base object) (coerce (page-number object) 'list)))
