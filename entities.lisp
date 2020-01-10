@@ -104,7 +104,7 @@
 
 ;;; Page
 (defclass page ()
-  ((page-number :accessor :name
+  ((page-number :accessor page-number
                 :initarg :page-number)
    (uuid :reader uuid)
    (tags :accessor tags
