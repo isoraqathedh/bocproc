@@ -41,8 +41,12 @@
                                                :if-exists :supersede
                                                :if-does-not-exist :create)
     (let ((*package* (find-package 'bpc-entities))
-          (*print-readably* t))
-      (prin1 *stable-entities* entity-file))))
+          (*print-readably* t)
+          (*print-case* :downcase))
+      (setf *stable-entities* (sort *stable-entities* #'entity<))
+      (dolist (entity *stable-entities*)
+        (prin1 entity entity-file)
+        (fresh-line entity-file)))))
 
 (defun load-entities (&optional preservep)
   (with-open-file (entity-file *entities-file* :direction :input
@@ -50,7 +54,8 @@
                                                :if-does-not-exist :error)
     (unless preservep
       (setf *stable-entities* (list)))
-    (dolist (entity (let ((*package* (find-package 'bpc-entities)))
-                      (read entity-file)))
-      (export (second entity) *entities-package-symbol*)
-      (store-stable-entity entity))))
+    (loop for entity = (read entity-file nil :end)
+          until (eql entity :end)
+          do (progn
+               (export (second entity) *entities-package-symbol*)
+               (store-stable-entity entity)))))
