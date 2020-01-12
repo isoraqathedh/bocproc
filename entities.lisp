@@ -124,3 +124,16 @@
 
 (defmethod listify append ((object page-number))
   (cons (base object) (coerce (page-number object) 'list)))
+
+;;; Sorting
+(defun entity< (left right)
+  (cond ((not (eql (type-of left) (type-of right)))
+         (let ((type-order '(affinity tag series))
+               (sentinel 999))
+           (< (or (position (type-of left) type-order :test #'eql) sentinel)
+              (or (position (type-of right) type-order :test #'eql) sentinel))))
+        ;; More sorting to come later
+        ;; Default: compare slugs
+        (t
+         (string-lessp (symbol-name (slug-symbol left))
+                       (symbol-name (slug-symbol right))))))
