@@ -54,8 +54,10 @@
                                                :if-does-not-exist :error)
     (unless preservep
       (setf *stable-entities* (list)))
-    (loop for entity = (read entity-file nil :end)
+    (loop for entity = (let ((*package* (find-package *entities-package-symbol*)))
+                         (read entity-file nil :end))
           until (eql entity :end)
           do (progn
                (export (second entity) *entities-package-symbol*)
-               (store-stable-entity entity)))))
+               (store-stable-entity entity)))
+    (setf *stable-entities* (sort *stable-entities* #'entity<))))
