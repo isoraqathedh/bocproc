@@ -38,6 +38,11 @@
            *stable-entities*
            :key #'slug-symbol))
 
+(defmacro define-stable-entity-function (type-symbol)
+  `(defmacro ,type-symbol (&rest construction-args)
+     `(funcall #'make-stable-entity ',',type-symbol
+               ',construction-args)))
+
 ;;; Affinity
 (defclass affinity (stable-entity)
   ((name :accessor name
@@ -50,6 +55,8 @@
   (destructuring-bind (slug-symbol &key name) args
     (make-instance 'affinity :slug-symbol slug-symbol
                              :name name)))
+
+(define-stable-entity-function bpc-entities::affinity)
 
 ;;; Tag
 (defclass tag (stable-entity)
@@ -75,6 +82,8 @@
                    :slug-symbol slug-symbol
                    :name name
                    :props all-args)))
+
+(define-stable-entity-function bpc-entities::tag)
 
 ;;; Series
 (defclass series (stable-entity)
