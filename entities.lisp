@@ -69,12 +69,12 @@
                      :initarg :props)))
 
 (defmethod listify append ((object tag))
-  `(:name ,(name object)
-    :affinity ,(slug-symbol (affinity object))
+  `(,(slug-symbol (affinity object))
+    :name ,(name object)
     ,@(slot-value object 'other-properties)))
 
 (defmethod make-stable-entity ((tag (eql 'bpc-entities::tag)) args)
-  (destructuring-bind (slug-symbol  affinity
+  (destructuring-bind (slug-symbol affinity
                        &rest all-args &key name &allow-other-keys) args
     (remf all-args :name)
     (make-instance 'tag
