@@ -42,9 +42,9 @@
                                                :if-does-not-exist :create)
     (let ((*package* (find-package 'bpc-entities))
           (*print-readably* t)
-          (*print-case* :downcase))
-      (setf *stable-entities* (sort *stable-entities* #'entity<))
-      (dolist (entity *stable-entities*)
+          (*print-case* :downcase)
+          (sorted-entities (sort (copy-list *stable-entities*) #'entity<)))
+      (dolist (entity sorted-entities)
         (prin1 entity entity-file)
         (fresh-line entity-file)))))
 
