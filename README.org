@@ -185,6 +185,24 @@ A formal specification of both languages will be written.
 ** Configuration and storage files
 The following files shall be used to store configuration, entities and pages.
 
+- ~$XDG_DATA_HOME/bocproc/entities.lisp~ ::
+     This file contains a series of Lisp expressions
+     each of which is a persistent entity in the system
+     written in a serialised format.
+     These are to be sorted in a particular order,
+     which we will discuss later.
+
+     Symbols written in this file will be read in the ~bpc-entities~ package
+     by default.
+- ~$XDG_DATA_HOME/bocproc/pages.lisp~ ::
+     This file contains all the information about pages.
+     They are mainly kept separate from the entities file
+     as a measure of ease of organisation --
+     in a sense, ~entities.lisp~ is to be edited by the user,
+     whereas ~pages.lisp~ will be entirely managed by the system.
+
+     As with the other file, the file consists of expressions, one per page.
+
 * Reuse
 Although the code is currently freely licensed,
 it is highly specialised to my needs
