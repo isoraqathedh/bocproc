@@ -7,10 +7,8 @@
 (defvar *entities-file*
   (uiop:xdg-data-home "bocproc" "entities.lisp"))
 
-(defparameter *books-location*
-  (make-subdirectory-pathname
-   (uiop/common-lisp:user-homedir-pathname) '("Documents" "My Scans"))
-  "Root directory of the scan destinations.")
+(defvar *pages-file*
+  (uiop:xdg-data-home "bocproc" "pages.lisp"))
 
 (defparameter *config* ()
   "Configuration tree.")
