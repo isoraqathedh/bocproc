@@ -104,9 +104,10 @@
 
 (defmethod make-stable-entity ((tag (eql 'bpc-entities::series)) args)
   (destructuring-bind (slug-symbol
-                       &key root filename-syntax page-specification)
+                       &key root filename-syntax page-specification name)
       args
-    (make-instance 'series :slug-symbol slug-symbol
+    (make-instance 'series :name name
+                           :slug-symbol slug-symbol
                            :root root
                            :filename-syntax filename-syntax
                            :page-specification page-specification)))
