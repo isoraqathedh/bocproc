@@ -132,8 +132,14 @@
          :initarg :base)
    (numbers :accessor numbers)))
 
+(defmethod print-object ((object page-number) stream)
+  (if *print-readably*
+      (prin1 (listify object) stream)
+      (print-unreadable-object (object stream :type t)
+        (format stream "~s ~{~s~^ ~}" (base object) (mapcar #'cdr (numbers object))))))
+
 (defmethod listify append ((object page-number))
-  (cons (base object) (coerce (page-number object) 'list)))
+  (cons (base object) (mapcar #'cdr (coerce (numbers object) 'list))))
 
 ;;; Sorting
 (defun entity< (left right)
