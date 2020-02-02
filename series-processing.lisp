@@ -30,6 +30,8 @@ which is out of bounds~:[~; ~:*(was ~a)~]"
                      (attempted-page-number c)
                      (old-page-number c)))))
 
+(defun ensure-valid-page-number (page-number))
+
 ;;; Converting page numbers to pages
 (defun fill (page-number))
 (defun available (page))
