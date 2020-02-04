@@ -4,8 +4,27 @@
   (uiop:xdg-config-home "bocproc" "config.lisp")
   "Location of the file that holds the config file.")
 
+(defmacro with-config-file ((stream-var) &body body)
+  `(with-open-file (,stream-var *config-file*
+                                :external-format :utf-8
+                                :direction :input
+                                :if-does-not-exist :error)
+     ,@body))
+
 (defvar *entities-file*
   (uiop:xdg-data-home "bocproc" "entities.lisp"))
+
+(defmacro with-entities-file ((stream-var &optional (direction :input))
+                              &body body)
+  `(with-open-file (,stream-var *entities-file*
+                                :external-format :utf-8
+                                ,@(ecase direction
+                                    (:input '(:direction :input
+                                              :if-does-not-exist :error))
+                                    (:output '(:direction :output
+                                               :if-does-not-exist :create
+                                               :if-exists :supersede))))
+     ,@body))
 
 (defvar *pages-file*
   (uiop:xdg-data-home "bocproc" "pages.lisp"))
@@ -24,7 +43,7 @@
 
 (defun load-config-file ()
   "Read the config file into *config*, and set up external variables."
-  (with-open-file (s *config-file* :external-format :utf-8)
+  (with-config-file (s)
     (let ((*package* (find-package '#:bpc)))
       (setf *config* (read s))
       (loop for i in (append (config :tags)
@@ -34,10 +53,7 @@
 ;;; Entity parsing
 (defun dump-entities ()
   (uiop:ensure-all-directories-exist (list *entities-file*))
-  (with-open-file (entity-file *entities-file* :direction :output
-                                               :external-format :utf-8
-                                               :if-exists :supersede
-                                               :if-does-not-exist :create)
+  (with-entities-file (entity-file :output)
     (let ((*package* (find-package 'bpc-entities))
           (*print-readably* t)
           (*print-case* :downcase)
@@ -47,9 +63,7 @@
         (fresh-line entity-file)))))
 
 (defun load-entities (&optional preservep)
-  (with-open-file (entity-file *entities-file* :direction :input
-                                               :external-format :utf-8
-                                               :if-does-not-exist :error)
+  (with-entities-file (entity-file :input)
     (unless preservep
       (setf *stable-entities* (list)))
     (loop for entity = (let ((*package* (find-package *entities-package-symbol*)))
