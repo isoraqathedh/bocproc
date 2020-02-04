@@ -29,6 +29,18 @@
 (defvar *pages-file*
   (uiop:xdg-data-home "bocproc" "pages.lisp"))
 
+(defmacro with-pages-file ((stream-var &optional (direction :input))
+                           &body body)
+  `(with-open-file (,stream-var *pages-file*
+                                :external-format :utf-8
+                                ,@(ecase direction
+                                    (:input '(:direction :input
+                                              :if-does-not-exist :error))
+                                    (:output '(:direction :output
+                                               :if-does-not-exist :create
+                                               :if-exists :supersede))))
+     ,@body))
+
 (defparameter *config* ()
   "Configuration tree.")
 
