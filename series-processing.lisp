@@ -20,7 +20,13 @@ which is out of bounds~:[~; ~:*(was ~a)~]"
                      (attempted-page-number c)
                      (old-page-number c)))))
 
-(defun ensure-valid-page-number (page-number))
+(defun ensure-valid-page-number (page-number)
+  (if (loop with series = (get-stable-entity (base page-number) 'series)
+            for (nil . number) in (numbers page-number)
+            for (nil min max) in (page-specification series)
+            always (<= min number (or max most-positive-fixnum)))
+      page-number
+      (error 'page-out-of-bounds-error :attempted page-number)))
 
 (defun next (page-number &optional spec)
   (let ((actual-spec (or spec (caar (last (numbers page-number))))))
