@@ -8,16 +8,6 @@
                 collect (cons specification min)))
     number))
 
-(defun next (page-number &optional spec)
-  (let ((actual-spec (or spec (caar (last (numbers page-number))))))
-    (incf (cdr (assoc actual-spec (numbers page-number))))
-    page-number))
-
-(defun previous (page-number &optional spec)
-  (let ((actual-spec (or spec (caar (last (numbers page-number))))))
-    (decf (cdr (assoc actual-spec (numbers page-number))))
-    page-number))
-
 (define-condition page-out-of-bounds-error (error)
   ((old-page-number :accessor old-page-number
                     :initarg :old
@@ -31,6 +21,16 @@ which is out of bounds~:[~; ~:*(was ~a)~]"
                      (old-page-number c)))))
 
 (defun ensure-valid-page-number (page-number))
+
+(defun next (page-number &optional spec)
+  (let ((actual-spec (or spec (caar (last (numbers page-number))))))
+    (incf (cdr (assoc actual-spec (numbers page-number))))
+    page-number))
+
+(defun previous (page-number &optional spec)
+  (let ((actual-spec (or spec (caar (last (numbers page-number))))))
+    (decf (cdr (assoc actual-spec (numbers page-number))))
+    page-number))
 
 ;;; Converting page numbers to pages
 (defun fill (page-number))
