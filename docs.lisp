@@ -34,5 +34,14 @@ Providing a SPEC that is not a defined specificity for the series is an error.
 If the provided PAGE-NUMBER cannot be advanced,
 then an error of `page-out-of-bounds' is signalled.")
 
+  (function previous
+    "As `next', but in the other direction.")
+
   (condition page-out-of-bounds-error
-    "Indicates that the page number is out of bounds."))
+    "Indicates that the page number is out of bounds.")
+
+  (function fill
+    "Seek information of that page number from the data file.
+
+This function will read the database for any matching page entries,
+and then fill in the correct page information in a fresh object."))
