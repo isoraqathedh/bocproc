@@ -6,10 +6,11 @@
   :version "6.3.1"
   :license "MIT"
   :depends-on (#:local-time #:thread-expr #:alexandria #:north-drakma #:humbler #:apply-argv
-                            #:uuid)
+                            #:uuid #:gzip-stream)
   :serial t
   :components ((:file "package")
                (:file "utils")
                (:file "entities")
-               (:file "config")
+               (:file "config-reading")
+               (:file "series-processing")
                (:file "docs")))
