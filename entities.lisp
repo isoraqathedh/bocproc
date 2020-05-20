@@ -130,13 +130,31 @@
 (defclass page-number ()
   ((base :accessor base
          :initarg :base)
-   (numbers :accessor numbers)))
+   (number :initform 0
+           :accessor page-number)))
+
+(defgeneric numbers (object)
+  (:method ((object page-number))
+    (nreverse
+     (loop with pg = (page-number object)
+           with spec-pg = 0
+           for (spec min . max) in (reverse
+                                    (page-specification
+                                     (get-stable-entity
+                                      (base object))))
+           if max
+           do (multiple-value-bind (quot rem) (floor pg (- (first max) min -1))
+                (setf pg quot
+                      spec-pg (+ min rem)))
+           and collect (cons spec spec-pg)
+           else collect (cons spec (+ pg min))))))
 
 (defmethod print-object ((object page-number) stream)
   (if *print-readably*
       (prin1 (listify object) stream)
       (print-unreadable-object (object stream :type t)
-        (format stream "~s ~{~s~^ ~}" (base object) (mapcar #'cdr (numbers object))))))
+        (format stream "~s ~{~s~^ ~}" (base object)
+                (mapcar #'cdr (numbers object))))))
 
 (defmethod listify append ((object page-number))
   (cons (base object) (mapcar #'cdr (coerce (numbers object) 'list))))

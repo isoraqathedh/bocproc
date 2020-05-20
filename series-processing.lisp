@@ -2,11 +2,7 @@
 
 ;;; Page number creation and manipulation
 (defun make-page-number-with-series (series)
-  (let ((number (make-instance 'page-number :base (slug-symbol series))))
-    (setf (numbers number)
-          (loop for (specification min . nil) in (page-specification series)
-                collect (cons specification min)))
-    number))
+  (make-instance 'page-number :base (slug-symbol series)))
 
 (define-condition page-out-of-bounds-error (error)
   ((old-page-number :accessor old-page-number
@@ -38,10 +34,27 @@ which is out of bounds~:[~; ~:*(was ~a)~]"
           (cons (cdr spec))
           (number spec))))
 
-(defun next (page-number &optional spec)
-  (destructuring-bind (spec-symbol . amount) (parse-spec page-number spec)
-    (incf (cdr (assoc spec-symbol (numbers page-number))) amount)
-    page-number))
+;; These should always set all lower specs to the lowest value possible.
+(defun next (page &optional spec)
+  (let* ((page-spec
+           (page-specification
+            (get-stable-entity
+             (base page))))
+         (steps (loop with acc = 1
+                      for i in (reverse page-spec)
+                      collect (ecase (length i)
+                                (2 1)
+                                (3 (* acc (- (third i) (second i) -1)))))))
+    (incf (page-number page)
+          (etypecase spec
+            (null 1)
+            (number spec)
+            (keyword
+             (- (nth (position spec page-spec) steps)
+                (mod (page-number page) (nth (position spec page-spec) steps))))
+            (cons
+             (- (* (car spec) (nth (position (cdr spec) page-spec) steps))
+                (mod (page-number page) (nth (position (cdr spec) page-spec) steps))))))))
 
 (defun previous (page-number &optional spec)
   (destructuring-bind (spec-symbol . amount) (parse-spec page-number spec)
