@@ -85,3 +85,8 @@
                (export (second entity) *entities-package-symbol*)
                (store-stable-entity entity)))
     (setf *stable-entities* (sort *stable-entities* #'entity<))))
+
+;;; Setup
+(defun setup ()
+  (load-entities)
+  (load-config-file))
