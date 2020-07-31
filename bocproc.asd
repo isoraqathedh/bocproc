@@ -11,6 +11,7 @@
   :components ((:file "package")
                (:file "utils")
                (:file "entities")
+               (:file "page-numbers")
                (:file "config-reading")
                (:file "series-processing")
                (:file "docs")))
