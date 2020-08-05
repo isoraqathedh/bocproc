@@ -23,7 +23,7 @@ it is absolutely the first page defined.
 If the date does show up in the page number,
 then it would default to the first page of the current time period.")
 
-  (function next
+  (function next-page
     "Retrieve the next page number after PAGE-NUMBER.
 
 If SPEC is provided, then jump to the next page number
@@ -34,11 +34,8 @@ Providing a SPEC that is not a defined specificity for the series is an error.
 If the provided PAGE-NUMBER cannot be advanced,
 then an error of `page-out-of-bounds' is signalled.")
 
-  (function previous
+  (function previous-page
     "As `next', but in the other direction.")
-
-  (condition page-out-of-bounds-error
-    "Indicates that the page number is out of bounds.")
 
   (function fill
     "Seek information of that page number from the data file.
