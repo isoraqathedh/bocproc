@@ -115,20 +115,6 @@
                            :filename-syntax filename-syntax
                            :page-specification page-specification)))
 
-;;; Page
-(defclass page ()
-  ((page-number :accessor page-number
-                :initarg :page-number)
-   (uuid :reader uuid)
-   (tags :accessor tags
-         :initarg :tags)
-   (title :accessor title
-          :initarg :title)
-   (comment :accessor comment
-            :initarg :comment)
-   (create-date :accessor create-date
-                :initform (local-time:now))))
-
 ;;; Sorting
 (defun entity< (left right)
   (cond ((not (eql (type-of left) (type-of right)))
