@@ -20,10 +20,13 @@
 
 (defparameter *stable-entities* ())
 
-(defun get-stable-entity (name &optional type)
+(defun get-stable-entity (name &optional type (errorp t))
   (let ((thing (find name *stable-entities* :key #'slug-symbol)))
-    (if (null type) thing
-        (and (typep thing type) thing))))
+    (or
+     (if (null type) thing
+         (and (typep thing type) thing))
+     (when errorp
+       (error "Stable entity with name ~a not found" name)))))
 
 (defun simple-character-p (character)
   (find character (concatenate 'string
