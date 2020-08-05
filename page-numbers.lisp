@@ -57,6 +57,32 @@
                  (page-number object)
                  (base object)))))
 
+;;; URL creation
+(defgeneric url (page-number)
+  (:method ((page-number page-number))
+    (format nil "/~(~a~)/~{~a~^/~}"
+            (symbol-name (slug-symbol (base page-number)))
+            (decode-page-number (page-number page-number)
+                                (base page-number)))))
+
+(defun page-number-from-url (url)
+  (destructuring-bind (empty series &rest page-numbers)
+      (split-sequence:split-sequence #\/ url)
+    (unless (string-equal empty "")
+      (error "Path not absolute"))
+    (let ((instance
+            (make-instance 'page-number
+                           :base (get-stable-entity
+                                  (or
+                                   (find-symbol
+                                    (string-upcase series)
+                                    '#:bpc-entities)
+                                   (error "Name ~a does not indicate a series."
+                                          series))))))
+      (setf (page-number instance)
+            (mapcar #'parse-integer page-numbers))
+      instance)))
+
 ;;; Navigation
 (defmethod (setf page-number) ((value list) (page-number page-number))
   (setf (page-number page-number)
