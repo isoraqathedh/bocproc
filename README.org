@@ -40,7 +40,7 @@ In the future this might include a full-on database solution,
 but this is not deemed necessary at the present time.
 
 ** Publication
-The publication package (~info.isoraqathedh.publication~)
+The publication package (~info.isoraqathedh.bocproc.publication~)
 is the component responsible for pushing processed scans
 to the rest of the world,
 including websites such as Tumblr and Twitter.
