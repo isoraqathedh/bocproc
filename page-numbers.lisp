@@ -20,6 +20,13 @@
          collect acc
          if max do (setf acc (* acc (- (first max) min -1))))))
 
+(defun spec-place-value (page-spec spec-symbol)
+  (nth (or (position spec-symbol page-spec :key #'car)
+           (error "~s is not a valid specification for ~s"
+                  spec-symbol
+                  page-spec))
+       (page-place-values page-spec)))
+
 (defun encode-page-number (number-list series)
   (loop with specs = (page-specification series)
         for place-value in (page-place-values specs)
@@ -97,7 +104,12 @@
     (declare (ignore _unused))
     (let ((page-spec (page-specification page)))
      (incf (page-number page)
-           (* (car spec)
-              (nth (position (cdr spec) page-spec :key #'car)
-                   (page-place-values page-spec))))
+           (* (car spec) (spec-place-value page-spec (cdr spec))))
+      page)))
+
+(defgeneric round-page-number (page-number spec)
+  (:method ((page page-number) (spec symbol))
+    (let ((stop (spec-place-value (page-specification page) spec)))
+      (setf (page-number page)
+            (* stop (floor (page-number page) stop)))
       page)))
