@@ -4,8 +4,10 @@
 (defclass page-details () ())
 
 (defclass page-available (page-details) ())
+(defconstant +page-available+ (make-instance 'page-available))
 
 (defclass page-ignored (page-details) ())
+(defconstant +page-ignored+ (make-instance 'page-ignored))
 
 (defclass page-info (page-details)
   ((title :accessor title
@@ -68,9 +70,9 @@
   (:method ((page-number page-number))
     (cond
       (t #||Case if the page is ignored||#
-       (make-instance 'page-ignored))
+       +page-ignored+)
       (t #||Case if page is available||#
-       (make-instance 'page-available))
+       +page-available+)
       (t #||Case if page is already in use||#))))
 
 (defgeneric imbue-page-info (page-number)
