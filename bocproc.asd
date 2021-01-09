@@ -12,6 +12,7 @@
                (:file "utils")
                (:file "entities")
                (:file "page-numbers")
+               (:file "pages")
                (:file "config-reading")
                (:file "series-processing")
                (:file "docs")))
