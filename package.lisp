@@ -1,9 +1,5 @@
 ;;;; package.lisp
 
-(defpackage #:info.isoraqathedh.bocproc
-  (:use #:cl)
-  (:documentation "General package for bocproc."))
-
 (defpackage #:info.isoraqathedh.bocproc.core
   (:use #:cl #:info.isoraqathedh.bocproc #:local-time)
   (:documentation "Core concepts for bocproc."))
@@ -30,3 +26,9 @@
   (:documentation "Special package for .bpc files.
 
 Symbols in this package is available for use in bocproc files."))
+
+(defpackage #:info.isoraqathedh.bocproc
+  (:use #:cl)
+  (:documentation "General package for bocproc.")
+  (:import-from #:info.isoraqathedh.bocproc.core
+                #:setup))
