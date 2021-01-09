@@ -64,6 +64,12 @@
                  (page-number object)
                  (base object)))))
 
+(defun parse-page-number (listified)
+  (let ((series (make-page-number-with-series
+                 (get-stable-entity (car listified) 'series))))
+    (setf (page-number series) (cdr listified))
+    series))
+
 ;;; URL creation
 (defgeneric url (page-number)
   (:method ((page-number page-number))
