@@ -62,8 +62,9 @@
                                          :date-time-separator #\Space)
 
             (tags info)
-            (mapcar #'get-stable-entity subject))
-      (setf (gethash (url num) *page-database*) info))))
+            (mapcar #'get-stable-entity subject)
+
+            (gethash (url num) *page-database*) info))))
 
 ;;; Page finding
 (defgeneric find-page-info (page-number)
