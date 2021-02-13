@@ -32,6 +32,17 @@
    (scan-date :accessor scan-date
               :initform nil)))
 
+(defmethod listify append ((object page-info))
+  (list :title (title object)
+        :subject (mapcar #'slug-symbol (tags object))
+        :comment (comment object)
+        :location (filename object)
+        :register-date (register-date object)
+        :entry-date (entry-date object)
+        :start-date (start-date object)
+        :finish-date (finish-date object)
+        :scan-date (scan-date object)))
+
 (defclass page ()
   ((page-number :accessor page-number
                 :initarg :number
@@ -39,6 +50,10 @@
    (info :accessor info
          :initarg :info
          :type 'page-details)))
+
+(defmethod listify append ((object page))
+  `(:page ,(listify (page-number object))
+          ,@(listify (info object))))
 
 ;;; Page storage and loading
 (defvar *page-database*
